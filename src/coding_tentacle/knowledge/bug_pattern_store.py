@@ -410,6 +410,78 @@ def create_seed_bug_store():
         fix_patterns=['@lru_cache()', 'batch processing', 'async I/O', 'profiling'],
         anti_patterns=['Optimieren ohne Profiling', 'N+1 Queries'], risk_level='medium')
 
+    # --- Build/Config/Dependency (10) ---
+    s.add_entry(bug_type='VersionMismatch', languages=['python','javascript'],
+        symptoms=[r"version.*mismatch", r"incompatible.*version", r"requires.*but you have"],
+        root_causes=['Package-Version nicht kompatibel', 'Breaking Change in neuer Version',
+                     'requirements.txt veraltet'],
+        fix_patterns=['pip install {package}=={version}', 'Check CHANGELOG for breaking changes'],
+        anti_patterns=['Version raten', 'Ohne Lock-File deployen'], risk_level='medium')
+
+    s.add_entry(bug_type='DeprecatedAPI', languages=['python','javascript','java'],
+        symptoms=[r"DeprecationWarning", r"deprecated", r"will be removed", r"use instead"],
+        root_causes=['Alte API verwendet', 'Funktion in neuer Version entfernt'],
+        fix_patterns=['# Replace {old}() with {new}()', 'Check migration guide'],
+        anti_patterns=['DeprecationWarning unterdrücken', 'Migration ignorieren'], risk_level='low')
+
+    s.add_entry(bug_type='MissingDependency', languages=['python','javascript'],
+        symptoms=[r"No module named|ModuleNotFoundError|Cannot find module"],
+        root_causes=['Package nicht installiert', 'Fehlt in requirements.txt',
+                     'Falsche Umgebung (venv/conda)'],
+        fix_patterns=['pip install {package}', 'npm install {package}',
+                      'Add to requirements.txt'],
+        anti_patterns=['Ohne venv installieren', 'Global install'], risk_level='medium')
+
+    s.add_entry(bug_type='CircularImport', languages=['python'],
+        symptoms=[r"circular import", r"cannot import name.*partially initialized"],
+        root_causes=['A importiert B, B importiert A', '__init__.py Zirkel'],
+        fix_patterns=['Lazy import inside function', 'Move to shared module',
+                      'from __future__ import annotations'],
+        anti_patterns=['Beide Module importieren sich', 'Zirkuläre __init__.py'], risk_level='high')
+
+    s.add_entry(bug_type='ConfigMissing', languages=['python','javascript'],
+        symptoms=[r"KeyError.*config", r"config.*not found", r"settings.*missing"],
+        root_causes=['Config-Datei fehlt', 'Environment-Variable nicht gesetzt',
+                     'Falscher Config-Pfad'],
+        fix_patterns=['os.environ.get("KEY", default)', 'config = load_config()',
+                      'Check .env file'],
+        anti_patterns=['Hardcoded defaults', 'Ohne Fallback'], risk_level='medium')
+
+    s.add_entry(bug_type='EnvVarMissing', languages=['python','unix'],
+        symptoms=[r"KeyError.*environ|os.environ.*KeyError|environment variable.*not set"],
+        root_causes=['Umgebungsvariable nicht gesetzt', '.env-Datei fehlt'],
+        fix_patterns=['os.environ.get("VAR", "default")', 'load_dotenv()'],
+        anti_patterns=['Ohne Default', 'Crash bei fehlender Env'], risk_level='medium')
+
+    s.add_entry(bug_type='PathConfigError', languages=['python','unix'],
+        symptoms=[r"FileNotFoundError.*config|No such file.*config|path.*not found.*config"],
+        root_causes=['Config-Pfad falsch', 'Relative vs absolute Pfade',
+                     'Config in falschem Verzeichnis'],
+        fix_patterns=['os.path.join(BASE_DIR, "config.yaml")', 'Path(__file__).parent / "config"'],
+        anti_patterns=['Hardcoded absolute Pfade', 'Ohne Fallback'], risk_level='medium')
+
+    s.add_entry(bug_type='BuildFailure', languages=['python','all'],
+        symptoms=[r"Build failed|compilation error|syntax error.*build"],
+        root_causes=['Syntax-Fehler', 'Typ-Fehler', 'Fehlende Build-Dependencies'],
+        fix_patterns=['Check compiler output', 'pip install build-deps',
+                      'python -m compileall .'],
+        anti_patterns=['Build-Fehler ignorieren', 'Nicht reproduzierbar'], risk_level='high')
+
+    s.add_entry(bug_type='TestFixtureMissing', languages=['python','javascript'],
+        symptoms=[r"fixture.*not found", r"beforeEach.*not defined", r"setup.*failed"],
+        root_causes=['Fixture nicht definiert', 'Falscher Scope', 'conftest.py falsch'],
+        fix_patterns=['@pytest.fixture', 'def {name}(): return ...',
+                      'conftest.py im test/-Verzeichnis'],
+        anti_patterns=['Ohne Fixture', 'Globaler State'], risk_level='medium')
+
+    s.add_entry(bug_type='MockMismatch', languages=['python','javascript'],
+        symptoms=[r"Mock.*not called|expected.*call.*not found|unexpected.*call"],
+        root_causes=['Mock falsch konfiguriert', 'Falscher call-Argumente',
+                     'Mock wurde nicht gecalled'],
+        fix_patterns=['mock.assert_called_once_with(args)',
+                      'mocker.patch("module.func")'],
+        anti_patterns=['Ohne Assert-Check mocken', 'Globaler Mock'], risk_level='medium')
+
     return s
 
 
