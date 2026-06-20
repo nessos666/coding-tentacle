@@ -130,10 +130,11 @@ class ScientificMethodBrain:
         ]
     }
 
-    def __init__(self):
+    def __init__(self, library_store=None):
         self.hypotheses = []       # Alle jemals generierten Hypothesen
         self.experiments = []      # Alle geplanten/durchgeführten Experimente
         self.evidence_log = []     # Gesamte Evidenz-Historie
+        self.library_store = library_store  # Optional, read-only
         self.total_think_calls = 0
         self.total_learn_calls = 0
 
@@ -152,16 +153,20 @@ class ScientificMethodBrain:
                 self.create_hypothesis(tmpl, confidence=0.5, source=f'template:{bt}')
             active = [h for h in self.hypotheses if h.status == 'ACTIVE']
 
-        # Ranking: confidence + BQ-Boost
+        # Ranking: confidence + BQ-Boost + Library-Boost
         ranked = []
         for h in active:
             boost = 0.0
             if bq_grounding:
                 boost += bq_grounding.get('grounding_score', 0) * 0.1
-                # Höherer Boost wenn meaning zur Hypothese passt
                 meaning = bq_grounding.get('meaning', '')
                 if any(w in meaning.lower() for w in h.statement.lower().split()[:3]):
                     boost += 0.05
+            # Library Evidence Boost (optional, read-only)
+            if self.library_store:
+                lib_results = self.library_store.search(h.statement, max_results=1)
+                if lib_results:
+                    boost += 0.08
             ranked.append((h, h.confidence + boost))
         ranked.sort(key=lambda x: -x[1])
 

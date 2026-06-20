@@ -13,9 +13,10 @@ from collections import defaultdict, deque
 
 class SymbolGroundingBrain:
     """Gehirn BQ — Symbole durch Code-Erfahrung mit Bedeutung füllen."""
-    def __init__(self, decay_days=30, history_path=None):
+    def __init__(self, decay_days=30, history_path=None, library_store=None):
         self.decay_days = decay_days
         self.history_path = history_path or os.path.expanduser('~/.hermes/bq_history.json')
+        self.library_store = library_store  # Optional
         # groundings: symbol → Grounding
         self.groundings = {}
         # related_symbols: symbol → [ähnliche Symbole]
@@ -186,6 +187,13 @@ class SymbolGroundingBrain:
         if g.total_fix_effects >= 3: boost += 0.05
         if g.success_count >= 2: boost += 0.05
         boost = min(0.20, boost)  # Maximal 0.20 Boost
+        
+        # Library Evidence Boost (optional, read-only, max +0.10)
+        if self.library_store:
+            lib_results = self.library_store.search(symbol, max_results=1)
+            if lib_results:
+                boost += 0.10
+        boost = min(0.25, boost)  # Overall cap
         
         score = min(1.0, g.grounding_score + boost)
         meaning = g.primary_meaning()
