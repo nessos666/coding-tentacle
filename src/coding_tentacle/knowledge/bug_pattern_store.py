@@ -179,6 +179,237 @@ def create_seed_bug_store():
         fix_patterns=['threading.Lock()', 'synchronized', 'mutex.Lock()', 'async/await'],
         anti_patterns=['Globale Variablen ohne Lock', 'sleep() als Fix'], risk_level='critical')
 
+    # ═══════════ RC5 EXPANSION: +40 Einträge ═══════════
+    # --- Logic/Algorithm (10) ---
+    s.add_entry(bug_type='RecursionError', languages=['python','javascript','java'],
+        symptoms=[r"RecursionError.*maximum recursion depth", r"stack overflow"],
+        root_causes=['Rekursion ohne Basisfall', 'Rekursionstiefe zu groß für Input',
+                     'Zyklische Aufrufe', 'Endlosrekursion'],
+        fix_patterns=['if depth > MAX_DEPTH: return', 'while statt recursion',
+                      '@lru_cache(maxsize=None)', 'sys.setrecursionlimit()'],
+        anti_patterns=['Rekursion für große Listen', 'Kein Basisfall'], risk_level='high')
+
+    s.add_entry(bug_type='MemoryError', languages=['python','cpp'],
+        symptoms=[r"MemoryError", r"OutOfMemoryError", r"bad_alloc", r"heap space"],
+        root_causes=['Datenstruktur zu groß', 'Speicher-Leak', 'Infinite Growth',
+                     'Kein Streaming für große Dateien'],
+        fix_patterns=['for chunk in iter():', 'del unused_var', 'gc.collect()',
+                      'Reduce batch size'],
+        anti_patterns=['Alles in RAM laden', 'Keine GC-Hints'], risk_level='high')
+
+    s.add_entry(bug_type='AssertionError', languages=['python','javascript','java'],
+        symptoms=[r"AssertionError", r"assert.*failed", r"expected.*got"],
+        root_causes=['Test-Erwartung falsch', 'Code-Logik produziert falsches Ergebnis',
+                     'Off-by-one', 'Race-Condition im Test'],
+        fix_patterns=['# Expected: X, Got: Y → Fix test or code',
+                      'pytest.raises() für Exception-Tests'],
+        anti_patterns=['assert für Production-Code', 'Test ohne Message'], risk_level='medium')
+
+    s.add_entry(bug_type='BufferError', languages=['python','cpp','c'],
+        symptoms=[r"BufferError.*buffer too small", r"buffer overflow", r"buffer overrun"],
+        root_causes=['Buffer-Größe falsch kalkuliert', 'Input größer als Puffer',
+                     'Keine Bounds-Check bei Buffer-Operationen'],
+        fix_patterns=['buffer = bytearray(size)', 'if len(data) <= buf_size:',
+                      'memoryview für zero-copy'],
+        anti_patterns=['malloc ohne size-Check', 'strcpy ohne bounds'], risk_level='high')
+
+    s.add_entry(bug_type='StopIteration', languages=['python'],
+        symptoms=[r"StopIteration", r"generator.*exhausted", r"iterator.*empty"],
+        root_causes=['Iterator/Generator erschöpft', 'next() auf leerem Iterator',
+                     'Generator yieldet nichts'],
+        fix_patterns=['next(it, default)', 'for item in items:', 'list(it)'],
+        anti_patterns=['next() ohne default', 'Iterator zweimal konsumieren'], risk_level='low')
+
+    s.add_entry(bug_type='OverflowError', languages=['python','java','cpp'],
+        symptoms=[r"OverflowError", r"int too large", r"overflow", r"arithmetic overflow"],
+        root_causes=['Zahlenwert zu groß für Datentyp', 'Endlos-Berechnung',
+                     'Fakultät/Exponent zu groß'],
+        fix_patterns=['from decimal import Decimal', 'int() statt float()',
+                      'if value > TYPE_MAX: raise'],
+        anti_patterns=['float für große Integer', 'Unbounded factorial'], risk_level='medium')
+
+    s.add_entry(bug_type='EncodingError', languages=['python','java'],
+        symptoms=[r"UnicodeDecodeError", r"UnicodeEncodeError", r"invalid start byte",
+                   r"unknown encoding"],
+        root_causes=['Falsches Encoding', 'Datei ist nicht UTF-8',
+                     'Binärdaten als Text gelesen'],
+        fix_patterns=['open(file, encoding="utf-8")', "errors='ignore'",
+                      'chardet.detect(data)'],
+        anti_patterns=['encoding raten', 'errors="strict" bei Fremddaten'], risk_level='low')
+
+    s.add_entry(bug_type='CircularDependency', languages=['python','javascript'],
+        symptoms=[r"circular import", r"circular reference", r"circular dependency",
+                   r"partially initialized module"],
+        root_causes=['Modul A importiert B, B importiert A',
+                     'Klasse A referenziert B, B referenziert A'],
+        fix_patterns=['# Move shared code to shared.py', 'Lazy import in function',
+                      'from __future__ import annotations'],
+        anti_patterns=['Beide Module importieren sich gegenseitig'], risk_level='high')
+
+    s.add_entry(bug_type='FloatingPointError', languages=['python','cpp','fortran'],
+        symptoms=[r"FloatingPointError", r"NaN", r"inf", r"invalid float operation"],
+        root_causes=['Division by zero (float)', 'sqrt von negativer Zahl',
+                     'NaN-Propagation', 'Float-Overflow'],
+        fix_patterns=['if math.isfinite(x):', 'try: ... except FloatingPointError:',
+                      'decimal.Decimal für exakte Arithmetik'],
+        anti_patterns=['NaN ignorieren', 'Ohne Check weiterrechnen'], risk_level='medium')
+
+    s.add_entry(bug_type='ConcurrentModification', languages=['python','java'],
+        symptoms=[r"ConcurrentModificationError", r"dictionary changed size",
+                   r"list modified during iteration"],
+        root_causes=['Collection während Iteration modifiziert',
+                     'Anderer Thread ändert Daten', 'Callback modifiziert Liste'],
+        fix_patterns=['for item in list(items):', 'copy.copy(items) vor Iteration',
+                      'threading.Lock()'],
+        anti_patterns=['Liste in for-loop modifizieren', 'Ohne Lock iterieren'], risk_level='high')
+
+    # --- AttributeError Disambiguation (10) ---
+    s.add_entry(bug_type='AttributeTypeMismatch', languages=['python'],
+        symptoms=[r"AttributeError.*int.*has no attribute",
+                   r"has no attribute.*int", r"str.*has no attribute"],
+        root_causes=['Falscher Datentyp (int/str statt Objekt)',
+                     'Rückgabewert einer Funktion ist anderer Typ'],
+        fix_patterns=['isinstance({var}, {expected_type})', 'type({var}) check'],
+        anti_patterns=['try/except AttributeError statt type-check'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeContainerError', languages=['python'],
+        symptoms=[r"AttributeError.*(dict|list|set|tuple).*has no attribute"],
+        root_causes=['Container-Typ erwartet, anderer bekommen',
+                     'dict statt list, list statt dict'],
+        fix_patterns=['isinstance({var}, dict)', 'if type({var}) is {expected}:'],
+        anti_patterns=['Container-Typen verwechseln'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeModuleError', languages=['python'],
+        symptoms=[r"AttributeError.*module.*has no attribute",
+                   r"module.*has no attribute"],
+        root_causes=['Falscher Import', 'Funktion/Klasse existiert nicht im Modul',
+                     'Version geändert'],
+        fix_patterns=['dir({module}) prüfen', 'from {module} import {name}',
+                      'help({module})'],
+        anti_patterns=['Import raten', 'Ohne dir() prüfen'], risk_level='medium')
+
+    s.add_entry(bug_type='AttributeDecoratorError', languages=['python'],
+        symptoms=[r"AttributeError.*function.*has no attribute",
+                   r"function.*has no attribute"],
+        root_causes=['Dekorator fehlt oder falsch', '@app.route statt @app.get',
+                     'self vergessen'],
+        fix_patterns=['@app.route("/")', 'def method(self):', '@staticmethod'],
+        anti_patterns=['Dekorator weglassen', 'self vergessen'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeNoneError', languages=['python','javascript'],
+        symptoms=[r"AttributeError.*NoneType.*has no attribute",
+                   r"cannot read propert.*null", r"cannot read propert.*undefined"],
+        root_causes=['Objekt ist None/null/undefined', 'Funktion gibt None zurück'],
+        fix_patterns=['if {var} is not None:', '{var}?.{method}()', 'return default'],
+        anti_patterns=['Kein None-Check', 'try/except AttributeError'], risk_level='high')
+
+    s.add_entry(bug_type='AttributeDatetimeError', languages=['python'],
+        symptoms=[r"AttributeError.*datetime.*has no attribute",
+                   r"datetime.*has no attribute"],
+        root_causes=['datetime statt datetime.datetime importiert',
+                     'Falsches datetime-Modul'],
+        fix_patterns=['from datetime import datetime', 'datetime.datetime.now()'],
+        anti_patterns=['import datetime; datetime.now()'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeResponseError', languages=['python'],
+        symptoms=[r"AttributeError.*Response.*has no attribute",
+                   r"has no attribute.*data"],
+        root_causes=['API-Response hat andere Struktur als erwartet',
+                     'HTTP-Response statt JSON-Response'],
+        fix_patterns=['response.json()', 'response.text', 'response.status_code'],
+        anti_patterns=['Response.data (existiert nicht)', 'Ohne Status-Check'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeCoroutineError', languages=['python'],
+        symptoms=[r"AttributeError.*coroutine.*has no attribute",
+                   r"coroutine.*has no attribute"],
+        root_causes=['Coroutine nicht awaited', 'Async-Funktion ohne await aufgerufen'],
+        fix_patterns=['await async_fn()', 'asyncio.run(async_fn())'],
+        anti_patterns=['async_fn() ohne await', 'result() auf coroutine'], risk_level='medium')
+
+    s.add_entry(bug_type='AttributeBytesError', languages=['python'],
+        symptoms=[r"AttributeError.*bytes.*has no attribute",
+                   r"bytes.*has no attribute"],
+        root_causes=['bytes statt str', 'Datei als binary statt text geöffnet'],
+        fix_patterns=['data.decode("utf-8")', 'open(file, "r")', 'str(data)'],
+        anti_patterns=['.read() auf str erwarten', 'Ohne decode()'], risk_level='low')
+
+    s.add_entry(bug_type='AttributeGeneratorError', languages=['python'],
+        symptoms=[r"AttributeError.*generator.*has no attribute",
+                   r"generator.*has no attribute"],
+        root_causes=['Generator statt Liste', 'map()/filter() gibt Iterator zurück'],
+        fix_patterns=['list(gen)', '[x for x in gen]', 'next(gen, default)'],
+        anti_patterns=['len(gen)', 'gen[0]', 'gen.append()'], risk_level='low')
+
+    # --- Performance / Resource (10) ---
+    s.add_entry(bug_type='ConnectionPoolExhausted', languages=['python','java','go'],
+        symptoms=[r"Connection.*pool.*exhausted", r"too many connections",
+                   r"connection.*timeout.*pool", r"max.*connections.*reached"],
+        root_causes=['Verbindungen nicht geschlossen', 'Pool-Größe zu klein',
+                     'Connection-Leak'],
+        fix_patterns=['with connection:', 'connection.close()', 'pool.dispose()',
+                      'Increase max_pool_size'],
+        anti_patterns=['Verbindungen offen lassen', 'Kein Connection-Pooling'], risk_level='high')
+
+    s.add_entry(bug_type='DiskFullError', languages=['python','unix'],
+        symptoms=[r"No space left on device", r"disk full", r"ENOSPC"],
+        root_causes=['Disk voll', 'Log-Dateien zu groß', 'Temp-Dateien nicht gelöscht'],
+        fix_patterns=['shutil.disk_usage()', 'RotatingFileHandler', 'tempfile cleanup'],
+        anti_patterns=['Ohne Check schreiben', 'Logs nie rotieren'], risk_level='high')
+
+    s.add_entry(bug_type='TimeoutError', languages=['python','javascript','go'],
+        symptoms=[r"TimeoutError", r"ReadTimeout", r"ConnectTimeout", r"timed out",
+                   r"deadline exceeded"],
+        root_causes=['Netzwerk-Problem', 'Server antwortet nicht', 'Operation zu langsam'],
+        fix_patterns=['timeout=30', 'with Timeout(10):', 'context.WithTimeout()'],
+        anti_patterns=['Kein Timeout setzen', 'Unendlich warten'], risk_level='medium')
+
+    s.add_entry(bug_type='ResourceWarning', languages=['python'],
+        symptoms=[r"ResourceWarning.*unclosed", r"unclosed file", r"unclosed socket"],
+        root_causes=['Datei/Socket nicht geschlossen', 'Exception vor close()'],
+        fix_patterns=['with open() as f:', 'try/finally: f.close()'],
+        anti_patterns=['f = open(); ... kein close()', 'Exception-handler ohne cleanup'], risk_level='medium')
+
+    s.add_entry(bug_type='BlockingIOError', languages=['python'],
+        symptoms=[r"BlockingIOError", r"resource.*unavailable", r"would block"],
+        root_causes=['Non-blocking I/O auf blockierender Resource',
+                     'Socket im falschen Modus'],
+        fix_patterns=['socket.setblocking(True)', 'select.select()', 'asyncio'],
+        anti_patterns=['Ohne select poll()', 'Non-blocking ohne Fallback'], risk_level='medium')
+
+    s.add_entry(bug_type='BrokenPipeError', languages=['python','unix'],
+        symptoms=[r"BrokenPipeError", r"broken pipe", r"EPIPE", r"SIGPIPE"],
+        root_causes=['Reader hat Pipe geschlossen', 'Prozess beendet'],
+        fix_patterns=['try: write() except BrokenPipeError:', 'signal(SIGPIPE, SIG_DFL)'],
+        anti_patterns=['Ohne try/except schreiben', 'SIGPIPE ignorieren'], risk_level='low')
+
+    s.add_entry(bug_type='ConnectionResetError', languages=['python','unix'],
+        symptoms=[r"ConnectionResetError", r"connection reset", r"ECONNRESET"],
+        root_causes=['Peer hat Verbindung beendet', 'Netzwerk-Problem', 'Firewall'],
+        fix_patterns=['retry with backoff', 'try/except reconnect', 'keepalive'],
+        anti_patterns=['Kein Retry', 'Ohne Reconnect'], risk_level='medium')
+
+    s.add_entry(bug_type='TooManyOpenFiles', languages=['python','unix'],
+        symptoms=[r"Too many open files", r"EMFILE", r"ulimit"],
+        root_causes=['Dateien nicht geschlossen', 'File-Descriptor-Leak',
+                     'ulimit zu niedrig'],
+        fix_patterns=['with open():', 'ulimit -n 4096', 'lsof zur Diagnose'],
+        anti_patterns=['Datei-Handles nie schließen', 'Kein ulimit-Check'], risk_level='high')
+
+    s.add_entry(bug_type='MemoryLeak', languages=['python','cpp','java'],
+        symptoms=[r"MemoryError.*leak", r"memory leak", r"OOM over time",
+                   r"heap.*growth"],
+        root_causes=['Referenzen nicht freigegeben', 'Cache wächst unbegrenzt',
+                     'Zirkuläre Referenzen'],
+        fix_patterns=['weakref.ref()', 'gc.collect()', 'Cache mit LRU-Eviction'],
+        anti_patterns=['Globale Caches ohne Limit', 'Liste endlos wachsen'], risk_level='high')
+
+    s.add_entry(bug_type='SlowOperation', languages=['python','all'],
+        symptoms=[r"slow", r"performance.*degrad", r"too slow", r"hangs"],
+        root_causes=['O(n²) statt O(n)', 'N+1 Query-Problem',
+                     'Kein Caching', 'Synchrone I/O in Hot-Path'],
+        fix_patterns=['@lru_cache()', 'batch processing', 'async I/O', 'profiling'],
+        anti_patterns=['Optimieren ohne Profiling', 'N+1 Queries'], risk_level='medium')
+
     return s
 
 

@@ -167,14 +167,33 @@ class SymbolGroundingBrain:
         self.total_symbols_seen += 1
 
         if symbol not in self.groundings or self.groundings[symbol].total_contexts == 0:
-            # INITIAL CONFIDENCE BOOST: Wenn Code-Kontext im sig steckt
-            # Signal ans Orchestrator: "Gib mir mehr"
+            # ═══ ATTRIBUTE DISAMBIGUATION (RC5) ═══
+            # Auch ohne Grounding: erkenne AttributeError-Subtypen
+            meaning = f'Ungrounded: Kein Code-Kontext für {symbol}.'
+            score = 0.0
+            sig_lower = sig.lower()
+            if symbol == 'AttributeError':
+                if 'nonetype' in sig_lower or 'none' in sig_lower or 'null' in sig_lower:
+                    meaning = 'AttributeError auf None → NullPointer-Variante: Objekt ist None.'
+                    score = 0.25
+                elif any(w in sig_lower for w in ['int', 'str', 'float', 'bytes', 'list', 'dict', 'set', 'tuple']):
+                    meaning = 'AttributeError auf Basis-Typ → Typ-Mismatch: Falscher Datentyp.'
+                    score = 0.25
+                elif 'module' in sig_lower:
+                    meaning = 'AttributeError auf Module → Import-/API-Problem.'
+                    score = 0.25
+                elif 'function' in sig_lower:
+                    meaning = 'AttributeError auf Function → Dekorator/Self-Problem.'
+                    score = 0.25
+                elif 'generator' in sig_lower or 'coroutine' in sig_lower:
+                    meaning = 'AttributeError auf Generator/Coroutine → await/list nötig.'
+                    score = 0.25
             return {
                 'action': 'ASK_CONTEXT',
                 'pattern': None,
-                'confidence': 0.0,
-                'grounding_score': 0.0,
-                'meaning': f'Ungrounded: Kein Code-Kontext für {symbol}.',
+                'confidence': score,
+                'grounding_score': score,
+                'meaning': meaning,
                 'missing_context': ['code_snippet', 'stacktrace', 'file_line'],
                 'reasoning': f'SG: {symbol} ist ungrounded. Frage nach Code-Kontext.'
             }
