@@ -174,8 +174,9 @@ class PatchSuggestionEngine:
         re.IGNORECASE
     )
 
-    def __init__(self):
+    def __init__(self, library_store=None):
         self.total_suggestions = 0
+        self.library_store = library_store  # Optional: LibraryKnowledgeStore
 
     def suggest(self, bug_report, code_context=None, test_output=None,
                 br_hypotheses=None, grounding=None, requested_action='suggest_patch'):
@@ -235,6 +236,15 @@ class PatchSuggestionEngine:
         )
         patch = best['patch'].format(**patch_kwargs)
 
+        # Library Store Evidence (optional, read-only)
+        final_explanation = best['explanation']
+        if self.library_store and confidence < 0.6:
+            lib_results = self.library_store.search(bug_report, max_results=2)
+            if lib_results:
+                best_lib = lib_results[0]
+                confidence = min(0.95, confidence + 0.15)
+                final_explanation = best['explanation'] + f' [Library: {best_lib.library} — {best_lib.root_cause[:60]}]'
+
         # Tests vorschlagen
         tests = best.get('tests', [f'test_{bt.lower()}'])
 
@@ -242,7 +252,7 @@ class PatchSuggestionEngine:
         rollback = f'git checkout {ctx_file}' if ctx_file != 'unknown' else 'Manuelles Rollback'
 
         return PatchSuggestion(
-            best['type'], patch, best['explanation'],
+            best['type'], patch, final_explanation,
             ctx_file, ctx_line, confidence, risk, requires_human, tests, rollback
         ).to_dict()
 
