@@ -223,7 +223,7 @@ class MinimalOrchestrator:
 # ═══════════ TEST ═══════════
 if __name__ == "__main__":
 
-    from working_memory import WorkingMemory
+    from coding_tentacle.memory.working_memory import WorkingMemory
     wm = WorkingMemory()
     state = wm.create_session()
     wm.update_context(state.session_id, "bug", "TestBug")

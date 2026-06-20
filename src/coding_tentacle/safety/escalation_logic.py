@@ -215,7 +215,9 @@ class EscalationLogic:
 
 # ═══════════ TEST ═══════════
 if __name__ == "__main__":
-    print("GEN 15c — ESCALATION LOGIC")
-    state = wm.create_session()
-    wm.update_context(state.session_id, "bug", "TestBug")
-    print("  ✅ escalation_logic.py — PASS")
+    print("EL SELF-TEST")
+    print("=" * 40)
+    el = EscalationLogic()
+    d = el.evaluate_escalation({"bug_type":"NullPointer","complexity":"low","known_pattern":True,"has_code_context":True,"has_tests":True,"confidence":0.8,"risk_level":"low","brain_outputs":[],"requested_action":"analyze"})
+    print(f"  Route: {d.route}")
+    print("  ✅ EL self-test PASS")
