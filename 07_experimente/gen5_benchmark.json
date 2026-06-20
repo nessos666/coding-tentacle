@@ -1,0 +1,30 @@
+{
+  "ts": "2026-06-19 11:21",
+  "results": {
+    "U_MoE": {
+      "test": "Transfer",
+      "score": 1,
+      "detail": "transfers"
+    },
+    "V_Palace": {
+      "test": "Transfer",
+      "score": 1,
+      "detail": "transfers"
+    },
+    "W_Curiosity": {
+      "test": "Transfer",
+      "score": 0,
+      "detail": "no transfer"
+    },
+    "X_Flow": {
+      "test": "Transfer",
+      "score": 0,
+      "detail": "no transfer"
+    },
+    "Y_GNN": {
+      "test": "Transfer",
+      "score": 0,
+      "detail": "no transfer"
+    }
+  }
+}

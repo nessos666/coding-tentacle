@@ -1,0 +1,839 @@
+{
+  "timestamp": "2026-06-19 14:03:29",
+  "total": 65,
+  "passed": 45,
+  "failed": 9,
+  "skipped": 1,
+  "avg_score": 0.7,
+  "protocol": [
+    {
+      "brain": "bayesian",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 0,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "shannon_entropie",
+      "status": "PASS",
+      "score": 1.0,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "graph_struktur",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "reinforcement",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "kybernetisch",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "act_r_spreading",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "hebbian",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "genetisch",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "attention",
+      "status": "WEAK",
+      "score": 0.67,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 0,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "fuzzy",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "ensemble",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "game_theory",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "gradient",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 0,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "nearest_neighbor",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "markov",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "contrastive",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "mixture_of_experts",
+      "status": "PASS",
+      "score": 1.0,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "memory_palace",
+      "status": "WEAK",
+      "score": 0.67,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 0,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "curiosity",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "normalizing_flow",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "graph_neural",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "hypernetwork",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "dnc",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "world_model",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "swarm",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "hierarchical_rl",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "predictive_coding",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "hopfield",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "soar",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "neural_turing",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "atomspace",
+      "status": "ERROR",
+      "reason": "cannot unpack non-iterable NoneType object"
+    },
+    {
+      "brain": "modern_hopfield",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "deep_predictive",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "chunking",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "pln_reasoning",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "metta_cognitive",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "hyperon_integrator",
+      "status": "SKIP",
+      "reason": "Nicht ladbar"
+    },
+    {
+      "brain": "beer_vsm",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "maturana_autopoiesis",
+      "status": "WEAK",
+      "score": 0.67,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "bateson_learning",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "foerster_second_order",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "prigogine_dissipative",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "online_learning",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "temporal_awareness",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 0,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 1,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "counterfactual",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "brain_mesh",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "curriculum",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "multitask_sharing",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "haken_synergetics",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "imitation",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "code_context",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "strategic_forgetting",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "wolfram_ca",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "braitenberg",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "thom_catastrophe",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "levin_basal",
+      "status": "WEAK",
+      "score": 0.5,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "explainability",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "uncertainty",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "adversarial",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "homeostatic",
+      "status": "WEAK",
+      "score": 0.33,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "recursive_self",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "superposition",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "emotion",
+      "status": "FAIL",
+      "score": 0.17,
+      "results": {
+        "T3_Recog": 0,
+        "T4_OOD": 1,
+        "T5_Interf": 0,
+        "T6_Persist": 0,
+        "T7_Transfer": 0,
+        "T8_Multi": 0
+      }
+    },
+    {
+      "brain": "human_collab",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    },
+    {
+      "brain": "causal_discovery",
+      "status": "PASS",
+      "score": 0.83,
+      "results": {
+        "T3_Recog": 1,
+        "T4_OOD": 1,
+        "T5_Interf": 1,
+        "T6_Persist": 1,
+        "T7_Transfer": 0,
+        "T8_Multi": 1
+      }
+    }
+  ]
+}

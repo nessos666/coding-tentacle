@@ -1,0 +1,107 @@
+{
+  "ts": "2026-06-19 10:33",
+  "avg": 0.8698500000000001,
+  "good": 18,
+  "results": {
+    "A_Bayesian": {
+      "test": "BLInD Probabilistic",
+      "score": 0.372,
+      "detail": "r=0.37 p=3"
+    },
+    "B_Shannon": {
+      "test": "ADBench Novelty",
+      "score": 1.0,
+      "detail": "20/20"
+    },
+    "C_Graph": {
+      "test": "OGB Karate Club",
+      "score": 0.95,
+      "detail": "19/20"
+    },
+    "D_RL": {
+      "test": "Bug-Loop 80eps",
+      "score": 0.55,
+      "detail": "40%\u219245%"
+    },
+    "E_Kybernetisch": {
+      "test": "Bug-Loop 60eps",
+      "score": 0.433,
+      "detail": "p:1 m:50"
+    },
+    "F_ACTR": {
+      "test": "Serial Position",
+      "score": 0.975,
+      "detail": "P=3.8 M=3.0 R=2.1"
+    },
+    "G_Friston": {
+      "test": "Free Energy \u2207F",
+      "score": 0.702,
+      "detail": "F:0\u21920"
+    },
+    "H_Causal": {
+      "test": "Causal Backdoor",
+      "score": 0.93,
+      "detail": "est=2.14"
+    },
+    "I_Kolmogorov": {
+      "test": "Calgary NCD",
+      "score": 0.695,
+      "detail": "same=0.19 diff=0.62"
+    },
+    "J_Mandelbrot": {
+      "test": "UCR Hurst",
+      "score": 0.79,
+      "detail": "Hp=0.58 Hr=0.80"
+    },
+    "K_Hebbian": {
+      "test": "Hebb \u0394w 80eps",
+      "score": 1.0,
+      "detail": "20/20 w:5"
+    },
+    "L_Genetisch": {
+      "test": "Evol 80eps",
+      "score": 1.0,
+      "detail": "20/20 gen:72"
+    },
+    "M_Attention": {
+      "test": "QKV 80eps",
+      "score": 1.0,
+      "detail": "20/20 mem:80"
+    },
+    "N_Fuzzy": {
+      "test": "Fuzzy 80eps",
+      "score": 1.0,
+      "detail": "20/20 rules:15"
+    },
+    "O_Ensemble": {
+      "test": "Meta Vote 60eps",
+      "score": 1.0,
+      "detail": "20/20 sub:4"
+    },
+    "P_GameTheory": {
+      "test": "Minimax 60eps",
+      "score": 1.0,
+      "detail": "20/20"
+    },
+    "Q_Gradient": {
+      "test": "Adam 60eps",
+      "score": 1.0,
+      "detail": "20/20"
+    },
+    "R_NearestNeighbor": {
+      "test": "k-NN 80eps",
+      "score": 1.0,
+      "detail": "20/20 cases:80"
+    },
+    "S_Markov": {
+      "test": "MDP 60eps",
+      "score": 1.0,
+      "detail": "20/20 states:5"
+    },
+    "T_Contrastive": {
+      "test": "InfoNCE 60eps",
+      "score": 1.0,
+      "detail": "20/20 proto:3"
+    }
+  }
+}

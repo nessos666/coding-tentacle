@@ -1,0 +1,1288 @@
+{
+  "efficiency": [
+    {
+      "brain": "bayesian",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": false,
+      "peak_memory_kb": 1.6,
+      "learn_type": "one_shot",
+      "mvp_relevant": 0
+    },
+    {
+      "brain": "shannon_entropie",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 168.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "graph_struktur",
+      "efficiency_score": 0.875,
+      "data_need": "one_shot",
+      "cpu_cost": "medium",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 799.7,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "reinforcement",
+      "efficiency_score": 0.5,
+      "data_need": "batch",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 28,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 2.0,
+      "learn_type": "batch",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "kybernetisch",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 276.9,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "act_r_spreading",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 7.7,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "hebbian",
+      "efficiency_score": 1.0,
+      "data_need": "few_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 4,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 4.0,
+      "learn_type": "few_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "genetisch",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "attention",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": false,
+      "peak_memory_kb": 165.2,
+      "learn_type": "one_shot",
+      "mvp_relevant": 0
+    },
+    {
+      "brain": "fuzzy",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "ensemble",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 0.7,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "game_theory",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.5,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "gradient",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": false,
+      "peak_memory_kb": 3.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 0
+    },
+    {
+      "brain": "nearest_neighbor",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 162.6,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "markov",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 2.5,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "contrastive",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 369.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "mixture_of_experts",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 12.0,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "memory_palace",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": false,
+      "peak_memory_kb": 5.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 0
+    },
+    {
+      "brain": "curiosity",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 6.7,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "normalizing_flow",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 142.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "graph_neural",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 276.6,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "hypernetwork",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 3,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 157.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "dnc",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "high",
+      "memory_cost": "medium",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 123.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "world_model",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 99.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "swarm",
+      "efficiency_score": 0.625,
+      "data_need": "few_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 4,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 5.8,
+      "learn_type": "few_shot",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "hierarchical_rl",
+      "efficiency_score": 0.875,
+      "data_need": "batch",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 33,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 4.2,
+      "learn_type": "batch",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "predictive_coding",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "high",
+      "memory_cost": "high",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 793.2,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "hopfield",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 306.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "soar",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 13.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "neural_turing",
+      "efficiency_score": 0.875,
+      "data_need": "one_shot",
+      "cpu_cost": "medium",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 41.7,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "atomspace",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 3.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "modern_hopfield",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "high",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 311.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "deep_predictive",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "high",
+      "memory_cost": "high",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1168.9,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "chunking",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 29.0,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "pln_reasoning",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 5.5,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "metta_cognitive",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 2.2,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "beer_vsm",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.6,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "maturana_autopoiesis",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 16.1,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "bateson_learning",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 20.4,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "foerster_second_order",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 6.5,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "prigogine_dissipative",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 9.5,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "online_learning",
+      "efficiency_score": 1.0,
+      "data_need": "few_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 4,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 6.0,
+      "learn_type": "few_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "temporal_awareness",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": false,
+      "peak_memory_kb": 9.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 0
+    },
+    {
+      "brain": "counterfactual",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 7.6,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "brain_mesh",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 1.6,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "curriculum",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 7.5,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "multitask_sharing",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 39.0,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "haken_synergetics",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 5.2,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "imitation",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 12.9,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "code_context",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 36.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "strategic_forgetting",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "medium",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 168.7,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "wolfram_ca",
+      "efficiency_score": 0.625,
+      "data_need": "few_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 7,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "few_shot",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "braitenberg",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "thom_catastrophe",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "levin_basal",
+      "efficiency_score": 0.75,
+      "data_need": "one_shot",
+      "cpu_cost": "high",
+      "memory_cost": "low",
+      "converges_after": 2,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 12.9,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "explainability",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "uncertainty",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "adversarial",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 5.8,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "homeostatic",
+      "efficiency_score": 0.625,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": false
+    },
+    {
+      "brain": "recursive_self",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 2.0,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "superposition",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 2.1,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "emotion",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 5.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "human_collab",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 1.3,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "causal_discovery",
+      "efficiency_score": 1.0,
+      "data_need": "one_shot",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 1,
+      "converged": true,
+      "ood_ok": true,
+      "peak_memory_kb": 4.6,
+      "learn_type": "one_shot",
+      "mvp_relevant": 1
+    },
+    {
+      "brain": "symbol_grounding",
+      "efficiency_score": 0.5,
+      "data_need": "high",
+      "cpu_cost": "low",
+      "memory_cost": "low",
+      "converges_after": 999,
+      "converged": false,
+      "ood_ok": true,
+      "peak_memory_kb": 21.8,
+      "learn_type": "long_horizon",
+      "mvp_relevant": false
+    }
+  ],
+  "clusters": {
+    "one_shot": {
+      "brains": [
+        "bayesian",
+        "shannon_entropie",
+        "graph_struktur",
+        "kybernetisch",
+        "act_r_spreading",
+        "genetisch",
+        "attention",
+        "fuzzy",
+        "game_theory",
+        "gradient",
+        "nearest_neighbor",
+        "markov",
+        "contrastive",
+        "mixture_of_experts",
+        "memory_palace",
+        "curiosity",
+        "normalizing_flow",
+        "graph_neural",
+        "hypernetwork",
+        "dnc",
+        "world_model",
+        "predictive_coding",
+        "hopfield",
+        "soar",
+        "neural_turing",
+        "atomspace",
+        "modern_hopfield",
+        "deep_predictive",
+        "chunking",
+        "metta_cognitive",
+        "beer_vsm",
+        "maturana_autopoiesis",
+        "bateson_learning",
+        "foerster_second_order",
+        "prigogine_dissipative",
+        "temporal_awareness",
+        "curriculum",
+        "multitask_sharing",
+        "imitation",
+        "code_context",
+        "strategic_forgetting",
+        "braitenberg",
+        "thom_catastrophe",
+        "levin_basal",
+        "explainability",
+        "uncertainty",
+        "adversarial",
+        "homeostatic",
+        "recursive_self",
+        "superposition",
+        "emotion",
+        "human_collab",
+        "causal_discovery"
+      ],
+      "count": 53
+    },
+    "batch": {
+      "brains": [
+        "reinforcement",
+        "hierarchical_rl"
+      ],
+      "count": 2
+    },
+    "few_shot": {
+      "brains": [
+        "hebbian",
+        "swarm",
+        "online_learning",
+        "wolfram_ca"
+      ],
+      "count": 4
+    },
+    "long_horizon": {
+      "brains": [
+        "ensemble",
+        "pln_reasoning",
+        "counterfactual",
+        "brain_mesh",
+        "haken_synergetics",
+        "symbol_grounding"
+      ],
+      "count": 6
+    }
+  },
+  "compatibility": [
+    {
+      "pair": "genetisch+contrastive",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "kybernetisch+game_theory",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "nearest_neighbor+mixture_of_experts",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "game_theory+symbol_grounding",
+      "score": 0.535,
+      "aligned": false,
+      "conflict": false
+    },
+    {
+      "pair": "kybernetisch+contrastive",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "markov+contrastive",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "mixture_of_experts+symbol_grounding",
+      "score": 0.535,
+      "aligned": false,
+      "conflict": false
+    },
+    {
+      "pair": "kybernetisch+act_r_spreading",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "graph_struktur+mixture_of_experts",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "contrastive+normalizing_flow",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "kybernetisch+symbol_grounding",
+      "score": 0.535,
+      "aligned": false,
+      "conflict": false
+    },
+    {
+      "pair": "hebbian+nearest_neighbor",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "curiosity+normalizing_flow",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "hebbian+curiosity",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "genetisch+fuzzy",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "graph_struktur+kybernetisch",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "graph_struktur+contrastive",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "game_theory+nearest_neighbor",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "genetisch+graph_neural",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "hebbian+fuzzy",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "shannon_entropie+normalizing_flow",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "nearest_neighbor+symbol_grounding",
+      "score": 0.535,
+      "aligned": false,
+      "conflict": false
+    },
+    {
+      "pair": "normalizing_flow+graph_neural",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "fuzzy+markov",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "fuzzy+contrastive",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "genetisch+normalizing_flow",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "kybernetisch+normalizing_flow",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "contrastive+symbol_grounding",
+      "score": 0.535,
+      "aligned": false,
+      "conflict": false
+    },
+    {
+      "pair": "hebbian+game_theory",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    },
+    {
+      "pair": "fuzzy+graph_neural",
+      "score": 0.735,
+      "aligned": true,
+      "conflict": false
+    }
+  ],
+  "synergies": [
+    {
+      "pair": "BQ+code_context",
+      "expected_benefit": "Unknown",
+      "a_found": false,
+      "b_found": true
+    },
+    {
+      "pair": "BQ+attention",
+      "expected_benefit": "Unknown",
+      "a_found": false,
+      "b_found": true
+    },
+    {
+      "pair": "BQ+knn",
+      "expected_benefit": "Unknown",
+      "a_found": false,
+      "b_found": false
+    },
+    {
+      "pair": "BQ+temporal_awareness",
+      "expected_benefit": "Unknown",
+      "a_found": false,
+      "b_found": true
+    },
+    {
+      "pair": "attention+hebbian",
+      "expected_benefit": "High",
+      "a_found": true,
+      "b_found": true
+    },
+    {
+      "pair": "game_theory+uncertainty",
+      "expected_benefit": "High",
+      "a_found": true,
+      "b_found": true
+    },
+    {
+      "pair": "memory_palace+temporal_awareness",
+      "expected_benefit": "High",
+      "a_found": true,
+      "b_found": true
+    },
+    {
+      "pair": "beer_vsm+bateson_learning",
+      "expected_benefit": "High",
+      "a_found": true,
+      "b_found": true
+    }
+  ],
+  "anti_patterns": [
+    {
+      "type": "Overwriting",
+      "pairs": [
+        [
+          "ensemble",
+          "any_untrained_brain"
+        ]
+      ],
+      "risk": "high"
+    },
+    {
+      "type": "Confidence_Inflation",
+      "pairs": [
+        [
+          "curiosity",
+          "homeostatic"
+        ]
+      ],
+      "risk": "medium"
+    },
+    {
+      "type": "Duplicate_Work",
+      "pairs": [
+        [
+          "bayesian",
+          "pln_reasoning"
+        ],
+        [
+          "hopfield",
+          "modern_hopfield"
+        ]
+      ],
+      "risk": "low"
+    },
+    {
+      "type": "Latency_Bomb",
+      "pairs": [
+        [
+          "brain_mesh",
+          "hyperon_integrator"
+        ],
+        [
+          "ensemble",
+          "swarm"
+        ]
+      ],
+      "risk": "high"
+    },
+    {
+      "type": "Amplified_Errors",
+      "pairs": [
+        [
+          "counterfactual",
+          "haken_synergetics"
+        ]
+      ],
+      "risk": "high"
+    }
+  ],
+  "routing": {
+    "empty_error": {
+      "brains": [
+        "code_context",
+        "online_learning",
+        "temporal"
+      ],
+      "reason": "Need context first"
+    },
+    "code_context_available": {
+      "brains": [
+        "attention",
+        "hebbian",
+        "bayesian",
+        "symbol_grounding"
+      ],
+      "reason": "Can reason with code"
+    },
+    "test_output_available": {
+      "brains": [
+        "explainability",
+        "uncertainty",
+        "game_theory"
+      ],
+      "reason": "Evidence-based decision"
+    },
+    "unknown_bug": {
+      "brains": [
+        "curiosity",
+        "ood detection brains"
+      ],
+      "reason": "Explore, dont guess"
+    },
+    "critical_production": {
+      "brains": [
+        "vsm",
+        "adversarial",
+        "homeostatic"
+      ],
+      "reason": "Safety-first, multi-layer check"
+    },
+    "long_term_project": {
+      "brains": [
+        "curriculum",
+        "bateson",
+        "recursive_self"
+      ],
+      "reason": "Plan and adapt over time"
+    }
+  },
+  "summary": {
+    "total_profiled": 65,
+    "efficient": 55,
+    "one_shot": 53,
+    "few_shot": 4,
+    "converged": 55,
+    "mvp_ready": 50,
+    "low_cpu": 59,
+    "low_memory": 49
+  }
+}
