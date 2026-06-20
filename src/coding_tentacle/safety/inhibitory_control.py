@@ -72,6 +72,9 @@ class InhibitoryControl:
         '~/.ssh', 'system32', '/etc/passwd', '/etc/shadow', '.env',
     ]
 
+    # ═══════════ ACTION TYPES ═══════════
+    READ_ONLY_ACTIONS = {'analyze', 'explain', 'suggest_patch', 'search', 'classify', 'inspect', 'review'}
+
     def __init__(self, security_store=None):
         self.decision_log = []
         self.block_count = 0
@@ -109,7 +112,11 @@ class InhibitoryControl:
         test_relevant = ar.get('test_relevant', False)
         test_count = ar.get('test_count', 0)
 
-        # ═══ 0. SECURITY STORE CHECK (optional, read-only, first!) ═══
+        # Action classification
+        action = ar.get('proposed_action', 'analyze')
+        is_readonly = action in self.READ_ONLY_ACTIONS
+
+        # ═══ 0. SECURITY STORE CHECK ═══
         security_clear = False  # True = SecurityStore found nothing dangerous
         if self.security_store:
             patch_text = ar.get('patch', '')
@@ -130,19 +137,23 @@ class InhibitoryControl:
         if sec and conf < 0.8 and not security_clear:
             blockers.append(f'Security-sensitive action with low confidence ({conf:.0%})')
 
-        # Critical risk + no rollback — but softer if SecurityStore says clean
-        if risk == 'critical' and not rollback and not security_clear:
-            blockers.append(f'Critical risk ({risk}) without rollback capability')
+        # Critical risk + no rollback — BLOCK nur für Write-Actions
+        # Read-only: security_clear erlaubt Durchlass; Write: immer BLOCK
+        if risk == 'critical' and not rollback:
+            if is_readonly and security_clear:
+                pass  # Allow through
+            else:
+                blockers.append(f'Critical risk ({risk}) without rollback capability')
 
-        # Dangerous patterns in patch
-        if patch:
+        # Sensitive file modification — nur bei Write-Actions relevant
+        if target and not is_readonly:
             for pattern, description in self.DANGEROUS_PATTERNS:
                 if re.search(pattern, patch, re.IGNORECASE):
                     blockers.append(f'{description}: matched "{pattern}"')
                     break
 
-        # Sensitive file modification
-        if target:
+        # Sensitive file modification — nur bei Write-Actions relevant
+        if target and not is_readonly:
             for sf in self.SENSITIVE_FILES:
                 if sf in target:
                     if not sec:  # User didn't flag it, but it IS sensitive
