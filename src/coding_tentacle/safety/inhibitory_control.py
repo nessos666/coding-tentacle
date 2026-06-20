@@ -110,6 +110,7 @@ class InhibitoryControl:
         test_count = ar.get('test_count', 0)
 
         # ═══ 0. SECURITY STORE CHECK (optional, read-only, first!) ═══
+        security_clear = False  # True = SecurityStore found nothing dangerous
         if self.security_store:
             patch_text = ar.get('patch', '')
             if patch_text:
@@ -118,15 +119,19 @@ class InhibitoryControl:
                     worst = max(s[1] for s in sec_results)
                     if worst > 0.5:
                         return InhibitionDecision('BLOCK', 0.95, f'Security: {sec_results[0][0].name}')
+                else:
+                    security_clear = True  # Store consulted, found nothing
+            else:
+                security_clear = True  # No patch to check = safe
 
         # ═══ 1. BLOCK-CHECKS (absolute Stopps) ═══
 
-        # Security-sensitive + low confidence
-        if sec and conf < 0.8:
+        # Security-sensitive + low confidence — softer if SecurityStore says clean
+        if sec and conf < 0.8 and not security_clear:
             blockers.append(f'Security-sensitive action with low confidence ({conf:.0%})')
 
-        # Critical risk + no rollback
-        if risk == 'critical' and not rollback:
+        # Critical risk + no rollback — but softer if SecurityStore says clean
+        if risk == 'critical' and not rollback and not security_clear:
             blockers.append(f'Critical risk ({risk}) without rollback capability')
 
         # Dangerous patterns in patch
@@ -168,8 +173,8 @@ class InhibitoryControl:
         if risk in ('high', 'critical') and conf < 0.7:
             escalate_reasons.append(f'{risk} risk with low confidence ({conf:.0%})')
 
-        # No test for risky change
-        if risk in ('high', 'critical') and not test:
+        # No test for risky change — softer if SecurityStore says clean
+        if risk in ('high', 'critical') and not test and not security_clear:
             escalate_reasons.append(f'No test available for {risk} risk change')
 
         # Conflicting brain outputs in WM
