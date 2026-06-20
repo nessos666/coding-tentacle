@@ -72,13 +72,14 @@ class InhibitoryControl:
         '~/.ssh', 'system32', '/etc/passwd', '/etc/shadow', '.env',
     ]
 
-    def __init__(self):
-        self.decision_log = []      # Alle Entscheidungen
+    def __init__(self, security_store=None):
+        self.decision_log = []
         self.block_count = 0
         self.escalate_count = 0
         self.go_count = 0
         self.hold_count = 0
         self.total_checks = 0
+        self.security_store = security_store  # Optional
 
     # ═══════════ CORE: EVALUATE ═══════════
 
@@ -107,6 +108,16 @@ class InhibitoryControl:
         test_passed = ar.get('test_passed')  # None = unknown, True/False
         test_relevant = ar.get('test_relevant', False)
         test_count = ar.get('test_count', 0)
+
+        # ═══ 0. SECURITY STORE CHECK (optional, read-only, first!) ═══
+        if self.security_store:
+            patch_text = ar.get('patch', '')
+            if patch_text:
+                sec_results = self.security_store.detect_danger(patch_text)
+                if sec_results:
+                    worst = max(s[1] for s in sec_results)
+                    if worst > 0.5:
+                        return InhibitionDecision('BLOCK', 0.95, f'Security: {sec_results[0][0].name}')
 
         # ═══ 1. BLOCK-CHECKS (absolute Stopps) ═══
 

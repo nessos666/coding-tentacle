@@ -130,11 +130,12 @@ class ScientificMethodBrain:
         ]
     }
 
-    def __init__(self, library_store=None):
-        self.hypotheses = []       # Alle jemals generierten Hypothesen
-        self.experiments = []      # Alle geplanten/durchgeführten Experimente
-        self.evidence_log = []     # Gesamte Evidenz-Historie
-        self.library_store = library_store  # Optional, read-only
+    def __init__(self, library_store=None, bug_pattern_store=None):
+        self.hypotheses = []
+        self.experiments = []
+        self.evidence_log = []
+        self.library_store = library_store
+        self.bug_pattern_store = bug_pattern_store  # Optional
         self.total_think_calls = 0
         self.total_learn_calls = 0
 
@@ -167,6 +168,13 @@ class ScientificMethodBrain:
                 lib_results = self.library_store.search(h.statement, max_results=1)
                 if lib_results:
                     boost += 0.08
+            # Bug Pattern Store Boost (optional, read-only, max +0.10)
+            if self.bug_pattern_store:
+                for h in active:
+                    bp_results = self.bug_pattern_store.search(h.statement, max_results=1)
+                    if bp_results:
+                        boost += 0.10
+                        break
             ranked.append((h, h.confidence + boost))
         ranked.sort(key=lambda x: -x[1])
 

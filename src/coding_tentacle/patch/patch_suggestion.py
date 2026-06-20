@@ -174,9 +174,10 @@ class PatchSuggestionEngine:
         re.IGNORECASE
     )
 
-    def __init__(self, library_store=None):
+    def __init__(self, library_store=None, bug_pattern_store=None):
         self.total_suggestions = 0
-        self.library_store = library_store  # Optional: LibraryKnowledgeStore
+        self.library_store = library_store
+        self.bug_pattern_store = bug_pattern_store  # Optional
 
     def suggest(self, bug_report, code_context=None, test_output=None,
                 br_hypotheses=None, grounding=None, requested_action='suggest_patch'):
