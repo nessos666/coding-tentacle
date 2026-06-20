@@ -178,6 +178,213 @@ def create_seed_store():
         fix_pattern='requests.{method}(url, headers={"Authorization": "Bearer {token}"})',
         source='requests-docs', confidence=0.85)
 
+    # ═══════════ EXPANSION: 10 pro Library ═══════════
+    # --- stdlib: +8 (type hints, asyncio, dataclasses, itertools, functools, json, csv, logging) ---
+    store.add_entry(library='stdlib', language='python', topic='typing',
+        symptom_pattern=r'TypeError.*not subscriptable|Optional.*None',
+        root_cause='Falscher Type-Hint oder missing Optional',
+        fix_pattern='from typing import Optional; {var}: Optional[{type}] = None',
+        source='python-docs', confidence=0.9)
+    store.add_entry(library='stdlib', language='python', topic='asyncio',
+        symptom_pattern=r'coroutine.*was never awaited|RuntimeWarning.*coroutine',
+        root_cause='Async-Funktion ohne await aufgerufen',
+        fix_pattern='await {coro}()  # or: asyncio.run({coro}())',
+        source='python-docs', confidence=0.9)
+    store.add_entry(library='stdlib', language='python', topic='dataclasses',
+        symptom_pattern=r'TypeError.*missing.*required.*argument|unexpected keyword',
+        root_cause='Dataclass-Feld falsch definiert',
+        fix_pattern='@dataclass\nclass {Name}:\n    {field}: {type} = field(default=...)',
+        source='python-docs', confidence=0.9)
+    store.add_entry(library='stdlib', language='python', topic='itertools',
+        symptom_pattern=r'StopIteration|generator already executing',
+        root_cause='Iterator erschöpft oder Generator doppelt verwendet',
+        fix_pattern='list({gen})  # einmalig materialisieren',
+        source='python-docs', confidence=0.85)
+    store.add_entry(library='stdlib', language='python', topic='functools',
+        symptom_pattern=r'TypeError.*missing.*argument.*partial',
+        root_cause='functools.partial falsch konfiguriert',
+        fix_pattern='from functools import partial\n{fn} = partial({orig}, {arg}={default})',
+        source='python-docs', confidence=0.85)
+    store.add_entry(library='stdlib', language='python', topic='json',
+        symptom_pattern=r'JSONDecodeError|json\.decoder',
+        root_cause='JSON-Daten ungültig oder falsches Encoding',
+        fix_pattern='json.loads({data})  # check: try/except JSONDecodeError',
+        source='python-docs', confidence=0.9)
+    store.add_entry(library='stdlib', language='python', topic='csv',
+        symptom_pattern=r'Error.*line.*csv|_csv\.Error',
+        root_cause='CSV-Datei mit falschem Delimiter oder Quote',
+        fix_pattern='csv.reader(f, delimiter=",", quotechar="")',
+        source='python-docs', confidence=0.85)
+    store.add_entry(library='stdlib', language='python', topic='logging',
+        symptom_pattern=r'No handlers could be found|logging.*not configured',
+        root_cause='Logger nicht konfiguriert vor erstem logging-Aufruf',
+        fix_pattern='logging.basicConfig(level=logging.INFO)',
+        source='python-docs', confidence=0.9)
+    # --- pytest: +8 (parametrize, marks, raises, tmp_path, capsys, monkeypatch, conftest, coverage) ---
+    store.add_entry(library='pytest', language='python', topic='parametrize',
+        symptom_pattern=r'fixture.*parametrize.*not found|indirect.*parametrize',
+        root_cause='Parametrize-Syntax falsch oder indirect flag fehlt',
+        fix_pattern='@pytest.mark.parametrize("{var}", [{vals}])',
+        source='pytest-docs', confidence=0.9)
+    store.add_entry(library='pytest', language='python', topic='marks',
+        symptom_pattern=r'Unknown marker|PytestUnknownMarkWarning',
+        root_cause='Custom marker nicht in pytest.ini registriert',
+        fix_pattern='# pytest.ini:\n[pytest]\nmarkers =\n    {name}: description',
+        source='pytest-docs', confidence=0.9)
+    store.add_entry(library='pytest', language='python', topic='raises',
+        symptom_pattern=r'Failed: DID NOT RAISE|pytest\.raises',
+        root_cause='Exception wird nicht geworfen oder falscher Typ',
+        fix_pattern='with pytest.raises({ExceptionType}):\n    {code}',
+        source='pytest-docs', confidence=0.9)
+    store.add_entry(library='pytest', language='python', topic='tmp_path',
+        symptom_pattern=r'FileNotFoundError.*tmp|tmpdir|tmp_path',
+        root_cause='tmp_path-File nach Test gelöscht',
+        fix_pattern='def test_{name}(tmp_path):\n    f = tmp_path / "file.txt"',
+        source='pytest-docs', confidence=0.85)
+    store.add_entry(library='pytest', language='python', topic='capsys',
+        symptom_pattern=r'AssertionError.*stdout|capsys',
+        root_cause='Output-Capture nicht aktiviert',
+        fix_pattern='def test_{name}(capsys):\n    captured = capsys.readouterr()',
+        source='pytest-docs', confidence=0.85)
+    store.add_entry(library='pytest', language='python', topic='monkeypatch',
+        symptom_pattern=r'AttributeError.*monkeypatch|monkeypatch\.setattr',
+        root_cause='Monkeypatch falsch gesetzt oder gelöscht',
+        fix_pattern='monkeypatch.setattr({module}, "{attr}", {value})',
+        source='pytest-docs', confidence=0.85)
+    store.add_entry(library='pytest', language='python', topic='conftest',
+        symptom_pattern=r'conftest.*not loaded|fixture.*not found.*conftest',
+        root_cause='conftest.py nicht im richtigen Verzeichnis',
+        fix_pattern='# conftest.py in test/ oder tests/ directory',
+        source='pytest-docs', confidence=0.9)
+    store.add_entry(library='pytest', language='python', topic='coverage',
+        symptom_pattern=r'CoverageWarning|No data collected',
+        root_cause='pytest-cov falsch konfiguriert',
+        fix_pattern='pytest --cov={package} --cov-report=term',
+        source='pytest-docs', confidence=0.85)
+    # --- FastAPI: +8 (middleware, CORS, status codes, headers, background, lifespan, websockets, uploads) ---
+    store.add_entry(library='fastapi', language='python', topic='middleware',
+        symptom_pattern=r'Middleware.*not applied|add_middleware',
+        root_cause='Middleware-Reihenfolge falsch oder nicht registriert',
+        fix_pattern='app.add_middleware({MiddlewareClass})  # CORSMiddleware zuerst',
+        source='fastapi-docs', confidence=0.9)
+    store.add_entry(library='fastapi', language='python', topic='cors',
+        symptom_pattern=r'CORS.*blocked|Cross-Origin|allow_origins',
+        root_cause='CORS nicht konfiguriert für Frontend-Origin',
+        fix_pattern='app.add_middleware(CORSMiddleware, allow_origins=["{url}"])',
+        source='fastapi-docs', confidence=0.9)
+    store.add_entry(library='fastapi', language='python', topic='status_codes',
+        symptom_pattern=r'status_code.*not found|422|500.*validation',
+        root_cause='Status-Code implizit statt explizit',
+        fix_pattern='return JSONResponse(content=..., status_code={code})',
+        source='fastapi-docs', confidence=0.9)
+    store.add_entry(library='fastapi', language='python', topic='headers',
+        symptom_pattern=r'KeyError.*header|Header.*missing',
+        root_cause='Required Header fehlt in Request',
+        fix_pattern='@app.get("/")\ndef endpoint({header}: str = Header(...)):',
+        source='fastapi-docs', confidence=0.85)
+    store.add_entry(library='fastapi', language='python', topic='background',
+        symptom_pattern=r'BackgroundTasks.*not working|background_tasks',
+        root_cause='BackgroundTasks falsch injected',
+        fix_pattern='def endpoint(background_tasks: BackgroundTasks):\n    background_tasks.add_task({task})',
+        source='fastapi-docs', confidence=0.85)
+    store.add_entry(library='fastapi', language='python', topic='lifespan',
+        symptom_pattern=r'RuntimeError.*lifespan|startup.*not called',
+        root_cause='Lifespan Event-Handler fehlt',
+        fix_pattern='@asynccontextmanager\nasync def lifespan(app):\n    yield',
+        source='fastapi-docs', confidence=0.85)
+    store.add_entry(library='fastapi', language='python', topic='websockets',
+        symptom_pattern=r'WebSocket.*disconnect|websocket.*error',
+        root_cause='WebSocket ohne try/except um accept()',
+        fix_pattern='@app.websocket("/ws")\nasync def ws(websocket: WebSocket):\n    await websocket.accept()\n    try: ...\n    except: await websocket.close()',
+        source='fastapi-docs', confidence=0.85)
+    store.add_entry(library='fastapi', language='python', topic='uploads',
+        symptom_pattern=r'UploadFile.*error|file.*too large',
+        root_cause='Upload-Größe nicht limitiert',
+        fix_pattern='from fastapi import UploadFile, File\nasync def upload(file: UploadFile = File(...)):',
+        source='fastapi-docs', confidence=0.85)
+    # --- Pydantic: +8 (validators, config, nested models, generics, aliases, env, parse_raw, errors) ---
+    store.add_entry(library='pydantic', language='python', topic='validators',
+        symptom_pattern=r'validator.*not called|@validator',
+        root_cause='Validator-Dekorator falsch platziert',
+        fix_pattern='@field_validator("{field}")\n@classmethod\ndef validate_{field}(cls, v):\n    return v',
+        source='pydantic-docs', confidence=0.9)
+    store.add_entry(library='pydantic', language='python', topic='config',
+        symptom_pattern=r'ConfigDict|model_config.*error',
+        root_cause='Model-Konfiguration falsch (v1 vs v2 Syntax)',
+        fix_pattern='class {Model}(BaseModel):\n    model_config = ConfigDict(extra="forbid")',
+        source='pydantic-docs', confidence=0.9)
+    store.add_entry(library='pydantic', language='python', topic='nested',
+        symptom_pattern=r'ValidationError.*nested|dict is not a.*model',
+        root_cause='Nested Model nicht richtig deklariert',
+        fix_pattern='class Outer(BaseModel):\n    inner: InnerModel',
+        source='pydantic-docs', confidence=0.9)
+    store.add_entry(library='pydantic', language='python', topic='generics',
+        symptom_pattern=r'TypeError.*Generic.*BaseModel',
+        root_cause='Generic Model falsch parametrisiert',
+        fix_pattern='from typing import Generic, TypeVar\nT = TypeVar("T")\nclass Response(BaseModel, Generic[T]):\n    data: T',
+        source='pydantic-docs', confidence=0.85)
+    store.add_entry(library='pydantic', language='python', topic='aliases',
+        symptom_pattern=r'KeyError.*alias|field.*serialization_alias',
+        root_cause='Field-Alias fehlt für API/Schema',
+        fix_pattern='{field}: {type} = Field(alias="{alias_name}")',
+        source='pydantic-docs', confidence=0.85)
+    store.add_entry(library='pydantic', language='python', topic='env',
+        symptom_pattern=r'Settings.*env|pydantic-settings|BaseSettings',
+        root_cause='Settings aus .env nicht geladen',
+        fix_pattern='from pydantic_settings import BaseSettings\nclass Settings(BaseSettings):\n    model_config = SettingsConfigDict(env_file=".env")',
+        source='pydantic-docs', confidence=0.85)
+    store.add_entry(library='pydantic', language='python', topic='parse_raw',
+        symptom_pattern=r'parse_raw.*deprecated|model_validate_json',
+        root_cause='v1-API (parse_raw) in v2 verwendet',
+        fix_pattern='{Model}.model_validate_json({data})  # v2 syntax',
+        source='pydantic-docs', confidence=0.85)
+    store.add_entry(library='pydantic', language='python', topic='errors',
+        symptom_pattern=r'pydantic.error_wrappers|ValidationError.*loc',
+        root_cause='Fehler-Location in verschachtelten Modellen schwer lesbar',
+        fix_pattern='try:\n    {Model}(**data)\nexcept ValidationError as e:\n    print(e.errors())',
+        source='pydantic-docs', confidence=0.85)
+    # --- requests: +8 (sessions, redirects, proxies, certificates, streaming, retries, headers, post) ---
+    store.add_entry(library='requests', language='python', topic='sessions',
+        symptom_pattern=r'Connection pool.*full|Session.*not reused',
+        root_cause='Session nicht verwendet (jeder Request neue Verbindung)',
+        fix_pattern='session = requests.Session()\nsession.{method}(url)',
+        source='requests-docs', confidence=0.9)
+    store.add_entry(library='requests', language='python', topic='redirects',
+        symptom_pattern=r'TooManyRedirects|redirect.*loop',
+        root_cause='Redirect-Limit erreicht',
+        fix_pattern='requests.{method}(url, allow_redirects=False)  # oder max_redirects',
+        source='requests-docs', confidence=0.85)
+    store.add_entry(library='requests', language='python', topic='proxies',
+        symptom_pattern=r'ProxyError|proxy.*connection',
+        root_cause='Proxy falsch konfiguriert',
+        fix_pattern='requests.{method}(url, proxies={{"http": "{proxy_url}"}})',
+        source='requests-docs', confidence=0.85)
+    store.add_entry(library='requests', language='python', topic='certificates',
+        symptom_pattern=r'SSLError|SSL.*certificate|certificate verify failed',
+        root_cause='SSL-Zertifikat nicht verifizierbar',
+        fix_pattern='requests.{method}(url, verify="{cert_path}")  # oder verify=False nur für dev',
+        source='requests-docs', confidence=0.9)
+    store.add_entry(library='requests', language='python', topic='streaming',
+        symptom_pattern=r'MemoryError.*large|ChunkedEncodingError',
+        root_cause='Große Response nicht gestreamt',
+        fix_pattern='with requests.{method}(url, stream=True) as r:\n    for chunk in r.iter_content():',
+        source='requests-docs', confidence=0.85)
+    store.add_entry(library='requests', language='python', topic='retries',
+        symptom_pattern=r'ConnectionError.*retry|MaxRetryError',
+        root_cause='Keine Retry-Strategie bei Verbindungsfehlern',
+        fix_pattern='from urllib3.util.retry import Retry\nsession.mount("https://", HTTPAdapter(max_retries=Retry(total=3))))',
+        source='requests-docs', confidence=0.85)
+    store.add_entry(library='requests', language='python', topic='headers',
+        symptom_pattern=r'KeyError.*header|Content-Type.*missing',
+        root_cause='Required Header fehlt in Response',
+        fix_pattern='r = requests.{method}(url, headers={{"Accept": "application/json"}})',
+        source='requests-docs', confidence=0.85)
+    store.add_entry(library='requests', language='python', topic='post',
+        symptom_pattern=r'400 Bad Request.*POST|json.*not serializable',
+        root_cause='POST-Daten nicht als JSON gesendet',
+        fix_pattern='requests.post(url, json={data})  # nicht data=',
+        source='requests-docs', confidence=0.9)
+
     return store
 
 
@@ -220,7 +427,7 @@ if __name__ == "__main__":
                     fix_pattern='def get() -> Type:', source='test')
     results = store.search('Depends error')
     lib_results = store.get_by_library('fastapi')
-    t6 = len(lib_results) == 1
+    t6 = len(lib_results) >= 1  # Store hat 10 fastapi entries nach Expansion
     print(f"  T6: {'✅' if t6 else '❌'} Search by library → {len(lib_results)}")
 
     # T7: Stats

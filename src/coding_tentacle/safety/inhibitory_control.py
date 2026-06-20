@@ -58,6 +58,9 @@ class InhibitoryControl:
         (r'pip\\s+uninstall|apt-get\\s+remove|yum\\s+remove', 'Package removal'),
         (r'\\.\\./|\\.\\.\\\\|%2e%2e/', 'Path traversal attempt'),
         (r'~/\\.ssh|/etc/passwd|/etc/shadow|/etc/sudoers', 'Sensitive system path'),
+        (r'deploy\\s+to\\s+production|production\\s+deploy|release\\s+to\\s+prod', 'Production deployment'),
+        (r'kubectl\\s+apply|terraform\\s+apply|helm\\s+upgrade', 'Infrastructure change'),
+        (r'docker\\s+push|systemctl\\s+restart|service\\s+restart', 'Service operation'),
     ]
 
     # ═══════════ SENSITIVE FILES ═══════════
