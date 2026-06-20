@@ -99,6 +99,66 @@ class PatchSuggestionEngine:
              'explanation': 'Datenbank-Constraint prüfen', 'risk': 'high',
              'requires_human': True},
         ],
+        # ═══════════ MULTI-LANGUAGE TEMPLATES ═══════════
+        'Rust_Panic': [
+            {'type': 'rust_match', 'patch': 'match {var} {{\n    Some(val) => val,\n    None => return Err(...),\n}}',
+             'explanation': 'Statt unwrap(): Pattern Matching mit match', 'risk': 'low'},
+            {'type': 'rust_iflet', 'patch': 'if let Some({var}) = {expr} {{\n    // use {var}\n}}',
+             'explanation': 'if-let statt unwrap() für Option/Result', 'risk': 'low'},
+        ],
+        'Rust_Result': [
+            {'type': 'rust_question', 'patch': 'let {var} = fallible_fn()?;',
+             'explanation': '?-Operator propagiert Fehler statt unwrap', 'risk': 'low'},
+            {'type': 'rust_match_err', 'patch': 'match {expr} {{\n    Ok(val) => val,\n    Err(e) => return Err(e.into()),\n}}',
+             'explanation': 'match auf Result für explizite Fehlerbehandlung', 'risk': 'low'},
+        ],
+        'Go_Nil': [
+            {'type': 'go_nil_check', 'patch': 'if {var} == nil {{\n    return fmt.Errorf("{var} is nil")\n}}',
+             'explanation': 'Nil-Check vor Dereferenzierung', 'risk': 'low'},
+        ],
+        'Go_Error': [
+            {'type': 'go_err_check', 'patch': 'if err != nil {{\n    return fmt.Errorf("...: %w", err)\n}}',
+             'explanation': 'Error nicht ignorieren, wrappen mit %w', 'risk': 'low'},
+        ],
+        'Go_Defer': [
+            {'type': 'go_defer_close', 'patch': 'defer {resource}.Close()',
+             'explanation': 'Ressource mit defer schließen', 'risk': 'low'},
+        ],
+        'C_Null': [
+            {'type': 'cpp_null_check', 'patch': 'if ({var} != nullptr) {{\n    {var}->{method}();\n}}',
+             'explanation': 'Nullptr-Check vor Dereferenzierung', 'risk': 'low'},
+            {'type': 'cpp_smartptr', 'patch': 'std::unique_ptr<{type}> {var} = std::make_unique<{type}>();',
+             'explanation': 'Smart-Pointer statt raw new/delete', 'risk': 'low'},
+        ],
+        'C_Range': [
+            {'type': 'cpp_bounds_check', 'patch': 'if ({idx} >= 0 && {idx} < {container}.size()) {{\n    auto& val = {container}[{idx}];\n}}',
+             'explanation': 'Bounds-Check mit .size()', 'risk': 'low'},
+        ],
+        'Ruby_Nil': [
+            {'type': 'ruby_safe_nav', 'patch': '{var}&.{method}',
+             'explanation': 'Safe Navigation Operator &. statt . bei nil', 'risk': 'low'},
+            {'type': 'ruby_nil_guard', 'patch': '{var}.nil? ? default : {var}.{method}',
+             'explanation': 'Nil-Guard mit Ternary', 'risk': 'low'},
+        ],
+        'Ruby_NoMethod': [
+            {'type': 'ruby_respond_to', 'patch': 'if {var}.respond_to?(:{method})\n  {var}.{method}\nend',
+             'explanation': 'respond_to? prüft ob Methode existiert', 'risk': 'low'},
+        ],
+        'Shell_Unset': [
+            {'type': 'shell_default', 'patch': '${{{VAR}:-default_value}}',
+             'explanation': 'Parameter-Expansion für unset/null Variablen', 'risk': 'low'},
+            {'type': 'shell_strict', 'patch': 'set -euo pipefail',
+             'explanation': 'Strict Mode: Fehler + unset = sofort exit', 'risk': 'low'},
+        ],
+        'Shell_Rm': [
+            {'type': 'shell_safe_rm', 'patch': 'rm -i "{path}" || echo "Not removing {path}"',
+             'explanation': 'Sicheres rm mit -i (interactive) und Guard', 'risk': 'low'},
+        ],
+        'Shell_Quote': [
+            {'type': 'shell_quote_var', 'patch': '"${{var}}"',
+             'explanation': 'Variablen IMMER in Anführungszeichen', 'risk': 'low'},
+        ],
+        # ═══════════ DEFAULT ═══════════
         '_default': [
             {'type': 'generic_fix', 'patch': '# Untersuchung nötig: {bug}',
              'explanation': 'Kein spezifischer Patch bekannt. Mehr Kontext nötig.', 'risk': 'medium'},
@@ -171,6 +231,7 @@ class PatchSuggestionEngine:
             alt_module='alternative', primary='primary_module', fallback='fallback_module',
             critical_section='# critical code here',
             default='default_value', file='filename', bug=bug_report[:30],
+            container='container', VAR='$VAR', path='/safe/path', resource='file',
         )
         patch = best['patch'].format(**patch_kwargs)
 
@@ -186,17 +247,54 @@ class PatchSuggestionEngine:
         ).to_dict()
 
     def _extract_bug_type(self, bug_report):
-        """Extrahiere Bug-Typ aus Stacktrace oder Report."""
+        """Extrahiere Bug-Typ aus Stacktrace oder Report (multi-language)."""
         if not bug_report:
             return '_default'
-        # Stacktrace: erste Zeile = "ErrorType: message"
         first_line = bug_report.split('\n')[0].strip()
+
+        # Language detection from stacktrace patterns
+        lang = ''
+        if '.rs:' in bug_report or 'rustc' in bug_report.lower():
+            lang = 'Rust_'
+        elif '.go:' in bug_report or 'goroutine' in bug_report.lower():
+            lang = 'Go_'
+        elif '.cpp:' in bug_report or '.hpp:' in bug_report or 'Segmentation fault' in first_line:
+            lang = 'C_'
+        elif '.rb:' in bug_report:
+            lang = 'Ruby_'
+        elif 'bash:' in bug_report.lower() or 'unbound variable' in first_line:
+            lang = 'Shell_'
+
+        # Match known bug types — language detection first!
+        if lang == 'Rust_' and ('unwrap' in bug_report.lower() or 'panic' in bug_report.lower()):
+            return 'Rust_Panic'
+        if lang == 'Rust_' and 'Result' in bug_report:
+            return 'Rust_Result'
+        if lang == 'Go_' and ('nil' in bug_report.lower() or 'invalid memory' in bug_report.lower()):
+            return 'Go_Nil'
+        if lang == 'Go_' and 'error' in bug_report.lower():
+            return 'Go_Error'
+        if lang == 'Go_' and ('resource' in bug_report.lower() or 'close' in bug_report.lower()):
+            return 'Go_Defer'
+        if lang == 'C_' and ('nullptr' in bug_report.lower() or 'Segmentation fault' in first_line):
+            return 'C_Null'
+        if lang == 'C_' and 'out of bounds' in bug_report.lower():
+            return 'C_Range'
+        if lang == 'Ruby_' and ('nil' in bug_report.lower() or 'NoMethod' in bug_report):
+            return 'Ruby_Nil'
+        if lang == 'Shell_' and ('unbound variable' in bug_report.lower() or 'unset' in bug_report.lower()):
+            return 'Shell_Unset'
+        if lang == 'Shell_' and 'rm' in bug_report.lower():
+            return 'Shell_Rm'
+
+        # Fallback: Python bug types
         for known in self.TEMPLATES:
-            if known.lower() in first_line.lower():
-                return known
+            if not any(known.startswith(p) for p in ['Rust_','Go_','C_','Ruby_','Shell_']):
+                if known.lower() in first_line.lower():
+                    return known
+
         if ':' in first_line:
             bt = first_line.split(':')[0]
-            # Strip "Exception"/"Error" suffix
             for suffix in ['Exception', 'Error']:
                 if bt.lower().endswith(suffix.lower()) and len(bt) > len(suffix):
                     return bt[:-len(suffix)]
