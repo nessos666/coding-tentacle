@@ -32,11 +32,43 @@ class LibraryEntry:
         self.created_at = time.strftime('%Y-%m-%d %H:%M')
 
     def match(self, symptom):
-        """Prüft ob dieser Eintrag zum Symptom passt."""
+        """Prüft ob dieser Eintrag zum Symptom passt. Hybrid: Regex + Keyword-Overlap."""
+        score = 0.0
+        matched = []
+        symptom_lower = symptom.lower()
+
+        # Regex-Match (stark, +0.7)
         try:
-            return bool(re.search(self.symptom_pattern, symptom, re.IGNORECASE))
+            if re.search(self.symptom_pattern, symptom, re.IGNORECASE):
+                score += 0.70
+                matched.append('pattern')
         except re.error:
-            return self.symptom_pattern.lower() in symptom.lower()
+            if self.symptom_pattern.lower() in symptom_lower:
+                score += 0.70
+                matched.append('pattern')
+
+        # Keyword-Overlap aus root_cause (mittel, +0.20)
+        cause_words = set(w.strip('.,:;()') for w in self.root_cause.lower().split()
+                         if len(w.strip('.,:;()')) > 3)
+        symptom_words = set(w.strip('.,:;()') for w in symptom_lower.split()
+                           if len(w.strip('.,:;()')) > 3)
+        if cause_words and symptom_words:
+            overlap = len(cause_words & symptom_words) / max(1, len(cause_words))
+            if overlap > 0.3:
+                score += 0.20 * overlap
+                matched.append('keywords')
+
+        # Topic-Match (schwach, +0.10)
+        if self.topic.lower() in symptom_lower:
+            score += 0.10
+            matched.append('topic')
+
+        return score, matched
+
+    def match_legacy(self, symptom):
+        """Altes bool-Interface für backward compatibility."""
+        score, _ = self.match(symptom)
+        return score > 0
 
     def to_dict(self):
         return {
@@ -68,7 +100,7 @@ class LibraryKnowledgeStore:
         return entry
 
     def search(self, symptom, library=None, language=None, max_results=5):
-        """Suche nach passenden Einträgen. Nur Evidenz, keine Aktion."""
+        """Suche nach passenden Einträgen. Hybrid scoring. Nur Evidenz, keine Aktion."""
         self._searches += 1
         candidates = self.entries
         if library:
@@ -76,14 +108,15 @@ class LibraryKnowledgeStore:
         elif language:
             candidates = self._by_language.get(language, [])
 
-        matches = []
+        scored = []
         for entry in candidates:
-            if entry.match(symptom):
-                matches.append(entry)
+            score, matched = entry.match(symptom)
+            if score > 0:
+                scored.append((entry, score, matched))
 
-        # Nach Confidence + Pattern-Länge sortieren (spezifischere Muster zuerst)
-        matches.sort(key=lambda e: (-e.confidence, -len(e.symptom_pattern)))
-        return matches[:max_results]
+        # Nach Score + Confidence sortieren
+        scored.sort(key=lambda x: (-x[1], -x[0].confidence))
+        return [e for e, _, _ in scored[:max_results]]
 
     def get_by_library(self, library):
         return self._by_library.get(library, [])
