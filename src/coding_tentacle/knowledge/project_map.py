@@ -174,6 +174,52 @@ class ProjectMap:
         return None
 
     # ═══════════ QUERY ═══════════
+    def resolve_file(self, query):
+        """Fuzzy-Auflösung: kurzer Dateiname → voller Pfad(en).
+        Unterstützt: 'file.py', 'dir/file.py', Windows-\\, vollen Pfad."""
+        if not query:
+            return []
+        query = query.replace('\\', '/')
+        candidates = []
+        for full_path in self.files:
+            rel = full_path.replace('\\', '/')
+            # Exakter Match (voller Pfad)
+            if rel.endswith(query) or query in rel:
+                candidates.append((full_path, 1.0 if rel.endswith(query) else 0.5))
+                continue
+            # Dateiname-Match
+            filename = rel.split('/')[-1]
+            qname = query.split('/')[-1]
+            if filename == qname:
+                candidates.append((full_path, 0.8))
+            elif qname in filename:
+                candidates.append((full_path, 0.3))
+        candidates.sort(key=lambda x: -x[1])
+        return [c[0] for c in candidates[:5]]
+
+    def who_imports(self, filepath):
+        """Which files import this file? Accepts full path or short name."""
+        resolved = self.resolve_file(filepath)
+        importers = set()
+        for rp in resolved:
+            importers.update(self.reverse_imports.get(rp, set()))
+            # Also try matching by relative path
+            for key in self.reverse_imports:
+                if key.endswith(filepath) or filepath in key:
+                    importers.update(self.reverse_imports[key])
+        return list(importers)
+
+    def file_info(self, filepath):
+        """Get parsed info for one file. Accepts full path or short name."""
+        resolved = self.resolve_file(filepath)
+        if resolved:
+            return self.files.get(resolved[0], None)
+        # Fallback: search by filename
+        for path, info in self.files.items():
+            if filepath in path or Path(filepath).name in path:
+                return info.to_dict()
+        return None
+
     def find_cycles(self):
         """Find circular import dependencies. Returns list of cycles."""
         cycles = []
@@ -193,17 +239,6 @@ class ProjectMap:
         for file in self.files.values():
             dfs(file.relpath, [])
         return cycles
-
-    def who_imports(self, filepath):
-        """Which files import this file?"""
-        return list(self.reverse_imports.get(filepath, set()))
-
-    def file_info(self, filepath):
-        """Get parsed info for one file."""
-        for path, info in self.files.items():
-            if filepath in path or Path(filepath).name in path:
-                return info.to_dict()
-        return None
 
     def search_function(self, name):
         """Find which files define a function."""
