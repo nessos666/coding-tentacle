@@ -203,20 +203,54 @@ class ShadowModeRunner:
         return report
     
     def _classify_bug_type(self, bug_report):
-        """Classify bug type from issue text."""
+        """Classify bug type from issue text. 13+ types supported."""
         text = bug_report.lower()
-        if any(w in text for w in ['null', 'none', 'nonetype', 'has no attribute', 'none reference']):
+        
+        # Core types (6 — existing, high confidence)
+        if any(w in text for w in ['null', 'none', 'nonetype', 'none reference',
+                                     'has no attribute', 'optional', 'none value']):
             return 'NullPointer'
-        if any(w in text for w in ['type', 'typeerror', 'cannot concatenate', 'unsupported operand']):
+        if any(w in text for w in ['type', 'typeerror', 'cannot concatenate',
+                                     'unsupported operand', 'multiply.*non-int', 'str and int',
+                                     'bytes', 'str and bytes']):
             return 'TypeError'
-        if any(w in text for w in ['import', 'modulenotfound', 'no module', 'cannot import']):
+        if any(w in text for w in ['import', 'modulenotfound', 'no module',
+                                     'cannot import', 'circular import']):
             return 'ImportError'
         if any(w in text for w in ['attribute', 'attributeerror', 'has no attribute']):
-            return 'AttributeError'
+            if not any(w in text for w in ['none', 'nonetype']):
+                return 'AttributeError'
         if any(w in text for w in ['key', 'keyerror', 'missing key']):
             return 'KeyError'
-        if any(w in text for w in ['drop table', 'sql injection', 'xss', 'eval(']):
+        
+        # Extended types (7 NEW — RC15.7)
+        if any(w in text for w in ['indexerror', 'list index', 'out of range',
+                                     'off-by-one', 'index out of bounds']):
+            return 'IndexError'
+        if any(w in text for w in ['valueerror', 'invalid literal', 'invalid value',
+                                     'string where int', 'invalid for int']):
+            return 'ValueError'
+        if any(w in text for w in ['memoryerror', 'out of memory', 'oom',
+                                     'memory leak', 'garbage collection']):
+            return 'MemoryError'
+        if any(w in text for w in ['syntaxerror', 'invalid syntax', 'syntax error',
+                                     'version mismatch', 'python version']):
+            return 'SyntaxError'
+        if any(w in text for w in ['connection', 'connectionrefused', 'timeout',
+                                     'refused', 'network', 'connection error']):
+            return 'ConnectionError'
+        if any(w in text for w in ['race condition', 'racecondition', 'deadlock',
+                                     'concurrency', 'thread safety', 'startup race']):
+            return 'RaceCondition'
+        if any(w in text for w in ['performance', 'slow', 'n+1', 'loading',
+                                     'load time', 'page load', 'optimiz']):
+            return 'Performance'
+        
+        # Security (highest priority — check LAST to avoid false positives)
+        if any(w in text for w in ['drop table', 'sql injection', 'xss',
+                                     'eval(', 'shell injection', 'api_key']):
             return 'SecurityRisk'
+        
         return 'Unknown'
     
     def run_batch(self, issues: list[GitHubIssueRun]) -> list[ShadowRunReport]:
