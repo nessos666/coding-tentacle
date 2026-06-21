@@ -130,13 +130,14 @@ class ScientificMethodBrain:
         ]
     }
 
-    def __init__(self, library_store=None, bug_pattern_store=None, project_map=None):
+    def __init__(self, library_store=None, bug_pattern_store=None, project_map=None, bug_learning_memory=None):
         self.hypotheses = []
         self.experiments = []
         self.evidence_log = []
         self.library_store = library_store
         self.bug_pattern_store = bug_pattern_store
-        self.project_map = project_map  # Optional
+        self.project_map = project_map
+        self.bug_learning_memory = bug_learning_memory  # Optional
         self.total_think_calls = 0
         self.total_learn_calls = 0
 

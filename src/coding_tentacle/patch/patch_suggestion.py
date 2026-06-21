@@ -174,10 +174,11 @@ class PatchSuggestionEngine:
         re.IGNORECASE
     )
 
-    def __init__(self, library_store=None, bug_pattern_store=None):
+    def __init__(self, library_store=None, bug_pattern_store=None, bug_learning_memory=None):
         self.total_suggestions = 0
         self.library_store = library_store
-        self.bug_pattern_store = bug_pattern_store  # Optional
+        self.bug_pattern_store = bug_pattern_store
+        self.bug_learning_memory = bug_learning_memory  # Optional
 
     def suggest(self, bug_report, code_context=None, test_output=None,
                 br_hypotheses=None, grounding=None, requested_action='suggest_patch'):
@@ -245,6 +246,20 @@ class PatchSuggestionEngine:
                 best_lib = lib_results[0]
                 confidence = min(0.95, confidence + 0.15)
                 final_explanation = best['explanation'] + f' [Library: {best_lib.library} — {best_lib.root_cause[:60]}]'
+
+        # Bug Learning Memory Evidence (optional, read-only)
+        if self.bug_learning_memory and bt != '_default':
+            # Check: was this fix type tried before (and failed)?
+            if self.bug_learning_memory.was_tried_before(bug_report[:80], best['type']):
+                confidence = max(0.1, confidence - 0.20)
+                final_explanation += ' [⚠️ Previously FAILED — reconsider this fix]'
+            else:
+                # Check: what worked best for this bug type?
+                best_fixes = self.bug_learning_memory.best_fix_for(bt)
+                if best_fixes and best_fixes[0]['count'] >= 1:
+                    confidence = min(0.95, confidence + 0.10)
+                    bf = best_fixes[0]
+                    final_explanation += f' [Memory: {bf["fix_type"]} worked {bf["count"]}x]'
 
         # Tests vorschlagen
         tests = best.get('tests', [f'test_{bt.lower()}'])
