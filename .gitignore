@@ -24,9 +24,20 @@ env/
 .DS_Store
 Thumbs.db
 
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
 # Project specific
 .data/
 src/coding_tentacle.egg-info/
-RC*.json
 *_REPORT.json
 *_PROBE_REPORT.json
+library_store_probe.py
+pm_probe.py
+real_pm_probe.py
+rc4_store_probe.py
+rc5_light_mode.py
+*.log
