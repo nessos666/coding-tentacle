@@ -100,6 +100,7 @@ class ProjectMap:
                     info.imports.append((alias.name, alias.asname, False))
             elif isinstance(node, ast.ImportFrom):
                 if node.module:
+                    info.imports.append((node.module, None, True))  # module, not module.name
                     for alias in node.names:
                         info.imports.append((f"{node.module}.{alias.name}", alias.asname, True))
                 else:
@@ -148,14 +149,25 @@ class ProjectMap:
         if top in stdlib:
             return None  # External, not part of project
         
-        # Try to resolve to a file
-        source_dir = Path(source_file).parent
+        # Handle project-internal imports (e.g., coding_tentacle.brains.sg_brain)
         parts = import_name.split('.')
-        candidates = [
-            source_dir.parent / '/'.join(parts) + '.py',
-            source_dir.parent / '/'.join(parts) / '__init__.py',
-            source_dir / '/'.join(parts[1:]) + '.py' if len(parts) > 1 else None,
-        ]
+        source_dir = Path(source_file).parent
+        
+        # Try: relative to source_dir
+        candidates = [source_dir / f"{parts[-1]}.py"]
+        # Try: relative to project root (for package imports like coding_tentacle.xxx)
+        if len(parts) >= 2:
+            pkg_path = '/'.join(parts)
+            candidates.append(self.root / (pkg_path + '.py'))
+            candidates.append(self.root / pkg_path / '__init__.py')
+            # src-layout: root/src/coding_tentacle/brains/sg_brain.py
+            candidates.append(self.root / 'src' / (pkg_path + '.py'))
+            candidates.append(self.root / 'src' / pkg_path / '__init__.py')
+            # Also try parent paths
+            for parent in [self.root.parent, self.root.parent.parent]:
+                candidates.append(parent / (pkg_path + '.py'))
+                candidates.append(parent / 'src' / (pkg_path + '.py'))
+        
         for cand in candidates:
             if cand and cand.exists():
                 return str(Path(cand).relative_to(self.root))
@@ -230,9 +242,17 @@ if __name__ == "__main__":
     print("=" * 55)
     passed = 0
     
-    # Build map of current project
+    # Build map of current project (from project root, not knowledge/ subdir)
     pm = ProjectMap()
-    pm.build(os.path.dirname(os.path.abspath(__file__)))
+    # Go up from knowledge/ to find GEHIRN_BIBLIOTHEK root
+    root_candidates = [os.path.dirname(os.path.abspath(__file__)) + '/../../..', 
+                       os.path.dirname(os.path.abspath(__file__)) + '/..',
+                       os.path.dirname(os.path.abspath(__file__))]
+    for r in root_candidates:
+        if os.path.isdir(r):
+            pm.build(r)
+            if len(pm.files) >= 8:
+                break
     
     t1 = pm._built and len(pm.files) > 0
     print(f"  T1: {'✅' if t1 else '❌'} Build map → {len(pm.files)} files")
