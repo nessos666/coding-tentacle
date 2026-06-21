@@ -81,9 +81,9 @@ class SandboxRunner:
         sandbox_path = None
         try:
             # Create isolated temp directory
+            Path(self.base_temp_dir).mkdir(parents=True, exist_ok=True)
             sandbox_path = tempfile.mkdtemp(
                 prefix='ct_sandbox_', dir=self.base_temp_dir)
-            Path(self.base_temp_dir).mkdir(parents=True, exist_ok=True)
             
             # Copy target file to sandbox
             source_file = os.path.join(project_path, patch_diff.file_path)
