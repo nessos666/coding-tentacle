@@ -6,7 +6,7 @@ Builds import graph, function index, class index, circular dependency detection.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
-import ast, os, json, time
+import ast, os, json, time, hashlib
 from pathlib import Path
 from collections import defaultdict, deque
 
@@ -44,6 +44,9 @@ class ProjectMap:
         self.call_graph = defaultdict(set)      # function → {called_functions}
         self._built = False
         self._build_time = 0
+        self.hash_cache = {}   # RC15.8: file_path → hash
+        self.info_cache = {}   # RC15.8: file_path → FileInfo
+        self.stats_cache = {}  # RC15.8: cache statistics
 
     # ═══════════ BUILD ═══════════
     def build(self, root_dir=None):
@@ -270,6 +273,56 @@ class ProjectMap:
             'stats': self.stats(),
         }
 
+
+
+
+    # ═══════════ AST CACHE (RC15.8) ═══════════
+    def _file_hash(self, file_path):
+        with open(file_path, 'rb') as f:
+            return hashlib.md5(f.read()).hexdigest()
+    
+    def build_cached(self, root_path, max_depth=5):
+        t0 = time.time()
+        root = Path(root_path).resolve()
+        
+        if not self.hash_cache:
+            self.hash_cache = {}
+        if not self.info_cache:
+            self.info_cache = {}
+        
+        cache_hits = 0; cache_misses = 0
+        
+        py_files = list(root.rglob('*.py'))
+        for pyf in py_files:
+            parts = pyf.parts
+            if any(skip in parts for skip in ['__pycache__','.git','.venv','venv','node_modules','data','reports','research']):
+                continue
+            if len(parts) - len(root.parts) > max_depth:
+                continue
+            
+            h = self._file_hash(str(pyf))
+            
+            if self.hash_cache.get(str(pyf)) == h and self.info_cache.get(str(pyf)):
+                self.files[str(pyf)] = self.info_cache[str(pyf)]
+                cache_hits += 1
+            else:
+                self.hash_cache[str(pyf)] = h
+                info = FileInfo(str(pyf))
+                self._parse_file(str(pyf))
+                self.files[str(pyf)] = info
+                self.info_cache[str(pyf)] = info
+                cache_misses += 1
+        
+        # Build reverse imports (same as build())
+        for pyf, info in list(self.files.items()):
+            for imp, _, is_from in info.imports:
+                resolved = self._resolve_import(pyf, imp)
+                if resolved:
+                    self.import_graph[info.relpath].add(resolved)
+                    self.reverse_imports[resolved].add(info.relpath)
+        self.build_time = time.time() - t0
+        self.stats_cache = {'total_files': len(self.files), 'build_time': self.build_time,
+                           'cache_hits': cache_hits, 'cache_misses': cache_misses}
 
 # ═══════════ TEST ═══════════
 if __name__ == "__main__":
