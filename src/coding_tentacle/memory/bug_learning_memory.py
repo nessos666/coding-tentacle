@@ -30,6 +30,9 @@ class BugLearningMemory:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp REAL NOT NULL,
                 bug_signature TEXT NOT NULL,
+                canonical_id TEXT DEFAULT '',
+                canonical_type TEXT DEFAULT '',
+                file_family TEXT DEFAULT '',
                 bug_type TEXT DEFAULT '',
                 language TEXT DEFAULT 'python',
                 library TEXT DEFAULT '',
@@ -71,12 +74,13 @@ class BugLearningMemory:
                           fix_type, fix_summary='', success=False,
                           tests_run=0, test_result='', confidence=0.5, notes=''):
         """Store a fix attempt (successful or failed)."""
+        canon = self.normalize_bug_signature(bug_signature, bug_type, language, file_path)
         self.conn.execute('''INSERT INTO experiences 
-            (timestamp, bug_signature, bug_type, language, library, file_path,
+            (timestamp, bug_signature, canonical_id, canonical_type, file_family, bug_type, language, library, file_path,
              root_cause, fix_type, fix_summary, success, tests_run, test_result,
              confidence, notes)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-            (time.time(), bug_signature, bug_type, language, library, file_path,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+            (time.time(), bug_signature, canon['canonical_id'], canon['canonical_type'], canon['file_family'], bug_type, language, library, file_path,
              root_cause, fix_type, fix_summary, int(success), tests_run, test_result,
              confidence, notes))
         self.conn.commit()
@@ -113,11 +117,84 @@ class BugLearningMemory:
             params + [limit]).fetchall()
         return [dict(r) for r in rows]
 
-    def was_tried_before(self, bug_signature, fix_type):
-        """Was this fix type already tried (and failed) for this bug?"""
+
+    # ═══════════ NORMALIZATION (RC6.5) ═══════════
+    @staticmethod
+    def normalize_bug_signature(raw_signature, bug_type="", language="python", file_path=""):
+        """Canonical normalization: extract essence of a bug report."""
+        import re, hashlib
+        s = raw_signature.lower()
+        
+        # Bug type detection
+        canonical_type = bug_type
+        if not canonical_type:
+            if any(w in s for w in ["nullpointer","null pointer","nonetype","none", "cannot read propert"]):
+                canonical_type = "NullPointer"
+            elif any(w in s for w in ["typeerror","type error","type mismatch"]):
+                canonical_type = "TypeError"
+            elif any(w in s for w in ["importerror","module not found","no module","cannot import"]):
+                canonical_type = "ImportError"
+            elif any(w in s for w in ["attributeerror","has no attribute"]):
+                canonical_type = "AttributeError"
+            elif any(w in s for w in ["keyerror","key error"]):
+                canonical_type = "KeyError"
+            else:
+                canonical_type = bug_type or "Unknown"
+        
+        # Sub-type disambiguation
+        if canonical_type == "AttributeError":
+            if any(w in s for w in ["nonetype","none","null"]):
+                canonical_type = "NullPointer"
+            elif any(w in s for w in ["int", "str", "float", "bytes", "list", "dict", "set", "tuple"]):
+                canonical_type = "AttributeError_TypeMismatch"
+            elif "module" in s:
+                canonical_type = "AttributeError_Module"
+        
+        # File family
+        if file_path:
+            file_family = re.sub(r"\.py$", "", file_path.split("/")[-1])
+        else:
+            file_match = re.search(r"([a-zA-Z_][a-zA-Z0-9_]*)\.py", s)
+            file_family = file_match.group(1) if file_match else "unknown"
+        
+        # Normalized message
+        normalized = s
+        normalized = re.sub(r"\.py:\d+", ".py:LINE", normalized)
+        normalized = re.sub(r"0x[0-9a-f]+", "MEM", normalized)
+        normalized = re.sub(r"'[^']*'", "VAR", normalized)
+        normalized = re.sub(r'"' + '[^"]*' + '"', "VAR", normalized)
+        normalized = re.sub(r"\d+", "N", normalized)
+        
+        canonical_id = hashlib.md5(f"{canonical_type}:{file_family}:{normalized}".encode()).hexdigest()[:12]
+        
+        return {
+            "canonical_type": canonical_type,
+            "language": language,
+            "file_family": file_family,
+            "symbol": canonical_type.split("_")[0] if "_" in canonical_type else canonical_type,
+            "normalized_message": normalized[:100],
+            "canonical_id": canonical_id,
+        }
+
+    def was_tried_before(self, bug_signature, fix_type, bug_type="", file_path="", language="python"):
+        """Was this fix type already tried (and failed)? Now uses canonical normalization."""
+        canon = self.normalize_bug_signature(bug_signature, bug_type, language, file_path)
+        
         rows = self.conn.execute(
-            'SELECT COUNT(*) FROM experiences WHERE bug_signature LIKE ? AND fix_type = ? AND success = 0',
-            (f'%{bug_signature}%', fix_type)).fetchone()
+            'SELECT COUNT(*) FROM experiences WHERE canonical_id = ? AND fix_type = ? AND success = 0',
+            (canon["canonical_id"], fix_type)).fetchone()
+        if rows[0] > 0:
+            return True
+        
+        rows = self.conn.execute(
+            'SELECT COUNT(*) FROM experiences WHERE canonical_type = ? AND file_family = ? AND fix_type = ? AND success = 0',
+            (canon["canonical_type"], canon["file_family"], fix_type)).fetchone()
+        if rows[0] > 0:
+            return True
+        
+        rows = self.conn.execute(
+            'SELECT COUNT(*) FROM experiences WHERE bug_type = ? AND fix_type = ? AND success = 0',
+            (canon["canonical_type"], fix_type)).fetchone()
         return rows[0] > 0
 
     def best_fix_for(self, bug_type, language=None, min_successes=1):
