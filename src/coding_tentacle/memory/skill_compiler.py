@@ -94,7 +94,7 @@ class SkillStore:
             fix_pattern=fix_pattern,
             confidence=procedure.confidence,
             times_compiled=1,
-            times_succeeded=procedure.times_succeeded,
+            times_succeeded=0,  # Start fresh — skill deployment counts separately
             verification_method="pytest",
             dependent_skills=[],
         )
