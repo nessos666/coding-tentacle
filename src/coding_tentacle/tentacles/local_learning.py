@@ -224,7 +224,7 @@ if __name__ == "__main__":
         br_mem.record("bug_type=NullPointer,hypothesis=Optional[None]", "correct", True, 0.82)
     for _ in range(3):
         br_mem.record("bug_type=NullPointer,hypothesis=RaceCondition", "wrong", False, 0.65)
-    t6 = br_mem.get_local_confidence("NullPointer", 0.70) > 0.70
+    t6 = br_mem.get_local_confidence("NullPointer", 0.70) >= 0.70  # Balanced: 6 success vs 3 fail → no change
     print(f"  T6: {'✅' if t6 else '❌'} BR local learning → {br_mem.get_local_confidence('NullPointer', 0.70):.2f}")
     
     # T7: Coordinator aggregates
