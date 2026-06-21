@@ -325,14 +325,21 @@ class MiniTentacleSystem:
             'session_id': sid,
             'code_context': {'has_context': cc.get('has_context', False), 'file': cc.get('file', '')},
             'grounding': {'score': gd.get('grounding_score', 0), 'meaning': gd.get('meaning', ''),
-                         'confidence': gd.get('confidence', 0)},
+                         'confidence': gd.get('confidence', 0),
+                         'related_files': gd.get('related_files', [])},
             'reasoning': {'hypotheses': len(hypotheses), 'top': hypotheses[0]['statement'][:60] if hypotheses else '',
-                         'confidence': rs.get('confidence', 0)},
+                         'confidence': rs.get('confidence', 0),
+                         'project_context': rs.get('project_context', {})},
             'safety': {'authorized': sf['authorized'], 'route': sf['el_route'],
                       'blocked': sf.get('blocked', False), 'reason': sf['reason'][:80]},
             'final_route': sf['el_route'],
             'authorized': sf['authorized'],
             'confidence': conf,
+            'project_context': {
+                'related_files': gd.get('related_files', []),
+                'import_cycles': rs.get('project_context', {}).get('cycles', []),
+                'sample_importers': rs.get('project_context', {}).get('sample_importers', []),
+            },
             'next_step': 'APPLY' if sf['authorized'] else f'ESCALATED: {sf["el_route"]}',
         }
 
