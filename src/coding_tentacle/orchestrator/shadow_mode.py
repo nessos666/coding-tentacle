@@ -121,7 +121,12 @@ class ShadowModeRunner:
             # Simple file setup for analysis
             code_context = {'file': f'{repo_name}/main.py', 'line': 1}
             
-            # ═══ STEP 3: MetaBrain analyzes ═══
+            # ═══ STEP 3: Classify bug type from issue text ═══
+            bug_type = self._classify_bug_type(bug_report)
+            report.detected_bug_type = bug_type
+            report.confidence = 0.7 if bug_type != 'Unknown' else 0.2
+            
+            # ═══ STEP 4: MetaBrain analyzes ═══
             if self.meta_brain:
                 decision = self.meta_brain.decide(bug_report, code_context=code_context)
                 if decision['final_decision'] == 'BLOCK':
@@ -129,11 +134,6 @@ class ShadowModeRunner:
                     report.recommendation = "BLOCKED by Safety — cannot analyze"
                     report.duration_ms = (time.time() - t0) * 1000
                     return report
-            
-            # ═══ STEP 4: Classify bug type from issue text ═══
-            bug_type = self._classify_bug_type(bug_report)
-            report.detected_bug_type = bug_type
-            report.confidence = 0.7 if bug_type != 'Unknown' else 0.2
             
             # ═══ STEP 5: Select procedure/skill ═══
             if self.teacher and self.teacher.procedural_memory:
