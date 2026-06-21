@@ -189,6 +189,9 @@ class PatchSuggestionEngine:
         self.total_suggestions += 1
 
         bt = self._extract_bug_type(bug_report)
+        # BQ Grounding bug_type overrides keyword heuristic (RC6.9C)
+        if grounding and grounding.get('bug_type'):
+            bt = grounding['bug_type']
         ctx_file = code_context.get('file', 'unknown') if code_context else 'unknown'
         ctx_line = code_context.get('line', 0) if code_context else 0
 
