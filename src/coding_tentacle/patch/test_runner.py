@@ -166,24 +166,23 @@ if __name__ == "__main__":
     passed = 0
     
     runner = TestRunner(max_timeout=5)
+    python_exe = __import__('sys').executable
     
     # Setup: create a sandbox with a trivial test file
     sb = tempfile.mkdtemp(prefix='ct_test_', dir='/tmp')
     test_file = os.path.join(sb, 'test_dummy.py')
-    with open(test_file, 'w') as f:
-        f.write("def test_pass(): assert 1 == 1\n")
     
-    # T1: Run passing test (use python -c, not pytest)
+    # T1: Run passing test (use sys.executable)
     with open(test_file, 'w') as f:
         f.write("# passing test\nassert 1 == 1\nprint('1 passed')\n")
-    result = runner.run(sb, test_command="python test_dummy.py")
+    result = runner.run(sb, test_command=f"{python_exe} test_dummy.py")
     t1 = result.success and result.exit_code == 0
     print(f"  T1: {'✅' if t1 else '❌'} Passing test → exit={result.exit_code} out={result.stdout[:50]}")
     
     # T2: Run failing test
     with open(test_file, 'w') as f:
         f.write("# failing test\nassert 1 == 2, 'FAIL'\n")
-    result2 = runner.run(sb, test_command="python test_dummy.py")
+    result2 = runner.run(sb, test_command=f"{python_exe} test_dummy.py")
     t2 = not result2.success and result2.exit_code != 0
     print(f"  T2: {'✅' if t2 else '❌'} Failing test → exit={result2.exit_code} err={result2.stderr[:50]}")
     
@@ -197,10 +196,10 @@ if __name__ == "__main__":
     t4 = result4.safety_blocked
     print(f"  T4: {'✅' if t4 else '❌'} /etc path blocked → {result4.safety_reason}")
     
-    # T5: Timeout protection works (use python -c sleep)
-    result5 = runner.run(sb, test_command="python -c 'import time; time.sleep(30)'")
+    # T5: Timeout protection (sleep 30s, timeout=5s)
+    result5 = runner.run(sb, test_command=f"{python_exe} -c 'import time; time.sleep(30)'")
     t5 = result5.timeout_occurred
-    print(f"  T5: {'✅' if t5 else '❌'} Timeout → {result5.timeout_occurred} ({result5.error_message if result5.error_message else 'N/A'})")
+    print(f"  T5: {'✅' if t5 else '❌'} Timeout → {result5.timeout_occurred}")
     
     # T6: Stats
     st = runner.stats()
