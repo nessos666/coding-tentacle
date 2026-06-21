@@ -86,6 +86,63 @@ class BugLearningMemory:
         self.conn.commit()
         return self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
 
+    def enrich_with_project_context(self, experience_id, project_map):
+        """Add ProjectMap context to an existing experience entry."""
+        # Get the experience
+        row = self.conn.execute(
+            'SELECT file_path, bug_type FROM experiences WHERE id = ?', 
+            (experience_id,)
+        ).fetchone()
+        if not row or not row['file_path']:
+            return
+        
+        file_path = row['file_path']
+        ctx = {
+            'function_name': '',
+            'class_name': '',
+            'related_files': [],
+            'importers': [],
+            'project_area': '',
+            'file_exists': False,
+        }
+        
+        # Resolve file in ProjectMap
+        resolved = project_map.resolve_file(file_path)
+        if resolved:
+            ctx['file_exists'] = True
+            info = project_map.file_info(file_path)
+            if info:
+                if isinstance(info, dict):
+                    funcs = info.get('functions', [])
+                    ctx['function_name'] = funcs[0][0] if funcs else ''
+                    cls = info.get('classes', [])
+                    ctx['class_name'] = cls[0] if cls else '' if isinstance(cls, list) else ''
+                elif hasattr(info, 'functions'):
+                    funcs = info.functions
+                    ctx['function_name'] = funcs[0][0] if funcs else ''
+                    cls = info.classes if hasattr(info, 'classes') else []
+                    ctx['class_name'] = cls[0] if cls else ''
+            
+            ctx['importers'] = project_map.who_imports(file_path)[:5]
+            
+            # Determine project area from path
+            rp = resolved[0].lower() if resolved else file_path.lower()
+            for area, keywords in [('knowledge', ['knowledge']), ('brains', ['brains']),
+                                    ('safety', ['safety']), ('tentacles', ['tentacle']),
+                                    ('memory', ['memory']), ('orchestrator', ['orchestrator']),
+                                    ('patch', ['patch']), ('core', ['src'])]:
+                if any(kw in rp for kw in keywords):
+                    ctx['project_area'] = area
+                    break
+        
+        # Store as JSON in notes field (non-destructive)
+        import json
+        self.conn.execute(
+            'UPDATE experiences SET notes = notes || ? WHERE id = ?',
+            (json.dumps({'project_context': ctx}), experience_id)
+        )
+        self.conn.commit()
+
     # ═══════════ QUERY ═══════════
     def find_similar(self, bug_signature, bug_type=None, language=None, limit=5):
         """Find similar bugs in memory (FTS5 + fallback)."""
