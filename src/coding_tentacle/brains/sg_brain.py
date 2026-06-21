@@ -168,6 +168,28 @@ class SymbolGroundingBrain:
         symbol = sig.split(':')[0] if ':' in sig else sig
         self.total_symbols_seen += 1
 
+        # ═══ SECURITY RISK DETECTION (RC6.9E) ═══
+        sig_lower = sig.lower()
+        security_patterns = [
+            r'api_key\s*=\s*["\']', r'secret\s*=\s*["\']', r'password\s*=\s*["\']',
+            r'drop\s+table', r'eval\s*\(', r'exec\s*\(', r'os\.system\s*\(',
+            r'subprocess\.(call|run|popen)', r'\.\./.*(passwd|shadow|ssh)',
+            r'unsafe.*deserial', r'pickle\.(loads|load)', r'rm\s+-rf',
+            r'xss|sql\s+injection|command\s+injection',
+        ]
+        is_security_risk = any(re.search(p, sig_lower) for p in security_patterns)
+        if is_security_risk:
+            return {
+                'action': 'SECURITY_ESCALATE',
+                'pattern': None,
+                'confidence': 0.0,
+                'grounding_score': 0.0,
+                'bug_type': 'SecurityRisk',
+                'meaning': 'SecurityRisk detected — NO automatic fix. Route to SecurityStore.',
+                'missing_context': [],
+                'reasoning': 'SG: Security pattern detected. IC/EL must handle. No PatchSuggestion.'
+            }
+
         if symbol not in self.groundings or self.groundings[symbol].total_contexts == 0:
             # ═══ ATTRIBUTE DISAMBIGUATION (RC5) ═══
             # Auch ohne Grounding: erkenne AttributeError-Subtypen
