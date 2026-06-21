@@ -220,12 +220,13 @@ class SafetyTentacle:
 class MiniTentacleSystem:
     """4 Tentakel + Working Memory + Zentrale Koordination."""
 
-    def __init__(self):
+    def __init__(self, bug_learning_memory=None):
         self.wm = WorkingMemory()
         self.code_context = CodeContextTentacle(self.wm)
         self.grounding = GroundingTentacle(self.wm)
         self.reasoning = ReasoningTentacle(self.wm)
         self.safety = SafetyTentacle(self.wm)
+        self.bug_learning_memory = bug_learning_memory  # Optional, persistent
         self.total_sessions = 0
 
     def process(self, request):
@@ -319,6 +320,23 @@ class MiniTentacleSystem:
             'security_sensitive': sec_sensitive,
         })
 
+
+        # ═══ CONSOLIDATION (WM → BLM Bridge, RC6.6) ═══
+        if self.bug_learning_memory:
+            session_fixes = self.wm.get_session_results(sid)
+            for fix in session_fixes:
+                try:
+                    self.bug_learning_memory.record_experience(
+                        bug_signature=fix.get('bug_signature', ''),
+                        bug_type=fix.get('bug_type', ''),
+                        fix_type=fix.get('fix_type', ''),
+                        fix_summary=fix.get('notes', ''),
+                        success=fix.get('success', False),
+                        confidence=fix.get('confidence', 0.5),
+                        notes=fix.get('notes', ''),
+                    )
+                except Exception:
+                    pass  # Never crash on consolidation
         # ═══ RESULT ═══
         hypotheses = rs.get('all_hypotheses', [])
         return {

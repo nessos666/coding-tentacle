@@ -22,6 +22,7 @@ class WorkingMemoryState:
         self.brain_outputs = {}        # {brain_name: [outputs]}
         self.open_questions = []       # ["Warum schlägt Test X fehl?"]
         self.confidence_history = []   # [(step, confidence)]
+        self.fix_attempts = []          # [{bug, fix_type, success, confidence, ...}]
         self.created_at = time.time()
         self.updated_at = time.time()
         self.step_count = 0
@@ -199,6 +200,25 @@ class WorkingMemory:
         if len(state.confidence_history) > 50:
             state.confidence_history = state.confidence_history[-50:]
         state.open_questions = [q for q in state.open_questions if q not in reason]
+        return dec
+
+    def add_fix_attempt(self, session_id, bug_signature, bug_type, fix_type, success, confidence=0.5, notes=""):
+        """Fix-Versuch in WM speichern."""
+        state = self.sessions.get(session_id)
+        if not state:
+            return None
+        state.update()
+        fa = {"bug_signature": bug_signature, "bug_type": bug_type,
+              "fix_type": fix_type, "success": success, "confidence": confidence,
+              "notes": notes, "timestamp": time.time()}
+        state.fix_attempts.append(fa)
+        return fa
+
+    def get_session_results(self, session_id):
+        """Alle Fix-Versuche einer Session abrufen."""
+        state = self.sessions.get(session_id)
+        return state.fix_attempts if state else []
+
         state.update()
         return dec
 
