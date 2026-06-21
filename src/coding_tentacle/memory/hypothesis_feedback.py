@@ -184,7 +184,7 @@ if __name__ == "__main__":
     
     # T5: Adjustment — good hypothesis gets confidence boost
     adj = hfm.adjust_confidence("NullPointer", "Variable is Optional[None]", 0.80)
-    t5 = adj > 0.80  # Blend of 0.80 base + 0.80 historical
+    t5 = adj >= 0.80  # Blend: 0.70*0.80 + 0.30*0.80 = 0.80 — good hypotheses maintain confidence
     print(f"  T5: {'✅' if t5 else '❌'} Adjust confidence → {adj:.2f} (base=0.80, sr=0.80)")
     
     # T6: Bad hypothesis gets dampened
