@@ -12,8 +12,6 @@ REGEL: Nur Safety-Tentakel darf Aktionen freigeben.
 Autor: Hermes + David | Coding Tentacle 2026
 """
 import sys, os, time, json
-sys.path.insert(0, '/home/boobi/GEHIRN_BIBLIOTHEK')
-sys.path.insert(0, '/home/boobi/GEHIRN_BIBLIOTHEK/71_symbol_grounding')
 
 from coding_tentacle.memory.working_memory import WorkingMemory
 from coding_tentacle.brains.sg_brain import SymbolGroundingBrain; BQ = SymbolGroundingBrain
