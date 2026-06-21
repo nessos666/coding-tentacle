@@ -95,6 +95,16 @@ class GroundingTentacle:
         )
 
         result = self.bq.think(symbol)
+        
+        # ProjectMap enrichment (optional, read-only)
+        if hasattr(self.bq, 'project_map') and self.bq.project_map and code_context:
+            ctx_file = code_context.get('file', '')
+            if ctx_file:
+                importers = self.bq.project_map.who_imports(ctx_file)
+                if importers:
+                    result['related_files'] = importers[:5]
+                    result['meaning'] = result.get('meaning', '') + f' [Importers: {", ".join(importers[:3])}]'
+        
         self.wm.add_brain_output(session_id, 'GroundingTentacle', {
             'action': result.get('action'), 'score': result.get('grounding_score', 0),
             'meaning': result.get('meaning', ''), 'confidence': result.get('confidence', 0)
@@ -114,6 +124,23 @@ class ReasoningTentacle:
             return {'action': 'ASK_CONTEXT', 'hypotheses': [], 'confidence': 0}
 
         result = self.br.think(bug_report, bq_grounding=grounding_result)
+
+        # ProjectMap enrichment for BR (optional, read-only)
+        if hasattr(self.br, 'project_map') and self.br.project_map:
+            pm = self.br.project_map
+            bug_lower = bug_report.lower()
+            result['project_context'] = {}
+            if 'circular' in bug_lower or 'partially initialized' in bug_lower:
+                cycles = pm.find_cycles()
+                if cycles:
+                    result['project_context']['cycles'] = cycles[:3]
+            if 'import' in bug_lower or 'module' in bug_lower:
+                for f in pm.files.values():
+                    if f.relpath.endswith('.py'):
+                        importers = pm.who_imports(f.relpath)
+                        if importers:
+                            result['project_context']['sample_importers'] = importers[:3]
+                            break
 
         # Hypothesen in WM speichern
         for h in result.get('all_hypotheses', [])[:3]:

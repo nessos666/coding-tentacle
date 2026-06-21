@@ -223,6 +223,19 @@ class SymbolGroundingBrain:
                 boost += 0.10
                 g.grounding_score = min(1.0, g.grounding_score + 0.05)
         
+        # ProjectMap Context Boost (optional, read-only, max +0.05)
+        if self.project_map:
+            ctx_file = sig.split(':')[1] if sig.count(':') >= 2 else ''
+            if ctx_file and any(w in symbol.lower() for w in ['importerror', 'import', 'circular', 'module']):
+                importers = self.project_map.who_imports(ctx_file)
+                if importers:
+                    boost += 0.05
+                    meaning += f' [Importers: {", ".join(importers[:3])}]'
+            elif ctx_file and any(w in symbol.lower() for w in ['attribute', 'attr']):
+                related = self.project_map.search_function(sig.split(':')[-1] if ':' in sig else sig)
+                if related:
+                    boost += 0.03
+        
         score = min(1.0, g.grounding_score + boost)
         meaning = g.primary_meaning()
 
