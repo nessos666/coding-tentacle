@@ -136,9 +136,13 @@ class MetacognitiveEvaluator:
         
         for name, score in active.items():
             bt = self.brains[name]
-            # Use uncertainty as weight — lower uncertainty = higher weight
-            weight = 1.0 / max(0.01, bt.uncertainty)
-            trusted_score = score * bt.calibrated_trust  # Trust-adjust the score
+            # Safety VETO brain: only dominant when REJECTING
+            if bt.is_veto and score >= 0.5:
+                # Safety says GO — let other brains decide
+                weight = 1.0 / max(0.1, bt.uncertainty)  # Still present, not dominant
+            else:
+                weight = 1.0 / max(0.01, bt.uncertainty)
+            trusted_score = score * bt.calibrated_trust
             weighted_sum += trusted_score * weight
             total_weight += weight
         
