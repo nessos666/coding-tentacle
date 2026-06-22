@@ -281,6 +281,7 @@ if __name__ == "__main__":
     tmp = tempfile.mkdtemp()
     # Create a tiny project structure
     os.makedirs(os.path.join(tmp, 'src'), exist_ok=True)
+    os.makedirs(os.path.join(tmp, 'tests'), exist_ok=True)
     with open(os.path.join(tmp, 'src', 'payment.py'), 'w') as f:
         f.write("from src.auth import check_user\nfrom src.logger import log\ndef process(): check_user(); log('paid')")
     with open(os.path.join(tmp, 'src', 'auth.py'), 'w') as f:
@@ -293,7 +294,13 @@ if __name__ == "__main__":
         f.write("from src.payment import process\ndef test_process(): process()")
     os.makedirs(os.path.join(tmp, 'tests'), exist_ok=True)
     
-    pm.build_cached(tmp)
+    # Build project map in temp dir (relative paths require chdir)
+    old_cwd = os.getcwd()
+    os.chdir(tmp)
+    try:
+        pm.build_cached(tmp)
+    finally:
+        os.chdir(old_cwd)
     tm = TestMap(pm)
     ia = ImpactAnalyzer(pm, test_map=tm)
     
