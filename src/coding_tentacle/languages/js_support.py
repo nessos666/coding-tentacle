@@ -98,7 +98,7 @@ def classify_js_bug(error_message, code=""):
         if pattern.get('block'):
             continue
         for kw in pattern['keywords']:
-            if re.search(kw.lower(), combined, re.IGNORECASE):
+            if re.search(re.escape(kw.lower()), combined, re.IGNORECASE):
                 return bug_type, pattern
     
     return 'JS_Unknown', {'fix': '// Unknown error', 'description': 'Unknown'}
