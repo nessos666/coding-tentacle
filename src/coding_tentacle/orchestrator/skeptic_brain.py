@@ -60,7 +60,11 @@ class SkepticBrain:
             risk += 0.10
         
         # 3. Teacher trust for this bug type
-        if self.trust_matrix and teacher_trust is not None:
+        bt_trust = teacher_trust
+        source = 'global'
+        if bt_trust is not None:
+            source = 'direct'
+        elif self.trust_matrix:
             bt_trust, _, source = self.trust_matrix.get_trust('Teacher', bug_type)
             if bt_trust < 0.50:
                 objections.append(f"Teacher has LOW trust for {bug_type} ({bt_trust:.0%})")
