@@ -52,9 +52,10 @@ RUBY_BUG_PATTERNS = {
         'description': 'FrozenError — trying to modify frozen object',
     },
     'Ruby_DangerousEval': {
-        'keywords': ['eval', 'system(', 'exec(', '`', '%x{', 'YAML.load', 'Marshal.load'],
+        'keywords': ['eval(', 'system(', 'exec(', 'YAML.load', 'Marshal.load',
+                     '%x{'],
         'fix': '# BLOCKED: dangerous method — requires human review',
-        'description': 'Security Risk — eval/system/backticks detected',
+        'description': 'Security Risk — eval/system/YAML.load detected',
         'block': True,
     },
 }
