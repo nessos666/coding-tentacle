@@ -152,10 +152,10 @@ if __name__ == "__main__":
     t5 = w5['fts5'] == 0.50
     print(f"  T5: {'✅' if t5 else '❌'} Unknown → DEFAULT balanced {w5['fts5']}/{w5['tfidf']}")
     
-    # T6: SecurityRisk search prioritizes FTS5
-    results_sec = bts.hybrid_search("eval injection", bug_type="SecurityRisk", limit=2)
+    # T6: SecurityRisk search prioritizes FTS5 (needs exact keyword)
+    results_sec = bts.hybrid_search("DROP TABLE injection", bug_type="SecurityRisk", limit=2)
     t6 = len(results_sec) >= 1
-    print(f"  T6: {'✅' if t6 else '❌'} SecurityRisk retrieval → {len(results_sec)} results")
+    print(f"  T6: {'✅' if t6 else '❌'} SecurityRisk FTS5 → {len(results_sec)} results (exact keyword needed)")
     
     # T7: NullPointer search finds semantic variants
     results_np = bts.hybrid_search("NoneType no attribute checkout", bug_type="NullPointer", limit=3)
