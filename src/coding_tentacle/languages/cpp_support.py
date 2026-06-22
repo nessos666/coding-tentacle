@@ -19,7 +19,7 @@ CPP_BUG_PATTERNS = {
     },
     'Cpp_MissingInclude': {
         'keywords': ['not declared', 'no member named', 'incomplete type',
-                     'forward declaration', 'undefined reference'],
+                     'forward declaration', 'undefined reference', 'has not been'],
         'fix': '#include <header>  // missing header',
         'description': 'Missing include or forward declaration',
     },
@@ -37,7 +37,7 @@ CPP_BUG_PATTERNS = {
     },
     'Cpp_UseAfterFree': {
         'keywords': ['use after free', 'dangling', 'freed', 'deleted',
-                     'double free'],
+                     'double free', 'use-after-free', 'heap-use-after'],
         'fix': 'ptr = nullptr;  // after delete\n// or: use std::unique_ptr / std::shared_ptr',
         'description': 'Use-after-free — use smart pointers (unique_ptr/shared_ptr)',
     },
