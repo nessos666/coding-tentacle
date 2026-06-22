@@ -188,6 +188,125 @@ class ProcedureStore:
             confidence=0.70, created_at=time.time(), last_used=time.time()
         )
         
+        # RC15.9: 7 NEW procedures for extended bug types
+        self.procedures["IndexError:python"] = Procedure(
+            bug_type="IndexError", language="python",
+            trigger="Stacktrace: IndexError, list index out of range, off-by-one",
+            steps=[
+                ProcedureStep(1, "analyze_index", "Welcher Index? Welche Collection?",
+                    "CodeContext", "list[5] on len=3 → out of range"),
+                ProcedureStep(2, "check_bounds", "Prüfe len() vor Zugriff oder try/except",
+                    "BQ", "IndexError — bounds check needed"),
+                ProcedureStep(3, "suggest_guard", "Guard: if idx < len(collection): oder enumerate()",
+                    "PatchSuggestion", "if idx < len(items):\n    return items[idx]"),
+                ProcedureStep(4, "test", "Teste mit Edge-Cases (leer, erstes, letztes)",
+                    "TestSelector", "pytest -k test_index"),
+                ProcedureStep(5, "verify", "Verifiziere kein IndexError mehr",
+                    "ResultEvaluator", "Tests grün"),
+            ],
+            confidence=0.65, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["ValueError:python"] = Procedure(
+            bug_type="ValueError", language="python",
+            trigger="Stacktrace: ValueError, invalid literal, invalid value",
+            steps=[
+                ProcedureStep(1, "analyze_value", "Welcher Wert? Welche Konvertierung?",
+                    "CodeContext", "int('abc') → ValueError"),
+                ProcedureStep(2, "validate_input", "Input vor Konvertierung validieren",
+                    "BQ", "ValueError — input validation needed"),
+                ProcedureStep(3, "suggest_try_parse", "try: int(x) except ValueError: ...",
+                    "PatchSuggestion", "try:\n    value = int(x)\nexcept ValueError:\n    value = 0"),
+                ProcedureStep(4, "test", "Teste mit validen und invaliden Inputs",
+                    "TestSelector", "pytest -k test_value"),
+                ProcedureStep(5, "verify", "Verifiziere kein ValueError mehr",
+                    "ResultEvaluator", "Tests grün"),
+            ],
+            confidence=0.65, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["MemoryError:python"] = Procedure(
+            bug_type="MemoryError", language="python",
+            trigger="Stacktrace: MemoryError, out of memory, OOM",
+            steps=[
+                ProcedureStep(1, "analyze_allocation", "Wo wird zu viel Speicher allokiert?",
+                    "CodeContext", "list(10**9) → MemoryError"),
+                ProcedureStep(2, "suggest_streaming", "Generator/Iterator statt Liste, Chunking",
+                    "PatchSuggestion", "for chunk in iter(lambda: f.read(8192), b''):"),
+                ProcedureStep(3, "suggest_limit", "Batch-Größe begrenzen, Lazy Evaluation",
+                    "PatchSuggestion", "MAX_BATCH = 10000"),
+                ProcedureStep(4, "verify", "Verifiziere konstante Memory-Nutzung",
+                    "ResultEvaluator", "Memory-Profil grün"),
+            ],
+            confidence=0.60, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["SyntaxError:python"] = Procedure(
+            bug_type="SyntaxError", language="python",
+            trigger="Stacktrace: SyntaxError, invalid syntax, version mismatch",
+            steps=[
+                ProcedureStep(1, "parse_error", "Welche Zeile? Welcher Syntax-Fehler?",
+                    "CodeContext", "line 42: x = (1 + 2  → SyntaxError"),
+                ProcedureStep(2, "locate_line", "Zeige defekte Zeile und Kontext",
+                    "BQ", "SyntaxError — manual fix likely needed"),
+                ProcedureStep(3, "suggest_fix", "Fehlende Klammer/Doppelpunkt/Einrückung?",
+                    "PatchSuggestion", "x = (1 + 2)  # missing closing paren"),
+                ProcedureStep(4, "verify", "python -m py_compile testet Syntax",
+                    "ResultEvaluator", "Syntax OK"),
+            ],
+            confidence=0.70, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["ConnectionError:python"] = Procedure(
+            bug_type="ConnectionError", language="python",
+            trigger="Stacktrace: ConnectionError, ConnectionRefused, timeout, network",
+            steps=[
+                ProcedureStep(1, "analyze_endpoint", "Welcher Host:Port? HTTP/DB/API?",
+                    "CodeContext", "localhost:5432 → ConnectionRefused"),
+                ProcedureStep(2, "check_timeout", "Timeout setzen, Retry-Logik",
+                    "PatchSuggestion", "requests.get(url, timeout=10)"),
+                ProcedureStep(3, "add_retry", "Exponential Backoff oder Circuit Breaker",
+                    "PatchSuggestion", "for attempt in range(3):\n    try: ...\n    except: time.sleep(2**attempt)"),
+                ProcedureStep(4, "verify", "Verifiziere Graceful Degradation",
+                    "ResultEvaluator", "Connection-Error-Handling getestet"),
+            ],
+            confidence=0.60, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["RaceCondition:python"] = Procedure(
+            bug_type="RaceCondition", language="python",
+            trigger="Stacktrace: race condition, deadlock, concurrency, thread safety",
+            steps=[
+                ProcedureStep(1, "analyze_shared_state", "Welche Variable? Welche Threads?",
+                    "CodeContext", "counter += 1 in Thread-1 und Thread-2"),
+                ProcedureStep(2, "suggest_lock", "threading.Lock oder asyncio.Lock",
+                    "PatchSuggestion", "with self.lock:\n    self.counter += 1"),
+                ProcedureStep(3, "suggest_ordering", "Queue oder Event für Reihenfolge",
+                    "PatchSuggestion", "queue.put(item)  # thread-safe"),
+                ProcedureStep(4, "test_concurrency", "Thread-sichere Tests mit pytest-timeout",
+                    "TestSelector", "pytest -k test_concurrent"),
+                ProcedureStep(5, "verify", "Verifiziere deterministisches Verhalten",
+                    "ResultEvaluator", "Race-Condition-Test wiederholbar grün"),
+            ],
+            confidence=0.55, created_at=time.time(), last_used=time.time()
+        )
+        
+        self.procedures["Performance:python"] = Procedure(
+            bug_type="Performance", language="python",
+            trigger="Stacktrace: performance, slow, N+1, loading, page load, optimize",
+            steps=[
+                ProcedureStep(1, "profile_hotspot", "cProfile/py-spy: Wo ist der Bottleneck?",
+                    "CodeContext", "for item in items: db.query() → N+1"),
+                ProcedureStep(2, "suggest_optimization", "Caching, Batch-Query, Lazy-Load?",
+                    "PatchSuggestion", "items = db.query_all(ids)  # 1 query statt N"),
+                ProcedureStep(3, "benchmark", "Vorher/Nachher Zeit messen",
+                    "TestSelector", "python -m timeit ..."),
+                ProcedureStep(4, "verify", "Verifiziere Verbesserung ohne Regression",
+                    "ResultEvaluator", "Performance +20%, Tests grün"),
+            ],
+            confidence=0.50, created_at=time.time(), last_used=time.time()
+        )
+        
         self._save()
     
     def _save(self):
