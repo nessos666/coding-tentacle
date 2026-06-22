@@ -91,8 +91,7 @@ def classify_js_bug(error_message, code=""):
     for bug_type, pattern in JS_BUG_PATTERNS.items():
         if pattern.get('block'):
             for kw in pattern['keywords']:
-                kw_clean = kw.replace('(', r'\(').replace(')', r'\)')
-                if re.search(kw_clean, code or error_message, re.IGNORECASE):
+                if re.search(re.escape(kw), code or error_message, re.IGNORECASE):
                     return bug_type, pattern
     
     for bug_type, pattern in JS_BUG_PATTERNS.items():
