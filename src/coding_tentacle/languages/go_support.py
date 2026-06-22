@@ -11,6 +11,12 @@ import re, time, os
 
 # ═══════════ GO BUG PATTERNS ═══════════
 GO_BUG_PATTERNS = {
+    'Go_SliceBounds': {
+        'keywords': ['slice bounds', 'index out of range', 'slice bounds out of range',
+                     'panic.*index'],
+        'fix': 'if idx < len(slice) { val := slice[idx] }',
+        'description': 'Slice bounds — check len() before index access',
+    },
     'Go_NilPointer': {
         'keywords': ['nil pointer', 'nil dereference', 'invalid memory address',
                      'nil pointer dereference', 'panic.*nil'],
