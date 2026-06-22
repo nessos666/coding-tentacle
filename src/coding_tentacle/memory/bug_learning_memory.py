@@ -17,8 +17,8 @@ from pathlib import Path
 class BugLearningMemory:
     """Persistent memory: which fixes worked, which failed."""
     
-    def __init__(self, db_path=None):
-        self.db_path = db_path or os.path.expanduser('~/.coding_tentacle/learning.db')
+    def __init__(self, config=None, db_path=None):
+        self.db_path = db_path or (config.get('learning.blm_db_path') if config else os.path.expanduser('~/.coding_tentacle/learning.db'))
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row

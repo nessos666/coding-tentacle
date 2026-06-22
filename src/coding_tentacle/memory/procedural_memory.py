@@ -57,8 +57,8 @@ class Procedure:
 class ProcedureStore:
     """Persistent store of fix procedures. Read-only guidance."""
     
-    def __init__(self, store_path=None):
-        self.store_path = store_path or os.path.expanduser('~/.coding_tentacle/procedures.json')
+    def __init__(self, config=None, store_path=None):
+        self.store_path = store_path or (config.get('learning.procedures_path') if config else os.path.expanduser('~/.coding_tentacle/procedures.json'))
         self.procedures: dict[str, Procedure] = {}  # key = "bug_type:language"
         self.actions_executed = 0
         self._load()

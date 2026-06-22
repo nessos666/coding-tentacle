@@ -29,12 +29,12 @@ class Rule:
 class ExperienceConsolidator:
     """Compresses BLM experiences into actionable pattern rules."""
     
-    def __init__(self, min_samples=10, success_threshold=0.80, avoid_threshold=0.20,
+    def __init__(self, config=None, min_samples=10, success_threshold=0.80, avoid_threshold=0.20,
                  rule_path=None):
         self.min_samples = min_samples
         self.success_threshold = success_threshold
         self.avoid_threshold = avoid_threshold
-        self.rule_path = rule_path or os.path.expanduser('~/.coding_tentacle/rules.json')
+        self.rule_path = rule_path or (config.get('learning.rules_path') if config else os.path.expanduser('~/.coding_tentacle/rules.json'))
         self.rules = []  # list[Rule]
         self.last_consolidation = 0.0
         self._load_rules()

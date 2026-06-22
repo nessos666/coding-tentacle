@@ -32,8 +32,8 @@ class HypothesisFeedbackMemory:
     """Persistent store of hypothesis correctness feedback.
     Integrates with BugLearningMemory for unified querying."""
     
-    def __init__(self, db_path=None):
-        self.db_path = db_path or os.path.expanduser('~/.coding_tentacle/hypothesis_feedback.json')
+    def __init__(self, config=None, db_path=None):
+        self.db_path = db_path or (config.get('learning.hypothesis_feedback_path') if config else os.path.expanduser('~/.coding_tentacle/hypothesis_feedback.json'))
         self.records: list[HypothesisRecord] = []
         self._load()
     

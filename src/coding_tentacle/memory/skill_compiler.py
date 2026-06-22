@@ -47,8 +47,8 @@ class Skill:
 class SkillStore:
     """Persistent store of compiled skills. Loadable by any tentacle."""
     
-    def __init__(self, store_path=None):
-        self.store_path = store_path or os.path.expanduser('~/.coding_tentacle/skills.json')
+    def __init__(self, config=None, store_path=None):
+        self.store_path = store_path or (config.get('learning.skills_path') if config else os.path.expanduser('~/.coding_tentacle/skills.json'))
         self.skills: dict[str, Skill] = {}  # name → Skill
         self.by_bug_type: dict[str, list[str]] = {}  # bug_type → [skill_names]
         self.actions_executed = 0
