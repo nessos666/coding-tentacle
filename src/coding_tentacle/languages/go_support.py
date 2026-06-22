@@ -40,6 +40,11 @@ GO_BUG_PATTERNS = {
         'fix': 'if idx < len(slice) {\n    val := slice[idx]\n}',
         'description': 'Slice bounds — check len() before index access',
     },
+    'Go_UnhandledError': {
+        'keywords': ['err != nil', 'error', 'must be handled', 'unhandled error'],
+        'fix': 'if err != nil {\n    return fmt.Errorf("op: %w", err)\n}',
+        'description': 'Unhandled error — check err != nil and return or handle',
+    },
     'Go_ContextTimeout': {
         'keywords': ['context deadline exceeded', 'context', 'timeout', 'deadline'],
         'fix': 'ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)\ndefer cancel()',
