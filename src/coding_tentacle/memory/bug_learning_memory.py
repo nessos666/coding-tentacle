@@ -178,6 +178,50 @@ class BugLearningMemory:
             f'SELECT * FROM experiences WHERE {" AND ".join(wheres)} ORDER BY timestamp DESC LIMIT ?',
             params + [limit]).fetchall()
         return [dict(r) for r in rows]
+    
+    # ═══════════ TF-IDF PRIMARY RETRIEVAL (RC28) ═══════════
+    def find_similar_tfidf(self, bug_signature, bug_type=None, limit=5, embedding_store=None):
+        """Primary retrieval: TF-IDF + cosine similarity.
+        
+        Uses EmbeddingStore for semantic matching.
+        FTS5 is NOT used here — only for safety checks via is_dangerous_pattern().
+        Falls back to LIKE search if no embedding store available.
+        """
+        if embedding_store and hasattr(embedding_store, 'search'):
+            tfidf_results = embedding_store.search(bug_signature, bug_type=bug_type, limit=limit)
+            if tfidf_results:
+                result = []
+                for exp_id, sim_score in tfidf_results:
+                    try:
+                        row = self.conn.execute(
+                            'SELECT * FROM experiences WHERE id = ?', (exp_id,)
+                        ).fetchone()
+                        if row:
+                            d = dict(row)
+                            d['_tfidf_score'] = round(sim_score, 3)
+                            d['_retrieval_method'] = 'tfidf'
+                            result.append(d)
+                    except Exception:
+                        pass
+                if result:
+                    return result
+        
+        # Fallback to LIKE search
+        return self.find_similar(bug_signature, bug_type=bug_type, limit=limit)
+    
+    def is_dangerous_pattern(self, bug_signature, code_content=None):
+        """Safety check: exact pattern match for dangerous operations.
+        This is the ONLY use-case where FTS5/keyword matching is primary.
+        Separate from retrieval — Safety only!
+        """
+        dangerous = ['DROP TABLE', 'DELETE FROM', 'eval(', 'exec(',
+                     'system(', 'rm -rf', 'sudo ', 'API_KEY', 
+                     'password =', 'secret =', 'token =',
+                     'subprocess', 'os.system', 'shell=True',
+                     'curl | bash', 'wget | sh']
+        sig_lower = (bug_signature + ' ' + (code_content or '')).lower()
+        found = [w for w in dangerous if w.lower() in sig_lower]
+        return len(found) > 0, found
 
 
     # ═══════════ NORMALIZATION (RC6.5) ═══════════
