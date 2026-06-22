@@ -110,9 +110,9 @@ class SkepticBrain:
                 bt_entry = self.trust_matrix.matrix.get('Teacher', {}).get(bug_type)
                 if bt_entry:
                     samples = bt_entry.predictions
-            if samples < self.min_samples:
+            if samples < self.min_samples and bt_trust < 0.65:
                 missing.append(f"Only {samples} samples for {bug_type} (need {self.min_samples})")
-                risk += 0.10
+                risk += 0.08
         
         # Clamp risk
         risk = min(0.95, risk)
