@@ -299,62 +299,62 @@ if __name__ == "__main__":
     os.chdir(tmp)
     try:
         pm.build_cached(tmp)
+        tm = TestMap(pm)
+        ia = ImpactAnalyzer(pm, test_map=tm)
+        
+        # T1: Core file with importers (use relative paths!)
+        report1 = ia.analyze('src/auth.py', bug_type='NullPointer')
+        t1 = report1.importer_count >= 1
+        print(f"  T1: {'✅' if t1 else '❌'} Core auth.py → {report1.importer_count} importers")
+        
+        # T2: Risk score computed
+        t2 = report1.risk_score >= 0.0 and report1.risk_score < 1.0
+        print(f"  T2: {'✅' if t2 else '❌'} Risk score → {report1.risk_score}")
+        
+        # T3: Payment analyzed
+        report3 = ia.analyze('src/payment.py')
+        t3 = report3.importer_count >= 0
+        print(f"  T3: {'✅' if t3 else '❌'} Payment analyzed → importers={report3.importer_count}")
+        
+        # T4: Security risk
+        report4 = ia.analyze('src/payment.py', bug_type='SecurityRisk', diff='eval(user_input)')
+        t4 = report4.risk_score >= 0.30 and report4.recommended_review == 'ESCALATE'
+        print(f"  T4: {'✅' if t4 else '❌'} SecurityRisk → risk={report4.risk_score} {report4.recommended_review}")
+        
+        # T5: Risk components
+        t5 = len(report4.risk_components) >= 5
+        print(f"  T5: {'✅' if t5 else '❌'} Risk components → {len(report4.risk_components)}")
+        
+        # T6: Low-risk file
+        report6 = ia.analyze('src/logger.py', bug_type='TypeError')
+        t6 = report6.risk_score < 0.3 or report6.risk_score < report1.risk_score
+        print(f"  T6: {'✅' if t6 else '❌'} Logger low risk → risk={report6.risk_score}")
+        
+        # T7: TestMap
+        tests = tm.find_tests_for('src/payment.py')
+        t7 = len(tests) >= 1
+        print(f"  T7: {'✅' if t7 else '❌'} TestMap → {tests}")
+        
+        # T8: Multi-lang
+        tests_rs = tm.find_tests_for('src/lib.rs')
+        tests_rb = tm.find_tests_for('app/models/user.rb')
+        t8 = len(tests_rs) >= 1 and len(tests_rb) >= 1
+        print(f"  T8: {'✅' if t8 else '❌'} Multi-lang → Rust={tests_rs} Ruby={tests_rb}")
+        
+        # T9: Quick risk
+        risk, rec = ia.quick_risk('src/payment.py', 'NullPointer')
+        t9 = rec in ('APPROVE', 'REQUEST_MORE')
+        print(f"  T9: {'✅' if t9 else '❌'} Quick risk → {risk:.2f} {rec}")
+        
+        # T10: Stats
+        t10 = ia.analyses >= 5
+        print(f"  T10: {'✅' if t10 else '❌'} Analyses: {ia.analyses}")
+        
+        passed = sum([t1,t2,t3,t4,t5,t6,t7,t8,t9,t10])
+        print(f"\n  {'='*55}")
+        print(f"  ERGEBNIS: {passed}/10 Tests bestanden")
+        print(f"  {'✅ IMPACT ANALYZER FERTIG' if passed >= 9 else '⚠️'}")
     finally:
         os.chdir(old_cwd)
-    tm = TestMap(pm)
-    ia = ImpactAnalyzer(pm, test_map=tm)
-    
-    # T1: Core file with importers
-    report1 = ia.analyze(os.path.join(tmp, 'src', 'auth.py'), bug_type='NullPointer')
-    t1 = report1.importer_count >= 1  # payment imports auth
-    print(f"  T1: {'✅' if t1 else '❌'} Core auth.py → {report1.importer_count} importers")
-    
-    # T2: Risk score computed
-    t2 = report1.risk_score >= 0.0 and report1.risk_score < 1.0
-    print(f"  T2: {'✅' if t2 else '❌'} Risk score → {report1.risk_score}")
-    
-    # T3: Payment is core file (imported by tests)
-    report3 = ia.analyze(os.path.join(tmp, 'src', 'payment.py'))
-    t3 = report3.importer_count >= 0  # payment may have test importers
-    print(f"  T3: {'✅' if t3 else '❌'} Payment analyzed → importers={report3.importer_count}")
-    
-    # T4: Security risk = high risk
-    report4 = ia.analyze(os.path.join(tmp, 'src', 'payment.py'), bug_type='SecurityRisk', 
-                         diff='eval(user_input)')
-    t4 = report4.risk_score >= 0.30 and report4.recommended_review == 'ESCALATE'
-    print(f"  T4: {'✅' if t4 else '❌'} SecurityRisk → risk={report4.risk_score} {report4.recommended_review}")
-    
-    # T5: Risk components
-    t5 = len(report4.risk_components) >= 5
-    print(f"  T5: {'✅' if t5 else '❌'} Risk components → {len(report4.risk_components)}")
-    
-    # T6: Low-risk file
-    report6 = ia.analyze(os.path.join(tmp, 'src', 'logger.py'), bug_type='TypeError')
-    t6 = report6.risk_score < report1.risk_score or report6.risk_score < 0.3
-    print(f"  T6: {'✅' if t6 else '❌'} Logger low risk → risk={report6.risk_score}")
-    
-    # T7: TestMap finds tests
-    tests = tm.find_tests_for(os.path.join(tmp, 'src', 'payment.py'))
-    t7 = len(tests) >= 1
-    print(f"  T7: {'✅' if t7 else '❌'} TestMap → {tests}")
-    
-    # T8: TestMap for different languages
-    tests_rs = tm.find_tests_for('src/lib.rs')
-    tests_rb = tm.find_tests_for('app/models/user.rb')
-    t8 = len(tests_rs) >= 1 and len(tests_rb) >= 1
-    print(f"  T8: {'✅' if t8 else '❌'} Multi-lang → Rust={tests_rs} Ruby={tests_rb}")
-    
-    # T9: Quick risk
-    risk, rec = ia.quick_risk(os.path.join(tmp, 'src', 'payment.py'), 'NullPointer')
-    t9 = rec in ('APPROVE', 'REQUEST_MORE')
-    print(f"  T9: {'✅' if t9 else '❌'} Quick risk → {risk:.2f} {rec}")
-    
-    # T10: Stats
-    t10 = ia.analyses >= 5
-    print(f"  T10: {'✅' if t10 else '❌'} Analyses: {ia.analyses}")
     
     shutil.rmtree(tmp, ignore_errors=True)
-    passed = sum([t1,t2,t3,t4,t5,t6,t7,t8,t9,t10])
-    print(f"\n  {'='*55}")
-    print(f"  ERGEBNIS: {passed}/10 Tests bestanden")
-    print(f"  {'✅ IMPACT ANALYZER FERTIG' if passed >= 9 else '⚠️'}")
