@@ -53,10 +53,10 @@ JS_BUG_PATTERNS = {
         'description': 'State mutation — use immutable updates (spread/immer)',
     },
     'JS_TypeScriptError': {
-        'keywords': ['TS[0-9]', 'type .* is not assignable', 'tsc',
-                     'property .* does not exist', 'type.*error'],
-        'fix': 'const value: ExpectedType = input as ExpectedType;  // type assertion',
-        'description': 'TypeScript type error — fix type annotation or assertion',
+        'keywords': ['type .* is not assignable', 'property .* does not exist',
+                     'tsc', 'TypeScript.*error'],
+        'fix': 'const value: ExpectedType = input as ExpectedType;',
+        'description': 'TypeScript type error — fix annotation or assertion',
     },
     'JS_NetworkError': {
         'keywords': ['fetch', 'network', 'ECONNREFUSED', 'ENOTFOUND',
@@ -77,7 +77,7 @@ JS_BUG_PATTERNS = {
 
 JS_DANGEROUS_PATTERNS = [
     r'\beval\s*\(', r'\bFunction\s*\(', r'new\s+Function\s*\(',
-    r'child_process\.exec', r'child_process\.spawn',
+    r'child_process', r'child_process\.exec', r'child_process\)\.exec',
     r'\.innerHTML\s*=', r'dangerouslySetInnerHTML',
     r'document\.write\s*\(', r'fs\.writeFile.*user',
     r'shelljs\.exec', r'execSync\s*\(', r'exec\(\s*[\'\"].*user',
