@@ -219,7 +219,9 @@ if __name__ == "__main__":
     blm = BugLearningMemory(db_path=os.path.join(tmp, 'blm.db'))
     ps_store = ProcedureStore(store_path=os.path.join(tmp, 'proc.json'))
     pm = ProjectMap()
-    pm.build_cached('/home/boobi/GEHIRN_BIBLIOTHEK') if hasattr(pm, 'build_cached') else pm.build('/home/boobi/GEHIRN_BIBLIOTHEK')
+    # Use current working directory instead of absolute path
+    import os as _os
+    pm.build_cached(_os.getcwd()) if hasattr(pm, 'build_cached') else pm.build(_os.getcwd())
     
     pam = ParallelActivationManager()
     pam.register('SafetyBrain', safety)
