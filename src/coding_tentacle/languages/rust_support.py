@@ -12,39 +12,39 @@ from dataclasses import dataclass, field, asdict
 
 # ═══════════ RUST BUG TYPES ═══════════
 RUST_BUG_PATTERNS = {
+    'Rust_ResultError': {
+        'keywords': ['Result', 'must be used', 'unused Result', '#[must_use]'],
+        'fix_template': 'let result = fallible_fn()?;',
+        'description': 'Unused Result — use ? operator',
+    },
     'Rust_OptionUnwrap': {
-        'keywords': ['unwrap', 'panic', 'called `Option::unwrap()`', 'None'],
-        'fix_template': 'match {var} {{\n    Some(val) => val,\n    None => return Err(...)  // or default\n}}',
-        'description': 'Option.unwrap() panics on None — use match or ? operator',
+        'keywords': ['Option.*unwrap', 'unwrap.*None', 'called.*Option', 'unwrap'],
+        'fix_template': 'match {var} {{ Some(val) => val, None => return Err(...) }}',
+        'description': 'Option.unwrap() panics on None — use match or ?',
     },
     'Rust_BorrowError': {
-        'keywords': ['cannot borrow', 'borrow', 'mutable', 'immutable', 'already borrowed'],
-        'fix_template': '// Clone before borrowing, or restructure ownership\nlet cloned = {var}.clone();',
-        'description': 'Borrow checker conflict — clone or restructure ownership',
+        'keywords': ['cannot borrow', 'already borrowed', 'E0502', 'E0499'],
+        'fix_template': 'let cloned = {var}.clone();',
+        'description': 'Borrow checker conflict — clone or restructure',
     },
     'Rust_LifetimeError': {
-        'keywords': ['lifetime', 'does not live long enough', 'borrowed value'],
-        'fix_template': "fn func<'a>(x: &'a str) -> &'a str {{\n    x\n}}",
+        'keywords': ['lifetime', 'does not live long enough', 'E0597'],
+        'fix_template': "fn func<'a>(x: &'a str) -> &'a str {{ x }}",
         'description': 'Lifetime annotation missing or incorrect',
     },
     'Rust_UseError': {
-        'keywords': ['use', 'unresolved import', 'not found in scope', 'mod'],
-        'fix_template': 'use std::collections::HashMap;\n// or: mod my_module;',
+        'keywords': ['unresolved import', 'E0432', 'not found in scope', 'use std'],
+        'fix_template': 'use std::collections::HashMap;',
         'description': 'Missing use statement or module declaration',
     },
     'Rust_TypeMismatch': {
-        'keywords': ['mismatched types', 'expected', 'found', 'type'],
-        'fix_template': 'let x: ExpectedType = value.into();  // or .try_into()?',
+        'keywords': ['mismatched types', 'E0308', 'expected.*found'],
+        'fix_template': 'let x: ExpectedType = value.into();',
         'description': 'Type mismatch — use .into() or explicit conversion',
     },
-    'Rust_ResultError': {
-        'keywords': ['Result', 'must be used', 'unused Result', '#[must_use]'],
-        'fix_template': 'let result = fallible_fn()?;  // propagate with ?',
-        'description': 'Unused Result — use ? operator or match',
-    },
     'Rust_PatternMatch': {
-        'keywords': ['non-exhaustive patterns', 'not covered', 'match'],
-        'fix_template': 'match value {{\n    Variant::A => {{}},\n    Variant::B => {{}},\n    _ => unreachable!(),\n}}',
+        'keywords': ['non-exhaustive patterns', 'E0004', 'not covered', 'non_exhaustive'],
+        'fix_template': 'match value {{ Variant::A => {{}}, _ => {{}}, }}',
         'description': 'Match not exhaustive — add missing arms',
     },
 }
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     create_rust_procedures(ps)
     proc = ps.find_procedure("Rust_OptionUnwrap")
     t8 = proc is not None and proc.language == "rust"
-    print(f"  T8: {'✅' if t8 else '❌'} Rust procedure → {proc.bug_type if proc else 'NONE'}")
+    print(f"  T8: {'✅' if t8 else '❌'} Rust procedure → {proc.bug_type if proc else 'NONE'} ({proc.language if proc else ''})")
     
     import shutil; shutil.rmtree(tmp, ignore_errors=True)
     
