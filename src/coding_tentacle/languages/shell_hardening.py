@@ -11,14 +11,14 @@ from dataclasses import dataclass
 
 # ═══════════ COMPLETE SHELL BUG PATTERNS ═══════════
 SHELL_BUG_PATTERNS = {
-    'SC2086_UnquotedVar': {
-        'keywords': ['SC2086', 'unquoted', 'word splitting', 'globbing', 'quote'],
-        'fix': 'echo "${var}"  # always double-quote variables',
+    'SC2046_UnquotedCmdSub': {
+        'keywords': ['SC2046', 'command substitution', '\\$\\(', 'cmd.*sub'],
+        'fix': 'result="$(command)"  # quote command substitution',
         'category': 'quoting',
     },
-    'SC2046_UnquotedCmdSub': {
-        'keywords': ['SC2046', 'command substitution', '$(', 'quote'],
-        'fix': 'result="$(command)"  # quote command substitution',
+    'SC2086_UnquotedVar': {
+        'keywords': ['SC2086', 'unquoted', 'word splitting', 'globbing'],
+        'fix': 'echo "${var}"  # always double-quote variables',
         'category': 'quoting',
     },
     'SC2154_UnassignedVar': {
