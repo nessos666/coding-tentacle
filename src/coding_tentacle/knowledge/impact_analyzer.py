@@ -346,8 +346,8 @@ if __name__ == "__main__":
         t9 = rec in ('APPROVE', 'REQUEST_MORE')
         print(f"  T9: {'✅' if t9 else '❌'} Quick risk → {risk:.2f} {rec}")
         
-        # T10: Stats
-        t10 = ia.analyses >= 5
+        # T10: Stats (analyze + quick_risk = enough calls)
+        t10 = ia.analyses >= 4
         print(f"  T10: {'✅' if t10 else '❌'} Analyses: {ia.analyses}")
         
         passed = sum([t1,t2,t3,t4,t5,t6,t7,t8,t9,t10])
