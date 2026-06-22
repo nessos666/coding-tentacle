@@ -36,7 +36,7 @@ JS_BUG_PATTERNS = {
     },
     'JS_AsyncAwait': {
         'keywords': ['unhandled promise', 'Promise', 'async', 'await',
-                     '.then(', '.catch('],
+                     '.then', '.catch'],
         'fix': 'try {\n  const result = await asyncFn();\n} catch (err) {\n  console.error(err);\n}',
         'description': 'Unhandled promise — use try/catch with await or .catch()',
     },
@@ -98,7 +98,12 @@ def classify_js_bug(error_message, code=""):
         if pattern.get('block'):
             continue
         for kw in pattern['keywords']:
-            if re.search(re.escape(kw.lower()), combined, re.IGNORECASE):
+            # Use raw regex if keyword contains regex metacharacters, else escaped literal
+            if any(c in kw for c in '.*+?^$(){}|[]\\'):
+                kw_pattern = kw.lower()
+            else:
+                kw_pattern = re.escape(kw)
+            if re.search(kw_pattern, combined, re.IGNORECASE):
                 return bug_type, pattern
     
     return 'JS_Unknown', {'fix': '// Unknown error', 'description': 'Unknown'}
