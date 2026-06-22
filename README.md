@@ -1,7 +1,7 @@
-# 🐙 Coding Tentacle v0.6.0
+# 🐙 Coding Tentacle v0.7.0
 
-**Safety-First Bug Analysis & Patch Suggestion System**
-*31 modules | 7.000+ lines | 180+ tests | Octopus Architecture*
+**Safety-First Multi-Language Bug Analysis & Patch Suggestion System**
+*8 Sprachen | 78+ Bug-Typen | 41+ Procedures | 40+ Module | 8.000+ LOC*
 
 Coding Tentacle analyzes bugs using a tentacle architecture with a strict safety gate. It **proposes patches**, **sandbox-tests them**, but **NEVER modifies files without human approval**. Every dangerous action is BLOCKED.
 
@@ -28,6 +28,19 @@ Coding Tentacle analyzes bugs using a tentacle architecture with a strict safety
 ❌ NO shell execution without Safety VETO
 ❌ NOT a replacement for Devin or Codex
 ❌ NOT an autonomous agent (yet — architecture supports it)
+```
+
+## Supported Languages
+
+```
+Python  █████ 5/5  13 Bug-Typen  10 Procedures
+Shell   █████ 5/5  12 SC-Rules   8 Procedures
+Rust    ████░ 4/5  7 Bug-Typen   2 Procedures
+Ruby    ████░ 4/5  9 Bug-Typen   4 Procedures
+C++     ████░ 4/5  9 Bug-Typen   5 Procedures
+Go      ████░ 4/5  9 Bug-Typen   4 Procedures
+JS/TS   ████░ 4/5  10 Bug-Typen  4 Procedures
+Java    ████░ 4/5  9 Bug-Typen   4 Procedures
 ```
 
 ## Quickstart
