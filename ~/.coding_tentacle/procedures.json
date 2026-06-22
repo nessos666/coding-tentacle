@@ -1,0 +1,632 @@
+{
+  "NullPointer:python": {
+    "bug_type": "NullPointer",
+    "language": "python",
+    "trigger": "Stacktrace: NoneType, has no attribute, None, null pointer",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_stacktrace",
+        "description": "Extrahiere Datei + Zeile + Variable aus Stacktrace",
+        "tool": "CodeContext",
+        "expected_output": "file=app.py, line=42, var=value",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "bq_ground",
+        "description": "Best\u00e4tige Bug-Typ: NullPointer mit BQ Grounding",
+        "tool": "BQ",
+        "expected_output": "NullPointer (grounding_score >= 0.35)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "find_source",
+        "description": "Finde wo die Variable herkommt (Return/Parameter/Optional)",
+        "tool": "ProjectMap.search_function()",
+        "expected_output": "def get_value() -> Optional[str]",
+        "fallback": "Manuelle Code-Inspektion",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "blm_best_fix",
+        "description": "Frage BugLearningMemory nach bestem Fix",
+        "tool": "BLM.best_fix_for()",
+        "expected_output": "guard_clause (45\u00d7 success)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "rule_check",
+        "description": "Pr\u00fcfe PREFER/AVOID Regeln aus RuleMemory",
+        "tool": "RuleMemory.check_fix()",
+        "expected_output": "PREFER guard_clause",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 6,
+        "action": "patch_suggest",
+        "description": "Erzeuge Patch-Vorschlag",
+        "tool": "PatchSuggestion",
+        "expected_output": "if self.value is not None: ...",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 7,
+        "action": "test_selection",
+        "description": "W\u00e4hle relevante Tests aus",
+        "tool": "TestSelector",
+        "expected_output": "pytest test_app.py -k test_null",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 8,
+        "action": "verify",
+        "description": "Verifiziere Fix (sp\u00e4ter: Sandbox-Lauf)",
+        "tool": "ResultEvaluator",
+        "expected_output": "Tests gr\u00fcn \u2192 Fix gespeichert",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.85,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029268,
+    "last_used": 1782141391.802927,
+    "success_rate": 0.0
+  },
+  "TypeError:python": {
+    "bug_type": "TypeError",
+    "language": "python",
+    "trigger": "Stacktrace: TypeError, cannot concatenate, unsupported operand",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_stacktrace",
+        "description": "Extrahiere Datei + Zeile + Operanden aus Fehler",
+        "tool": "CodeContext",
+        "expected_output": "file=worker.py, line=22, int + str",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "bq_ground",
+        "description": "Best\u00e4tige Bug-Typ: TypeError",
+        "tool": "BQ",
+        "expected_output": "TypeError (grounding_score >= 0.35)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "blm_best_fix",
+        "description": "Frage BLM nach bestem Fix f\u00fcr TypeError",
+        "tool": "BLM.best_fix_for()",
+        "expected_output": "type_cast (38\u00d7 success)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "rule_check",
+        "description": "Pr\u00fcfe Regeln",
+        "tool": "RuleMemory",
+        "expected_output": "PREFER type_cast",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "patch_suggest",
+        "description": "Erzeuge Patch",
+        "tool": "PatchSuggestion",
+        "expected_output": "str(value) oder int(value)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 6,
+        "action": "verify",
+        "description": "Verifiziere",
+        "tool": "ResultEvaluator",
+        "expected_output": "Tests gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.8,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029332,
+    "last_used": 1782141391.8029332,
+    "success_rate": 0.0
+  },
+  "ImportError:python": {
+    "bug_type": "ImportError",
+    "language": "python",
+    "trigger": "Stacktrace: ModuleNotFoundError, No module named, cannot import",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_stacktrace",
+        "description": "Welches Modul fehlt?",
+        "tool": "CodeContext",
+        "expected_output": "module=utils",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "check_installation",
+        "description": "Ist das Package installiert?",
+        "tool": "pip list",
+        "expected_output": "utils==1.2.3",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "blm_best_fix",
+        "description": "Bester Fix",
+        "tool": "BLM",
+        "expected_output": "pip install oder import fix",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "patch_suggest",
+        "description": "Patch",
+        "tool": "PatchSuggestion",
+        "expected_output": "from utils import helper",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "verify",
+        "description": "Verifiziere",
+        "tool": "ResultEvaluator",
+        "expected_output": "Import OK",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.7,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029368,
+    "last_used": 1782141391.802937,
+    "success_rate": 0.0
+  },
+  "IndexError:python": {
+    "bug_type": "IndexError",
+    "language": "python",
+    "trigger": "Stacktrace: IndexError, list index out of range, off-by-one",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_index",
+        "description": "Welcher Index? Welche Collection?",
+        "tool": "CodeContext",
+        "expected_output": "list[5] on len=3 \u2192 out of range",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "check_bounds",
+        "description": "Pr\u00fcfe len() vor Zugriff oder try/except",
+        "tool": "BQ",
+        "expected_output": "IndexError \u2014 bounds check needed",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "suggest_guard",
+        "description": "Guard: if idx < len(collection): oder enumerate()",
+        "tool": "PatchSuggestion",
+        "expected_output": "if idx < len(items):\n    return items[idx]",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "test",
+        "description": "Teste mit Edge-Cases (leer, erstes, letztes)",
+        "tool": "TestSelector",
+        "expected_output": "pytest -k test_index",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "verify",
+        "description": "Verifiziere kein IndexError mehr",
+        "tool": "ResultEvaluator",
+        "expected_output": "Tests gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.65,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029394,
+    "last_used": 1782141391.8029394,
+    "success_rate": 0.0
+  },
+  "ValueError:python": {
+    "bug_type": "ValueError",
+    "language": "python",
+    "trigger": "Stacktrace: ValueError, invalid literal, invalid value",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_value",
+        "description": "Welcher Wert? Welche Konvertierung?",
+        "tool": "CodeContext",
+        "expected_output": "int('abc') \u2192 ValueError",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "validate_input",
+        "description": "Input vor Konvertierung validieren",
+        "tool": "BQ",
+        "expected_output": "ValueError \u2014 input validation needed",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "suggest_try_parse",
+        "description": "try: int(x) except ValueError: ...",
+        "tool": "PatchSuggestion",
+        "expected_output": "try:\n    value = int(x)\nexcept ValueError:\n    value = 0",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "test",
+        "description": "Teste mit validen und invaliden Inputs",
+        "tool": "TestSelector",
+        "expected_output": "pytest -k test_value",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "verify",
+        "description": "Verifiziere kein ValueError mehr",
+        "tool": "ResultEvaluator",
+        "expected_output": "Tests gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.65,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029413,
+    "last_used": 1782141391.8029413,
+    "success_rate": 0.0
+  },
+  "MemoryError:python": {
+    "bug_type": "MemoryError",
+    "language": "python",
+    "trigger": "Stacktrace: MemoryError, out of memory, OOM",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_allocation",
+        "description": "Wo wird zu viel Speicher allokiert?",
+        "tool": "CodeContext",
+        "expected_output": "list(10**9) \u2192 MemoryError",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "suggest_streaming",
+        "description": "Generator/Iterator statt Liste, Chunking",
+        "tool": "PatchSuggestion",
+        "expected_output": "for chunk in iter(lambda: f.read(8192), b''):",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "suggest_limit",
+        "description": "Batch-Gr\u00f6\u00dfe begrenzen, Lazy Evaluation",
+        "tool": "PatchSuggestion",
+        "expected_output": "MAX_BATCH = 10000",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "verify",
+        "description": "Verifiziere konstante Memory-Nutzung",
+        "tool": "ResultEvaluator",
+        "expected_output": "Memory-Profil gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.6,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.802944,
+    "last_used": 1782141391.802944,
+    "success_rate": 0.0
+  },
+  "SyntaxError:python": {
+    "bug_type": "SyntaxError",
+    "language": "python",
+    "trigger": "Stacktrace: SyntaxError, invalid syntax, version mismatch",
+    "steps": [
+      {
+        "order": 1,
+        "action": "parse_error",
+        "description": "Welche Zeile? Welcher Syntax-Fehler?",
+        "tool": "CodeContext",
+        "expected_output": "line 42: x = (1 + 2  \u2192 SyntaxError",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "locate_line",
+        "description": "Zeige defekte Zeile und Kontext",
+        "tool": "BQ",
+        "expected_output": "SyntaxError \u2014 manual fix likely needed",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "suggest_fix",
+        "description": "Fehlende Klammer/Doppelpunkt/Einr\u00fcckung?",
+        "tool": "PatchSuggestion",
+        "expected_output": "x = (1 + 2)  # missing closing paren",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "verify",
+        "description": "python -m py_compile testet Syntax",
+        "tool": "ResultEvaluator",
+        "expected_output": "Syntax OK",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.7,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029504,
+    "last_used": 1782141391.8029504,
+    "success_rate": 0.0
+  },
+  "ConnectionError:python": {
+    "bug_type": "ConnectionError",
+    "language": "python",
+    "trigger": "Stacktrace: ConnectionError, ConnectionRefused, timeout, network",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_endpoint",
+        "description": "Welcher Host:Port? HTTP/DB/API?",
+        "tool": "CodeContext",
+        "expected_output": "localhost:5432 \u2192 ConnectionRefused",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "check_timeout",
+        "description": "Timeout setzen, Retry-Logik",
+        "tool": "PatchSuggestion",
+        "expected_output": "requests.get(url, timeout=10)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "add_retry",
+        "description": "Exponential Backoff oder Circuit Breaker",
+        "tool": "PatchSuggestion",
+        "expected_output": "for attempt in range(3):\n    try: ...\n    except: time.sleep(2**attempt)",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "verify",
+        "description": "Verifiziere Graceful Degradation",
+        "tool": "ResultEvaluator",
+        "expected_output": "Connection-Error-Handling getestet",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.6,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029525,
+    "last_used": 1782141391.8029528,
+    "success_rate": 0.0
+  },
+  "RaceCondition:python": {
+    "bug_type": "RaceCondition",
+    "language": "python",
+    "trigger": "Stacktrace: race condition, deadlock, concurrency, thread safety",
+    "steps": [
+      {
+        "order": 1,
+        "action": "analyze_shared_state",
+        "description": "Welche Variable? Welche Threads?",
+        "tool": "CodeContext",
+        "expected_output": "counter += 1 in Thread-1 und Thread-2",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "suggest_lock",
+        "description": "threading.Lock oder asyncio.Lock",
+        "tool": "PatchSuggestion",
+        "expected_output": "with self.lock:\n    self.counter += 1",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "suggest_ordering",
+        "description": "Queue oder Event f\u00fcr Reihenfolge",
+        "tool": "PatchSuggestion",
+        "expected_output": "queue.put(item)  # thread-safe",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "test_concurrency",
+        "description": "Thread-sichere Tests mit pytest-timeout",
+        "tool": "TestSelector",
+        "expected_output": "pytest -k test_concurrent",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 5,
+        "action": "verify",
+        "description": "Verifiziere deterministisches Verhalten",
+        "tool": "ResultEvaluator",
+        "expected_output": "Race-Condition-Test wiederholbar gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.55,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.802955,
+    "last_used": 1782141391.802955,
+    "success_rate": 0.0
+  },
+  "Performance:python": {
+    "bug_type": "Performance",
+    "language": "python",
+    "trigger": "Stacktrace: performance, slow, N+1, loading, page load, optimize",
+    "steps": [
+      {
+        "order": 1,
+        "action": "profile_hotspot",
+        "description": "cProfile/py-spy: Wo ist der Bottleneck?",
+        "tool": "CodeContext",
+        "expected_output": "for item in items: db.query() \u2192 N+1",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 2,
+        "action": "suggest_optimization",
+        "description": "Caching, Batch-Query, Lazy-Load?",
+        "tool": "PatchSuggestion",
+        "expected_output": "items = db.query_all(ids)  # 1 query statt N",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 3,
+        "action": "benchmark",
+        "description": "Vorher/Nachher Zeit messen",
+        "tool": "TestSelector",
+        "expected_output": "python -m timeit ...",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      },
+      {
+        "order": 4,
+        "action": "verify",
+        "description": "Verifiziere Verbesserung ohne Regression",
+        "tool": "ResultEvaluator",
+        "expected_output": "Performance +20%, Tests gr\u00fcn",
+        "fallback": "",
+        "success_count": 0,
+        "failure_count": 0
+      }
+    ],
+    "confidence": 0.5,
+    "times_used": 0,
+    "times_succeeded": 0,
+    "created_at": 1782141391.8029568,
+    "last_used": 1782141391.802957,
+    "success_rate": 0.0
+  }
+}
