@@ -151,7 +151,7 @@ if __name__ == "__main__":
     tmp = tempfile.mkdtemp()
     ps = ProcedureStore(store_path=os.path.join(tmp, 'proc.json'))
     create_rust_procedures(ps)
-    proc = ps.find_procedure("Rust_OptionUnwrap")
+    proc = ps.find_procedure("Rust_OptionUnwrap", language="rust")
     t8 = proc is not None and proc.language == "rust"
     print(f"  T8: {'✅' if t8 else '❌'} Rust procedure → {proc.bug_type if proc else 'NONE'} ({proc.language if proc else ''})")
     
