@@ -40,14 +40,20 @@ class SafetyBrain:
     
     def evaluate(self, bug_report, proposed_action="analyze", 
                  patch="", confidence=0.5, context=None):
-        """Safety check — runs FIRST, can BLOCK everything."""
+        """Safety check — runs FIRST, can BLOCK everything.
+        Now scans BOTH bug_report AND code/patch content (RC15.9B)."""
         bug_lower = bug_report.lower()
+        patch_lower = (patch or "").lower()
+        if context and isinstance(context, dict):
+            code = context.get('file', '') + ' ' + context.get('code', '')
+            patch_lower += ' ' + code.lower()
         
         # Hard security checks
-        dangerous = any(w in bug_lower for w in 
+        dangerous = any(w in bug_lower or w in patch_lower for w in 
             ['drop table', 'delete from', 'rm -rf', 'api_key', 
              'secret', 'password', '../../', '/etc/passwd', 'eval(',
-             'exec(', 'os.system', 'subprocess', 'pickle.loads'])
+             'exec(', 'os.system', 'subprocess', 'pickle.loads',
+             'curl ', 'wget ', '__import__("os"', '/etc/shadow'])
         
         if dangerous:
             return BrainDecision(
