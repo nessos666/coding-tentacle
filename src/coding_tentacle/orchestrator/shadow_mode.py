@@ -312,7 +312,6 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     fix_summary=report.generated_diff[:100] if report.generated_diff else 'No diff',
                     file_path=code_context.get('file', 'unknown'),
                     language='python',
-                    session_id=str(time.time()),
                 )
                 report.blm_written = True
                 report.blm_error = ''
