@@ -43,6 +43,8 @@ class ShadowRunReport:
     skeptic_recommendation: str = ""
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
+    blm_written: bool = False
+    blm_error: str = ""
     sandbox_result: dict = field(default_factory=dict)
     test_result: dict = field(default_factory=dict)
     safety_events: list = field(default_factory=list)
@@ -294,10 +296,14 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 # In production: present to human, wait for approve/reject/request_changes
                 # In shadow mode: mark as pending, continue with report
             
-            # ═══ STEP 8C: BLM learning record (RC42 Fix2) ═══
+            # ═══ STEP 8C: BLM learning record (RC43B Fix) ═══
             try:
                 from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
-                blm = BugLearningMemory()
+                import os as _os
+                blm_dir = _os.path.expanduser('~/.coding_tentacle')
+                _os.makedirs(blm_dir, exist_ok=True)
+                blm_db = _os.path.join(blm_dir, 'learning.db')
+                blm = BugLearningMemory(db_path=blm_db)
                 blm.record_experience(
                     bug_signature=f"{bug_type}: {run.issue_title[:80]}",
                     bug_type=bug_type,
@@ -308,8 +314,11 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     language='python',
                     session_id=str(time.time()),
                 )
-            except Exception:
-                pass  # BLM recording failure is non-fatal
+                report.blm_written = True
+                report.blm_error = ''
+            except Exception as e:
+                report.blm_written = False
+                report.blm_error = str(e)[:200]
             
             # ═══ STEP 8D: EngineLearning record (RC42 Fix4) ═══
             if report.engine_used:
