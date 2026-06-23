@@ -211,7 +211,17 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 try:
                     from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
                     blm = BugLearningMemory(db_path=os.path.join(workspace, 'safety_check.db'))
-                    dangerous, patterns = blm.is_dangerous_pattern(report.generated_diff)
+                    
+                    # RC43B: decode Base64, HTML entities, string concatenation bypasses
+                    import base64, html, re
+                    decoded_text = report.generated_diff
+                    try:
+                        decoded_text += ' ' + base64.b64decode(report.generated_diff.encode()).decode('utf-8', errors='ignore')
+                    except: pass
+                    decoded_text = html.unescape(decoded_text)
+                    decoded_text += ' ' + re.sub(r"['\"]\\s*\\+\\s*['\"]", '', decoded_text)
+                    
+                    dangerous, patterns = blm.is_dangerous_pattern(decoded_text)
                     if dangerous:
                         report.safety_events.append(f'ENGINE_DIFF_DANGEROUS: {patterns}')
                         report.generated_diff = ''
