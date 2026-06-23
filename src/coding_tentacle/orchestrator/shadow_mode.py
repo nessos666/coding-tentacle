@@ -38,6 +38,8 @@ class ShadowRunReport:
     generated_diff: str = ""
     engine_used: str = ""
     engine_fix_raw: str = ""
+    approval_status: str = ""        # pending | approved | rejected | changes_requested
+    approval_notes: str = ""
     sandbox_result: dict = field(default_factory=dict)
     test_result: dict = field(default_factory=dict)
     safety_events: list = field(default_factory=list)
@@ -237,6 +239,13 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     'tests_passed': tr.tests_passed,
                     'tests_failed': tr.tests_failed,
                 }
+            
+            # ═══ STEP 8B: Human Approval Gate (RC41) ═══
+            if self.approval_gate and report.generated_diff and not report.safety_events:
+                report.approval_status = 'pending'
+                report.approval_notes = 'Shadow mode — awaiting human decision'
+                # In production: present to human, wait for approve/reject/request_changes
+                # In shadow mode: mark as pending, continue with report
             
             # ═══ STEP 9: Recommendation ═══
             if report.safety_events:
