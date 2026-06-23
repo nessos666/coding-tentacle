@@ -36,6 +36,8 @@ class ShadowRunReport:
     selected_procedure: str = ""
     selected_skill: str = ""
     generated_diff: str = ""
+    engine_used: str = ""
+    engine_fix_raw: str = ""
     sandbox_result: dict = field(default_factory=dict)
     test_result: dict = field(default_factory=dict)
     safety_events: list = field(default_factory=list)
@@ -87,7 +89,8 @@ class ShadowModeRunner:
     
     def __init__(self, meta_brain=None, teacher=None, diff_generator=None,
                  sandbox_runner=None, test_runner=None, repair_loop=None,
-                 approval_gate=None, project_map_class=None):
+                 approval_gate=None, project_map_class=None,
+                 engine_router=None, safety_brain=None):
         self.meta_brain = meta_brain
         self.teacher = teacher
         self.diff_generator = diff_generator
@@ -96,6 +99,8 @@ class ShadowModeRunner:
         self.repair_loop = repair_loop
         self.approval_gate = approval_gate
         self.project_map_class = project_map_class
+        self.engine_router = engine_router
+        self.safety_brain = safety_brain or (meta_brain.safety if meta_brain else None)
         self.runs = []
     
     def analyze_issue(self, run: GitHubIssueRun) -> ShadowRunReport:
@@ -145,8 +150,57 @@ class ShadowModeRunner:
                 if skill:
                     report.selected_skill = skill.name
             
-            # ═══ STEP 6: Generate diff ═══
-            if self.diff_generator and self.teacher:
+            # ═══ STEP 6: Generate fix via Engine Router (RC40) ═══
+            if self.engine_router and bug_type != 'SecurityRisk':
+                try:
+                    from coding_tentacle.orchestrator.engine_router import EngineRouter
+                    engine_name, engine_cfg, route_reason = self.engine_router.route(bug_type)
+                    report.engine_used = engine_name or 'none'
+                    
+                    if engine_name and engine_cfg:
+                        prompt = f"""Fix this bug. Output ONLY the corrected code or unified diff.
+
+BUG: {run.issue_title}
+DESCRIPTION: {run.issue_body[:300]}
+BUG TYPE: {bug_type}
+
+RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
+                        
+                        import subprocess
+                        engine_path = engine_cfg.get('path', '')
+                        if 'opencode' in engine_name.lower():
+                            cmd = [engine_path, 'run', prompt]
+                        elif 'ollama' in engine_name.lower():
+                            cmd = ['ollama', 'run', 'granite3.2-vision', prompt]
+                        else:
+                            cmd = []
+                        
+                        if cmd:
+                            try:
+                                result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, cwd='/tmp')
+                                if result.returncode == 0:
+                                    report.engine_fix_raw = (result.stdout + result.stderr)[:800]
+                                    # Extract code block or diff from engine output
+                                    output = report.engine_fix_raw
+                                    if '```' in output:
+                                        # Extract code between backticks
+                                        parts = output.split('```')
+                                        if len(parts) >= 2:
+                                            report.generated_diff = parts[1].strip()
+                                            if report.generated_diff.startswith('python'):
+                                                report.generated_diff = report.generated_diff[6:].strip()
+                                            elif report.generated_diff.startswith('diff'):
+                                                report.generated_diff = report.generated_diff
+                                    else:
+                                        report.generated_diff = output[:500]
+                            except subprocess.TimeoutExpired:
+                                report.generated_diff = ''
+                            except Exception:
+                                report.generated_diff = ''
+                except ImportError:
+                    pass  # Engine router not available, fall through to template
+            # Fallback: template-based diff (if no engine or engine failed)
+            if not report.generated_diff and self.diff_generator and self.teacher:
                 plan = self.teacher.create_plan(bug_report,
                     code_context=code_context,
                     grounding={'bug_type': bug_type, 'grounding_score': report.confidence})
