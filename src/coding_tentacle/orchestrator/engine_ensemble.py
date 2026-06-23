@@ -59,6 +59,10 @@ class EnsembleMode:
     
     def should_ensemble(self, bug_type, confidence, impact_risk, skeptic_risk):
         """Determine if ensemble mode should be used."""
+        # Never ensemble for high-confidence, low-risk cases
+        if confidence > 0.75 and impact_risk < 0.30 and skeptic_risk < 0.20:
+            return False, ['High confidence, low risk — single engine sufficient']
+        
         reasons = []
         
         if confidence < 0.60:
