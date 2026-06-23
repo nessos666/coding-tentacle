@@ -165,11 +165,28 @@ class ShadowModeRunner:
                     engine_name, engine_cfg, route_reason = self.engine_router.route(bug_type)
                     report.engine_used = engine_name or 'none'
                     
+                    # RC46 Fix2: BLM context enrichment for engine prompt
+                    blm_context = ''
+                    try:
+                        import os as _os2
+                        blm_db2 = _os2.path.expanduser('~/.coding_tentacle/learning.db')
+                        if _os2.path.exists(blm_db2):
+                            from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
+                            blm_read = BugLearningMemory(db_path=blm_db2)
+                            similar = blm_read.find_similar(bug_report, bug_type=bug_type, limit=2)
+                            if similar:
+                                blm_context = '\\nSIMILAR PAST BUGS:\\n'
+                                for s in similar[:2]:
+                                    blm_context += f"- {s.get('bug_type','?')}: {str(s.get('bug_signature',''))[:80]} | fix: {s.get('fix_type','?')}\\n"
+                    except Exception:
+                        pass
+                    
                     if engine_name and engine_cfg:
                         prompt = f"""Fix this bug. Output ONLY the corrected code or unified diff.
 
 BUG: {run.issue_title}
 DESCRIPTION: {run.issue_body[:300]}
+{blm_context}
 BUG TYPE: {bug_type}
 
 RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
@@ -319,12 +336,20 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 report.blm_written = False
                 report.blm_error = str(e)[:200]
             
-            # ═══ STEP 8D: EngineLearning record (RC42 Fix4) ═══
+            # ═══ STEP 8D: EngineLearning record (RC46 Fix1+3) ═══
             if report.engine_used:
                 try:
                     from coding_tentacle.orchestrator.engine_learning import EnginePerformanceStore
                     eps = EnginePerformanceStore()
-                    success = bool(report.test_result.get('success')) if report.test_result else False
+                    # Fix 1: Correct success detection
+                    success = False
+                    if report.test_result:
+                        success = bool(report.test_result.get('tests_passed', 0) > 0 or report.test_result.get('success'))
+                    elif report.generated_diff and not report.safety_events:
+                        success = True  # Diff generated + safety clean = partial success
+                    elif report.skeptic_recommendation == 'APPROVE':
+                        success = True
+                    
                     eps.record(
                         engine_name=report.engine_used,
                         bug_type=bug_type,

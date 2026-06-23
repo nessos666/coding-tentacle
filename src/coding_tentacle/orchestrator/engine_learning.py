@@ -36,10 +36,21 @@ class EnginePerformanceStore:
         entry['avg_impact_risk'] = (entry['avg_impact_risk'] + impact_risk) / 2 if entry['attempts'] > 1 else impact_risk
         entry['last_used'] = time.time()
         
-        # Bayesian trust update
+        # Bayesian trust update with caps + diminishing returns (RC46 Fix3)
         prior = entry['trust']
         likelihood = 0.80 if success else 0.20
-        entry['trust'] = round((likelihood * prior) / max(0.001, (likelihood * prior + (1 - likelihood) * (1 - prior))), 3)
+        
+        # Diminishing returns: each new evidence matters less
+        weight = 1.0 / (1.0 + entry['attempts'] * 0.05)  # Decreases with more attempts
+        blended_prior = prior + weight * (0.60 - prior)   # Pull toward initial value
+        
+        new_trust = (likelihood * blended_prior) / max(0.001, 
+                     (likelihood * blended_prior + (1 - likelihood) * (1 - blended_prior)))
+        
+        # Cap at 0.95 / floor at 0.05 (never fully convinced or abandoned)
+        new_trust = max(0.05, min(0.95, new_trust))
+        
+        entry['trust'] = round(new_trust, 3)
         
         self._save()
     
