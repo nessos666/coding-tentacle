@@ -38,6 +38,9 @@ class ShadowRunReport:
     generated_diff: str = ""
     engine_used: str = ""
     engine_fix_raw: str = ""
+    skeptic_risk: float = 0.0
+    skeptic_objections: list = field(default_factory=list)
+    skeptic_recommendation: str = ""
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
     sandbox_result: dict = field(default_factory=dict)
@@ -92,7 +95,7 @@ class ShadowModeRunner:
     def __init__(self, meta_brain=None, teacher=None, diff_generator=None,
                  sandbox_runner=None, test_runner=None, repair_loop=None,
                  approval_gate=None, project_map_class=None,
-                 engine_router=None, safety_brain=None):
+                 engine_router=None, safety_brain=None, skeptic_brain=None):
         self.meta_brain = meta_brain
         self.teacher = teacher
         self.diff_generator = diff_generator
@@ -103,6 +106,7 @@ class ShadowModeRunner:
         self.project_map_class = project_map_class
         self.engine_router = engine_router
         self.safety_brain = safety_brain or (meta_brain.safety if meta_brain else None)
+        self.skeptic_brain = skeptic_brain
         self.runs = []
     
     def analyze_issue(self, run: GitHubIssueRun) -> ShadowRunReport:
@@ -201,6 +205,39 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                                 report.generated_diff = ''
                 except ImportError:
                     pass  # Engine router not available, fall through to template
+            
+            # ═══ STEP 6B: SafetyBrain scan of engine-generated diff (RC42 Fix1) ═══
+            if report.generated_diff and self.safety_brain:
+                try:
+                    from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
+                    blm = BugLearningMemory(db_path=os.path.join(workspace, 'safety_check.db'))
+                    dangerous, patterns = blm.is_dangerous_pattern(report.generated_diff)
+                    if dangerous:
+                        report.safety_events.append(f'ENGINE_DIFF_DANGEROUS: {patterns}')
+                        report.generated_diff = ''
+                        report.recommendation = f'SAFETY BLOCK — engine diff contains: {patterns}'
+                except Exception:
+                    pass  # Safety check failed, continue with caution
+            
+            # ═══ STEP 6C: SkepticBrain review of engine diff (RC42 Fix3) ═══
+            if report.generated_diff and hasattr(self, 'skeptic_brain') and self.skeptic_brain:
+                try:
+                    review = self.skeptic_brain.review(
+                        bug_type=bug_type,
+                        confidence=report.confidence,
+                        teacher_trust=getattr(report, 'engine_trust', 0.70),
+                        test_available=bool(report.test_result.get('success')) if report.test_result else False,
+                    )
+                    report.skeptic_risk = review.risk_score
+                    report.skeptic_objections = getattr(review, 'objections', [])
+                    report.skeptic_recommendation = review.suggested_action
+                    
+                    if review.suggested_action == 'REJECT':
+                        report.recommendation = f'SKEPTIC REJECT — risk={review.risk_score}'
+                        report.approval_status = 'rejected'
+                except Exception:
+                    pass  # Skeptic review failed, continue
+            
             # Fallback: template-based diff (if no engine or engine failed)
             if not report.generated_diff and self.diff_generator and self.teacher:
                 plan = self.teacher.create_plan(bug_report,
@@ -246,6 +283,40 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 report.approval_notes = 'Shadow mode — awaiting human decision'
                 # In production: present to human, wait for approve/reject/request_changes
                 # In shadow mode: mark as pending, continue with report
+            
+            # ═══ STEP 8C: BLM learning record (RC42 Fix2) ═══
+            try:
+                from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
+                blm = BugLearningMemory()
+                blm.record_experience(
+                    bug_signature=f"{bug_type}: {run.issue_title[:80]}",
+                    bug_type=bug_type,
+                    fix_type=report.engine_used or 'template',
+                    root_cause=f"Engine: {report.engine_used}" if report.engine_used else 'Unknown',
+                    fix_summary=report.generated_diff[:100] if report.generated_diff else 'No diff',
+                    file_path=code_context.get('file', 'unknown'),
+                    language='python',
+                    session_id=str(time.time()),
+                )
+            except Exception:
+                pass  # BLM recording failure is non-fatal
+            
+            # ═══ STEP 8D: EngineLearning record (RC42 Fix4) ═══
+            if report.engine_used:
+                try:
+                    from coding_tentacle.orchestrator.engine_learning import EnginePerformanceStore
+                    eps = EnginePerformanceStore()
+                    success = bool(report.test_result.get('success')) if report.test_result else False
+                    eps.record(
+                        engine_name=report.engine_used,
+                        bug_type=bug_type,
+                        success=success,
+                        runtime_s=report.duration_ms / 1000 if report.duration_ms else 0,
+                        skeptic_risk=getattr(report, 'skeptic_risk', 0.0),
+                        impact_risk=getattr(report, 'impact_risk', 0.0),
+                    )
+                except Exception:
+                    pass  # Engine learning failure is non-fatal
             
             # ═══ STEP 9: Recommendation ═══
             if report.safety_events:
