@@ -41,6 +41,9 @@ class ShadowRunReport:
     skeptic_risk: float = 0.0
     skeptic_objections: list = field(default_factory=list)
     skeptic_recommendation: str = ""
+    impact_risk: float = 0.0
+    impacted_files: list = field(default_factory=list)
+    impacted_tests: list = field(default_factory=list)
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
     blm_written: bool = False
@@ -195,6 +198,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         engine_path = engine_cfg.get('path', '')
                         if 'opencode' in engine_name.lower():
                             cmd = [engine_path, 'run', prompt]
+                        elif 'claude' in engine_name.lower():
+                            cmd = [engine_path, '-p', prompt]
                         elif 'ollama' in engine_name.lower():
                             cmd = ['ollama', 'run', 'granite3.2-vision', prompt]
                         else:
@@ -248,6 +253,23 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 except Exception:
                     pass  # Safety check failed, continue with caution
             
+            # ═══ STEP 6B.5: ImpactAnalyzer (RC48 Fix1) ═══
+            if report.generated_diff:
+                try:
+                    from coding_tentacle.knowledge.impact_analyzer import ImpactAnalyzer
+                    from coding_tentacle.knowledge.project_map import ProjectMap
+                    pm = ProjectMap()
+                    ia = ImpactAnalyzer(project_map=pm)
+                    impact = ia.analyze(code_context.get('file', 'unknown'), 
+                                       bug_type=bug_type, diff=report.generated_diff)
+                    report.impact_risk = impact.risk_score
+                    report.impacted_files = impact.impacted_files[:5]
+                    report.impacted_tests = impact.impacted_tests[:3]
+                    if impact.risk_score > 0.40:
+                        report.skeptic_recommendation = 'REQUEST_MORE'
+                except Exception:
+                    pass  # Impact analysis is bonus, not critical
+            
             # ═══ STEP 6C: SkepticBrain review of engine diff (RC42 Fix3) ═══
             if report.generated_diff and hasattr(self, 'skeptic_brain') and self.skeptic_brain:
                 try:
@@ -256,6 +278,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         confidence=report.confidence,
                         teacher_trust=getattr(report, 'engine_trust', 0.70),
                         test_available=bool(report.test_result.get('success')) if report.test_result else False,
+                        diff=report.generated_diff,  # RC48 Fix2: pass actual diff
+                        impact_risk=getattr(report, 'impact_risk', 0.0),  # RC48 Fix1: impact context
                     )
                     report.skeptic_risk = review.risk_score
                     report.skeptic_objections = getattr(review, 'objections', [])
