@@ -29,6 +29,16 @@ class EngineRouter:
             'priority': 2,
             'bug_types': ['*'],  # All bug types
         },
+        'claude': {
+            'path': '/home/boobi/.local/bin/claude',
+            'check_cmd': ['claude', '--version'],
+            'fix_cmd': ['claude', '-p', '{prompt}'],
+            'status': 'unknown',
+            'priority': 1,  # Same as OpenCode — both are top-tier
+            'bug_types': ['NullPointer', 'TypeError', 'ImportError', 'KeyError',
+                         'IndexError', 'ValueError', 'SecurityRisk', 'RaceCondition',
+                         'Deadlock', 'RecursionError', 'MemoryError', 'Performance'],
+        },
         'codex': {
             'path': '/home/boobi/.npm-global/bin/codex',
             'check_cmd': ['codex', '--version'],

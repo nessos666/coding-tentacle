@@ -195,6 +195,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         engine_path = engine_cfg.get('path', '')
                         if 'opencode' in engine_name.lower():
                             cmd = [engine_path, 'run', prompt]
+                        elif 'claude' in engine_name.lower():
+                            cmd = [engine_path, '-p', prompt]
                         elif 'ollama' in engine_name.lower():
                             cmd = ['ollama', 'run', 'granite3.2-vision', prompt]
                         else:
