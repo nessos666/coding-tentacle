@@ -130,6 +130,35 @@ class ShadowModeRunner:
             issue_title=run.issue_title,
         )
         
+        # ═══ STEP 0: REFLEX LAYER (RC52) — runs BEFORE everything ═══
+        try:
+            from coding_tentacle.brains.reflex_layer import ReflexLayer, VarietyMonitor
+            reflex = ReflexLayer()
+            vm = VarietyMonitor()
+            reflex_report = reflex.scan(bug_report)
+            if reflex_report.reflex_blocked:
+                report.recommendation = f'REFLEX BLOCK: {reflex_report.reflex_reason}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
+                return report  # Block immediately — no engine, no analysis
+            if reflex_report.recommendation == 'REQUEST_MORE':
+                report.recommendation = f'REFLEX: {reflex_report.reflex_reason}'
+        except Exception:
+            pass  # Reflex layer is bonus
+        
+        # ═══ STEP 0B: VARIETY CHECK (RC52) ═══
+        try:
+            vm = VarietyMonitor()
+            variety_report = vm.check(
+                bug_type='Unknown',  # Will be updated after classification
+                blm_similar_count=0
+            )
+            if variety_report.recommendation == 'REQUEST_MORE':
+                if not report.recommendation:
+                    report.recommendation = f'VARIETY: {variety_report.variety_details}'
+        except Exception:
+            pass
+        
         # ═══ STEP 0A: Prompt Injection Detection (RC51) ═══
         try:
             from coding_tentacle.brains.prompt_injection_brain import PromptInjectionBrain
