@@ -108,6 +108,30 @@ print(f'BLM:      {\"Learned\" if r.blm_written else \"Error: \" + r.blm_error}'
 "
 ```
 
+## Kombinationen
+
+| CT mit | Ergebnis |
+|--------|----------|
+| **CT + OpenCode** | ✅ Empfohlen. OpenCode (deepseek-v4-pro) erzeugt Fix. CT prüft + lernt. |
+| **CT + Ollama** | 🔵 Fallback. granite3.2-vision lokal. Langsamer, offline-fähig. |
+| **CT + Codex** | ⚠️ Braucht OpenAI API-Key. |
+| **CT alleine** | ❌ Klassifiziert Bugs, erzeugt Template-Fixes (keine echte Reparatur). |
+
+## Was passiert im Hintergrund?
+
+```
+1. Bug → CT klassifiziert (18 Typen)
+2. Safety check: DROP TABLE? eval()? → BLOCK
+3. EngineRouter wählt OpenCode/Ollama
+4. Engine erzeugt echten Code-Diff
+5. CT scannt Diff auf Gefahren (Base64/HTML-decodiert)
+6. SkepticBrain: "Warum könnte das falsch sein?"
+7. Sandbox testet isoliert (Originale UNVERÄNDERT)
+8. HumanApprovalGate: APPROVE/REJECT/REQUEST_CHANGES
+9. BLM speichert, EngineLearning kalibriert Vertrauen
+10. Nächster Bug bekommt ähnliche Erfahrungen im Prompt
+```
+
 ---
 
 ## Pipeline (Shadow Mode)
