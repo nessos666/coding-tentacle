@@ -34,6 +34,7 @@ class ShadowRunReport:
     injection_detected: bool = False
     injection_severity: str = 'none'
     injection_attack_type: str = ''
+    observation: str = ""
     detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
@@ -481,6 +482,31 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     )
                 except Exception:
                     pass  # Engine learning failure is non-fatal
+            
+            # ═══ STEP 8E: Self-Observation Audit (RC54) ═══
+            report.observation = ''
+            try:
+                from coding_tentacle.brains.self_observation_brain import SelfObservationBrain, DecisionStep
+                observer = SelfObservationBrain()
+                trace = [
+                    DecisionStep("ReflexLayer", "ALLOW" if not report.safety_events else "BLOCK", 0.95, "Reflex check"),
+                    DecisionStep("Classifier", "GO", report.confidence, f"Type: {report.detected_bug_type}"),
+                    DecisionStep("RootCauseBrain", "GO", report.root_cause_confidence, f"Cause: {report.root_cause}"),
+                ]
+                obs_report = observer.observe(
+                    decision_trace=trace,
+                    bug_type=report.detected_bug_type,
+                    engine_used=report.engine_used,
+                    engine_trust=0.60,
+                    safety_warnings=report.safety_events if report.safety_events else None,
+                    skeptic_risk=report.skeptic_risk,
+                    test_passed=bool(report.test_result.get('success')) if report.test_result else None,
+                    approval_status=report.approval_status,
+                    root_cause=report.root_cause,
+                )
+                report.observation = obs_report.final_explanation
+            except Exception:
+                pass  # Observation is bonus, never blocks pipeline
             
             # ═══ STEP 9: Recommendation ═══
             if report.safety_events:
