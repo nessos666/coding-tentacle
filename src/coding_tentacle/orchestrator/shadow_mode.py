@@ -150,12 +150,34 @@ class ShadowModeRunner:
         try:
             vm = VarietyMonitor()
             variety_report = vm.check(
-                bug_type='Unknown',  # Will be updated after classification
+                bug_type='Unknown',
                 blm_similar_count=0
             )
             if variety_report.recommendation == 'REQUEST_MORE':
                 if not report.recommendation:
                     report.recommendation = f'VARIETY: {variety_report.variety_details}'
+        except Exception:
+            pass
+        
+        # ═══ STEP 0C: HOMEOSTASIS CHECK (RC53) ═══
+        try:
+            from coding_tentacle.brains.homeostasis_brain import HomeostasisBrain
+            hb = HomeostasisBrain()
+            homeo_report = hb.check(
+                engine_trust=getattr(self, '_last_trust', 0.60),
+                error_rate=getattr(self, '_error_rate', 0.0),
+                blm_entries=getattr(self, '_blm_count', 10),
+                response_time=0.0,
+                safety_active=self.safety_brain is not None,
+                approval_active=self.approval_gate is not None,
+                reflex_active=True,
+                injection_active=True,
+            )
+            if homeo_report.status == 'CRITICAL':
+                report.recommendation = f'HOMEOSTASIS CRITICAL: {homeo_report.detected_imbalances}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
+                return report  # Critical = don't proceed
         except Exception:
             pass
         
