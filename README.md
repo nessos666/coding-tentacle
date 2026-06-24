@@ -113,6 +113,7 @@ print(f'BLM:      {\"Learned\" if r.blm_written else \"Error: \" + r.blm_error}'
 | CT mit | Ergebnis |
 |--------|----------|
 | **CT + OpenCode** | ✅ Empfohlen. OpenCode (deepseek-v4-pro) erzeugt Fix. CT prüft + lernt. |
+| **CT + Claude Code** | ✅ Top-tier. Claude Code (2.1.86) — alternativ zu OpenCode. |
 | **CT + Ollama** | 🔵 Fallback. granite3.2-vision lokal. Langsamer, offline-fähig. |
 | **CT + Codex** | ⚠️ Braucht OpenAI API-Key. |
 | **CT alleine** | ❌ Klassifiziert Bugs, erzeugt Template-Fixes (keine echte Reparatur). |
