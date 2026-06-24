@@ -1,5 +1,7 @@
 # 🐙 Coding Tentacle v0.9.0
 
+![Coding Tentacle Banner](https://raw.githubusercontent.com/nessos666/coding-tentacle/main/banner.png)
+
 **Safety-First Guardian Layer for LLM-Based Code Fixing**
 
 [![Status](https://img.shields.io/badge/status-research%20%2F%20shadow-blue)]()
