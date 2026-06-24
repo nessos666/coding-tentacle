@@ -1,20 +1,42 @@
+<p align="center">
+  <img src="banner.png" alt="Coding Tentacle" width="100%">
+</p>
+
 # 🐙 Coding Tentacle v0.9.0
 
-![Coding Tentacle Banner](https://raw.githubusercontent.com/nessos666/coding-tentacle/main/banner.png)
+<p align="center">
+  <a href="https://github.com/nessos666/coding-tentacle/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://github.com/nessos666/coding-tentacle/releases"><img src="https://img.shields.io/badge/Release-v0.9.0-blue?style=for-the-badge" alt="v0.9.0"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Python-3.10+-yellow?style=for-the-badge&logo=python" alt="Python 3.10+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Status-Research%20%2F%20Shadow-red?style=for-the-badge" alt="Status"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Tests-Passing-brightgreen?style=for-the-badge" alt="Tests"></a>
+</p>
 
-**Safety-First Guardian Layer for LLM-Based Code Fixing**
-
-[![Status](https://img.shields.io/badge/status-research%20%2F%20shadow-blue)]()
-[![License](https://img.shields.io/badge/license-MIT-green)]()
-[![Tests](https://img.shields.io/badge/tests-10%2F10-brightgreen)]()
+<p align="center">
+  <b>Safety-first guardian layer that controls LLM code-fixing agents.</b><br>
+  <i>OpenCode writes fixes. CT analyzes, reviews, blocks danger, requires human approval, and learns from every run.</i>
+</p>
 
 ---
 
-## What is Coding Tentacle?
+## Why Coding Tentacle?
 
-Coding Tentacle does NOT try to replace coding agents like OpenCode, Codex, or Claude Code.
+OpenCode, Codex, and Claude Code are brilliant at generating code. But they have **zero safety guarantees**. They can output `DROP TABLE`, `eval(user_input)`, or `rm -rf /` — and nothing stops them.
 
-Instead, it **controls** them.
+Coding Tentacle sits **in front of** any LLM fix engine and acts as a guardian.
+
+<table>
+<tr><td width="200"><b>🛡️ Safety VETO</b></td><td>Blocks dangerous patterns (SQL injection, eval, shell commands) — before execution. Base64 and HTML-encoded payloads are decoded and caught.</td></tr>
+<tr><td><b>🔍 SkepticBrain</b></td><td>Adversarial review of every fix. "Why could this be wrong?" Risk score, objections, recommendation.</td></tr>
+<tr><td><b>🧠 Self-Learning</b></td><td>BLM stores every bug experience. EngineLearning calibrates trust per engine + bug type. Later runs get better context.</td></tr>
+<tr><td><b>🔗 Engine Router</b></td><td>Routes bugs to the best engine. OpenCode primary. Ollama fallback. Codex (API key needed). Bug-type-specific trust routing.</td></tr>
+<tr><td><b>👤 Human Approval</b></td><td>Every fix requires human APPROVE/REJECT/REQUEST_CHANGES. Safety VETO can NEVER be overridden — even by humans.</td></tr>
+<tr><td><b>📊 Impact Analysis</b></td><td>Predicts which files, tests, skills, and procedures are affected by a change. Risk score before approval.</td></tr>
+</table>
+
+---
+
+## Architecture
 
 ```
                     ┌─────────────────────────┐
@@ -22,7 +44,7 @@ Instead, it **controls** them.
                     │    ┌───────────────────┐ │
   Bug Report ──────►│    │  Safety VETO 🛡️   │ │
                     │    │  SkepticBrain 🔍  │ │
-                    │    │  ImpactAnalyzer 📊 │ │
+                    │    │  Engine Router 🔗  │ │
                     │    │  Trust Calibration │ │
                     │    │  Learning Loop 🧠  │ │
                     │    └───────┬───────────┘ │
@@ -35,117 +57,8 @@ Instead, it **controls** them.
                     │   Fix Engines            │
                     │   ┌──────┐ ┌──────────┐ │
                     │   │OpenCode│ │ Ollama  │ │
-                    │   │deepseek│ │granite  │ │
-                    │   └───┬──┘ └────┬─────┘ │
-                    │       │         │       │
-                    │   Unified Diff Output   │
+                    │   └──────┘ └──────────┘ │
                     └─────────────────────────┘
-```
-
----
-
-## Architecture: Two Tentacles
-
-```
-┌───────────────────────────────────┐  ┌─────────────────────────────┐
-│      TENTACLE A: ANALYZE          │  │     TENTACLE B: FIX         │
-│      Safety + Learning            │  │     Code Generation         │
-│                                   │  │                             │
-│  ✅ Bug Classification (18 types) │  │  ✅ OpenCode (deepseek-v4)  │
-│  ✅ Safety VETO (absolute block)  │  │  ✅ Ollama (granite3.2)     │
-│  ✅ SkepticBrain (adversarial)    │  │  ✅ Template Fallback       │
-│  ✅ ImpactAnalyzer                │  │                             │
-│  ✅ Engine Router                 │  │  ❌ NO direct file access   │
-│  ✅ Human Approval Gate           │  │  ❌ NO commits / PRs        │
-│  ✅ BLM Learning Loop             │  │  ❌ NO safety bypass        │
-│  ✅ Engine Trust Calibration      │  │                             │
-│  ✅ Outcome Learning              │  │  Sandbox + TestRunner only  │
-│                                   │  │                             │
-│  CAN block any fix.               │  │  CANNOT act without A.      │
-│  CAN learn from every run.        │  │  CAN be replaced/upgraded.  │
-└───────────────────────────────────┘  └─────────────────────────────┘
-              │                                      │
-              └────────── A controls B ──────────────┘
-```
-
----
-
-## Learning Loop
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │                     LEARNING FLOW                             │
-  │                                                               │
-  │  Run #1: Bug → CT → OpenCode → Fix → BLM stores experience   │
-  │                                          ↓                    │
-  │  Run #2: Bug → CT → BLM: "I've seen this!" → EnginePrompt    │
-  │                     → "SIMILAR: NullPointer fixed by opencode"│
-  │                     → OpenCode gets CONTEXT → BETTER fix      │
-  │                                          ↓                    │
-  │  Run #N: BLM: 500+ experiences                               │
-  │          EngineLearning: trust=0.95 for opencode+NullPointer  │
-  │          OutcomeLearning: "OpenCode excels at NullPointer"    │
-  │          → Automatic routing to best engine                   │
-  │          → Higher fix quality                                 │
-  └──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ShadowMode Pipeline
-
-```
-  GitHub Issue
-      │
-      ▼
-  ┌─────────────┐
-  │ Classifier   │ ← UnifiedBugClassifier (18 types, 100% accuracy)
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ SafetyBrain  │ ← VETO: DROP TABLE, eval(), system() → BLOCKED
-  └──────┬──────┘         (Base64/HTML/string-concat decoded)
-         │ GO
-         ▼
-  ┌─────────────┐
-  │ EngineRouter │ ← OpenCode primary, Ollama fallback
-  └──────┬──────┘    Bug-type-specific trust routing
-         │
-         ▼
-  ┌─────────────┐
-  │ OpenCode     │ ← Generates real code fix (unified diff)
-  └──────┬──────┘    Template-fallback if engine unavailable
-         │
-         ▼
-  ┌─────────────┐
-  │ Safety scan  │ ← Scans ENGINE OUTPUT for dangerous patterns
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ SkepticBrain │ ← "Why could this fix be WRONG?"
-  └──────┬──────┘    risk_score + objections + recommendation
-         │
-         ▼
-  ┌─────────────┐
-  │ Sandbox      │ ← Isolated test environment
-  └──────┬──────┘    Original files NEVER touched
-         │
-         ▼
-  ┌─────────────┐
-  │ TestRunner   │ ← pytest / shellcheck
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ ApprovalGate │ ← APPROVE / REJECT / REQUEST_CHANGES
-  └──────┬──────┘    Safety BLOCK can NEVER be overridden
-         │
-         ▼
-  ┌─────────────┐
-  │ BLM + EL     │ ← Store experience + update engine trust
-  └─────────────┘
 ```
 
 ---
@@ -153,11 +66,14 @@ Instead, it **controls** them.
 ## Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/nessos666/mmrp-research.git
-cd mmrp-research
+git clone https://github.com/nessos666/coding-tentacle.git
+cd coding-tentacle
 
-# Run a single bug through the full pipeline
+# Verify everything works
+python3 scripts/full_regression.py
+# → ✅ RC2 ALL TESTS PASSED
+
+# Analyze a bug with full pipeline
 python3 -c "
 from coding_tentacle.orchestrator.shadow_mode import ShadowModeRunner, GitHubIssueRun
 from coding_tentacle.orchestrator.metabrain import MetaBrain, SafetyBrain
@@ -185,38 +101,92 @@ r = runner.analyze_issue(GitHubIssueRun(
 
 print(f'Bug Type: {r.detected_bug_type}')
 print(f'Engine:   {r.engine_used}')
-print(f'Diff:     {r.generated_diff[:200]}...')
 print(f'Safety:   {\"BLOCKED\" if r.safety_events else \"OK\"}')
 print(f'Skeptic:  risk={r.skeptic_risk:.2f} {r.skeptic_recommendation}')
 print(f'Approval: {r.approval_status}')
+print(f'BLM:      {\"Learned\" if r.blm_written else \"Error: \" + r.blm_error}')
 "
 ```
+
+---
+
+## Pipeline (Shadow Mode)
+
+```
+  GitHub Issue
+      │
+      ▼
+  ┌─────────────┐
+  │ Classifier   │  18 bug types, 100% accuracy
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ SafetyBrain  │  VETO: DROP TABLE, eval(), system() → BLOCKED
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ EngineRouter │  OpenCode primary, Ollama fallback
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ Fix Engine   │  Generates real code diff
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ Safety scan  │  Scans engine output for dangerous patterns
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ SkepticBrain │  "Why could this fix be WRONG?"
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ Sandbox      │  Isolated test. Original files NEVER touched.
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ ApprovalGate │  APPROVE / REJECT / REQUEST_CHANGES
+  └──────┬──────┘
+         ▼
+  ┌─────────────┐
+  │ BLM + Trust  │  Store experience + update engine trust
+  └─────────────┘
+```
+
+---
+
+## What CT Is NOT
+
+- ❌ Not a replacement for Codex, Devin, or Claude Code
+- ❌ Not an autonomous bug fixer (requires OpenCode/Ollama for code generation)
+- ❌ Not production-ready (Research / Shadow Release)
+
+## What CT IS
+
+- ✅ Safety-first guardian that controls LLM fix engines
+- ✅ Self-learning bug analysis system
+- ✅ The only agent with Safety VETO + SkepticBrain + Bayesian Trust
+- ✅ 100% open source, zero API costs
 
 ---
 
 ## Requirements
 
 - Python 3.10+
-- OpenCode CLI (`opencode`) — for actual code fixing
-- Ollama + granite3.2-vision — for local fallback
+- [OpenCode CLI](https://github.com/opencode) (`opencode`) — for actual code fixing
+- [Ollama](https://ollama.com) + granite3.2-vision — for local fallback
 - No API keys required
-- No cloud dependencies
 
 ---
 
-## What CT Is Not
+## Community
 
-- ❌ Not a replacement for Codex, Devin, or Claude Code
-- ❌ Not an autonomous bug fixer without an LLM engine
-- ❌ Not a product — research/shadow release
+[![GitHub Issues](https://img.shields.io/github/issues/nessos666/coding-tentacle?style=flat-square)](https://github.com/nessos666/coding-tentacle/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/nessos666/coding-tentacle?style=flat-square)](https://github.com/nessos666/coding-tentacle/stargazers)
 
-## What CT Is
-
-- ✅ Safety-first guardian layer for LLM-generated code
-- ✅ Self-learning bug analysis system
-- ✅ Engine router with trust calibration
-- ✅ Human-in-the-loop approval gate
-- ✅ The ONLY coding agent with Safety VETO + SkepticBrain + Bayesian Trust
+- Found a bug? [Open an issue](https://github.com/nessos666/coding-tentacle/issues/new?template=bug_report.md)
+- Want to contribute? [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security concern? [SECURITY.md](SECURITY.md)
 
 ---
 
@@ -224,6 +194,6 @@ print(f'Approval: {r.approval_status}')
 
 MIT — free, open source, no restrictions.
 
----
-
-*Built by David + Hermes. June 2026.*
+<p align="center">
+  <sub>Built by David + Hermes. June 2026. 🦑</sub>
+</p>
