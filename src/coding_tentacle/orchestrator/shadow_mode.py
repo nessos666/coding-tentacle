@@ -31,7 +31,10 @@ class ShadowRunReport:
     repo: str
     issue: str
     issue_title: str
-    detected_bug_type: str = ""
+    injection_detected: bool = False
+    injection_severity: str = 'none'
+    injection_attack_type: str = ''
+    detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
     selected_skill: str = ""
@@ -126,6 +129,23 @@ class ShadowModeRunner:
             issue=run.issue_url,
             issue_title=run.issue_title,
         )
+        
+        # ═══ STEP 0A: Prompt Injection Detection (RC51) ═══
+        try:
+            from coding_tentacle.brains.prompt_injection_brain import PromptInjectionBrain
+            pi_brain = PromptInjectionBrain()
+            injection_report = pi_brain.analyze(bug_report)
+            report.injection_detected = injection_report.injection_detected
+            report.injection_severity = injection_report.severity
+            report.injection_attack_type = injection_report.attack_type
+            
+            if injection_report.recommendation == 'BLOCK':
+                report.recommendation = f'SAFETY BLOCK — prompt injection: {injection_report.attack_type}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
+                return report  # Don't send injection to LLM
+        except Exception:
+            pass  # Injection detection is bonus, not critical
         
         # Extract repo name from URL
         repo_name = run.repo_url.rstrip('/').split('/')[-1]
