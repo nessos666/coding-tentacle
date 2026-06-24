@@ -44,6 +44,9 @@ class ShadowRunReport:
     impact_risk: float = 0.0
     impacted_files: list = field(default_factory=list)
     impacted_tests: list = field(default_factory=list)
+    root_cause: str = ""
+    root_cause_confidence: float = 0.0
+    root_cause_evidence: list = field(default_factory=list)
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
     blm_written: bool = False
@@ -142,6 +145,28 @@ class ShadowModeRunner:
             report.detected_bug_type = bug_type
             report.confidence = 0.7 if bug_type != 'Unknown' else 0.2
             
+            # ═══ STEP 3B: Root Cause Analysis (RC50) ═══
+            try:
+                from coding_tentacle.brains.root_cause_brain import RootCauseBrain
+                import os as _os3
+                blm_db3 = _os3.path.expanduser('~/.coding_tentacle/learning.db')
+                similar = []
+                if _os3.path.exists(blm_db3):
+                    from coding_tentacle.memory.bug_learning_memory import BugLearningMemory
+                    blm_tmp = BugLearningMemory(db_path=blm_db3)
+                    similar = blm_tmp.find_similar(bug_report, bug_type=bug_type, limit=3)
+                
+                rc_brain = RootCauseBrain()
+                rc_report = rc_brain.analyze(bug_type, bug_report=bug_report,
+                    impacted_files=[code_context.get('file', 'unknown')],
+                    blm_similar=similar)
+                
+                report.root_cause = rc_report.root_cause
+                report.root_cause_confidence = rc_report.confidence
+                report.root_cause_evidence = rc_report.evidence
+            except Exception:
+                pass  # Root cause analysis is bonus
+            
             # ═══ STEP 4: MetaBrain analyzes ═══
             if self.meta_brain:
                 decision = self.meta_brain.decide(bug_report, code_context=code_context)
@@ -191,6 +216,7 @@ BUG: {run.issue_title}
 DESCRIPTION: {run.issue_body[:300]}
 {blm_context}
 BUG TYPE: {bug_type}
+ROOT CAUSE: {report.root_cause} (confidence: {report.root_cause_confidence:.0%})
 
 RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         
