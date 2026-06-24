@@ -155,6 +155,26 @@ print(f'BLM:      {\"Learned\" if r.blm_written else \"Error: \" + r.blm_error}'
 
 ---
 
+## CT vs The World
+
+| Feature | CT | Codex | Devin | Claude Code | OpenHands |
+|---------|:--:|:-----:|:-----:|:-----------:|:---------:|
+| Safety VETO | ✅ | ❌ | ❌ | ❌ | ❌ |
+| SkepticBrain | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Bayesian Trust | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Human Approval | ✅ | ⚠️ | ⚠️ | ⚠️ | ❌ |
+| Self-Learning | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Bug Classification | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Engine Router | ✅ | ❌ | ❌ | ❌ | ⚠️ |
+| Impact Analysis | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Open Source | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Cost/Task | $0 | $12 | $500/mo | $20 | $0 |
+| SWE-bench | N/A | 88.7% | 87% | 95.5% | 65% |
+
+**CT is not a competitor. CT is the safety layer that controls them.**
+
+---
+
 ## What CT Is NOT
 
 - ❌ Not a replacement for Codex, Devin, or Claude Code
