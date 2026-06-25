@@ -51,6 +51,7 @@ class ShadowRunReport:
     root_cause: str = ""
     root_cause_confidence: float = 0.0
     root_cause_evidence: list = field(default_factory=list)
+    causal_chain: str = ""
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
     blm_written: bool = False
@@ -266,6 +267,20 @@ class ShadowModeRunner:
                 report.root_cause = rc_report.root_cause
                 report.root_cause_confidence = rc_report.confidence
                 report.root_cause_evidence = rc_report.evidence
+            except Exception:
+                pass
+            
+            # ═══ STEP 3C: Causal Chain Graph (RC58) ═══
+            try:
+                from coding_tentacle.brains.causal_chain_graph import CausalChainGraph
+                ccg = CausalChainGraph()
+                chain = ccg.trace(
+                    bug_type=bug_type, bug_report=bug_report,
+                    affected_file=code_context.get('file', 'unknown'),
+                    impacted_files=code_context.get('impacted_files', []),
+                    root_cause=report.root_cause,
+                )
+                report.causal_chain = chain.ascii_diagram
             except Exception:
                 pass  # Root cause analysis is bonus
             
