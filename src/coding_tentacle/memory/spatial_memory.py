@@ -144,14 +144,18 @@ class SpatialMemory:
         
         for node in smap.files:
             nbase = os.path.splitext(node.name)[0]
-            # test_foo.py or foo_test.py
-            if (nbase == f'test_{base}' or nbase == f'{base}_test' or
-                f'test_{base}' in nbase):
-                candidates.append(node.path)
-            # In tests/ directory
-            if 'tests/' in node.path or 'test/' in node.path:
-                if base in nbase:
-                    candidates.append(node.path)
+            node_path = node.path
+            
+            # Direct match: test_root_cause.py for root_cause_brain.py
+            if base in nbase or nbase in base:
+                if 'test' in nbase.lower() or 'test' in node_path.lower():
+                    candidates.append(node_path)
+            
+            # In tests/ directory with name overlap
+            if ('tests/' in node_path.lower() or 'test/' in node_path.lower()):
+                if base.replace('_brain', '') in nbase or base in nbase:
+                    if node_path not in candidates:
+                        candidates.append(node_path)
         
         return candidates[:3]
     
@@ -170,12 +174,16 @@ class SpatialMemory:
         try:
             with open(file_path) as f:
                 for line in f:
-                    # Match: from coding_tentacle.X import Y
+                    # Match: from coding_tentacle.X import Y or from coding_tentacle.X.Y import Z
                     m = re.match(r'from\s+(coding_tentacle\.[\w.]+)\s+import', line)
                     if m:
-                        mod_path = m.group(1).replace('.', '/') + '.py'
-                        if any(n.path and mod_path in n.path for n in smap.files):
-                            imports.append(mod_path)
+                        mod_path = m.group(1).replace('.', '/')
+                        # Convert package import to file path
+                        possible_file = mod_path + '.py'
+                        possible_init = mod_path + '/__init__.py'
+                        for n in smap.files:
+                            if n.path and (possible_file in n.path or possible_init in n.path):
+                                imports.append(n.path)
         except:
             pass
         return imports
