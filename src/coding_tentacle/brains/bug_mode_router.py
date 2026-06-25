@@ -99,6 +99,22 @@ class BugModeRouter:
                 all_signals.extend([f'{mode}: {m}' for m in matched[:3]])
         
         if not scores:
+            # RC72: Check if test failure (algorithmic candidate)
+            try:
+                from coding_tentacle.analyzers.test_failure_analyzer import TestFailureAnalyzer
+                tfa = TestFailureAnalyzer()
+                tfa_result = tfa.analyze(test_output=original, bug_report=bug_report)
+                if tfa_result.is_algorithmic_candidate:
+                    report.mode = 'ALGORITHMIC'
+                    report.confidence = tfa_result.confidence
+                    report.signals = [f'ALGORITHMIC: {tfa_result.assertion_type}']
+                    report.recommended_pipeline = 'TestAnalyzer → LLM Repair → Patch Tournament'
+                    report.external_tools = ['pytest']
+                    report.explanation = tfa_result.explanation
+                    return report
+            except:
+                pass
+            
             report.mode = 'UNKNOWN'
             report.confidence = 0.0
             report.recommended_pipeline = 'Human Triage Required'
