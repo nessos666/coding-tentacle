@@ -11,6 +11,7 @@ COPY scripts/ scripts/
 # Setup venv and install
 RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install hatchling && \
     /opt/venv/bin/pip install -e . && \
     /opt/venv/bin/pip install pytest
 
