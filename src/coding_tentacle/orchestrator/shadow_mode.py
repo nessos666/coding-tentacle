@@ -35,6 +35,7 @@ class ShadowRunReport:
     injection_severity: str = 'none'
     injection_attack_type: str = ''
     observation: str = ""
+    evidence_ledger_path: str = ""
     detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
@@ -550,6 +551,26 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     root_cause=report.root_cause,
                 )
                 report.observation = obs_report.final_explanation
+            except Exception:
+                pass
+            
+            # ═══ STEP 8F: Evidence Ledger (RC59) ═══
+            try:
+                from coding_tentacle.audit.evidence_ledger import EvidenceLedger
+                el = EvidenceLedger()
+                el_report = el.record(
+                    run_id=f'{repo_name}_{report.detected_bug_type}',
+                    bug_report=bug_report,
+                    bug_type=report.detected_bug_type,
+                    root_cause=report.root_cause,
+                    engine_used=report.engine_used,
+                    diff=report.generated_diff,
+                    safety_warnings=report.safety_events if report.safety_events else None,
+                    skeptic_risk=report.skeptic_risk,
+                    test_passed=bool(report.test_result.get('success')) if report.test_result else None,
+                    approval_status=report.approval_status,
+                )
+                report.evidence_ledger_path = el_report.report_path
             except Exception:
                 pass  # Observation is bonus, never blocks pipeline
             
