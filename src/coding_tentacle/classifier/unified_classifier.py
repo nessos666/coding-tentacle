@@ -29,13 +29,16 @@ class UnifiedBugClassifier:
         },
         'TypeError': {
             'keywords': ['typeerror', 'cannot concatenate', 'unsupported operand',
-                         'type .* is not', 'mismatched types', 'expected.*found'],
+                         'expected string but got', 'float object cannot',
+                         'list indices must be', 'indices must be integers',
+                         'mismatched types', 'expected.*found'],
             'confidence': 0.85,
             'languages': ['*'],
         },
         'ImportError': {
             'keywords': ['importerror', 'modulenotfound', 'no module', 'cannot import',
-                         'cannot find module', 'unresolved import'],
+                         'deprecated function removed', 'install missing package',
+                         'circular import', 'unresolved import'],
             'confidence': 0.90,
             'languages': ['*'],
         },
@@ -57,9 +60,10 @@ class UnifiedBugClassifier:
             'languages': ['*'],
         },
         'SyntaxError': {
-            'keywords': ['syntaxerror', 'invalid syntax', 'unexpected token',
-                         'expected.*got', 'syntax error'],
-            'confidence': 0.92,
+            'keywords': ['syntaxerror', 'invalid syntax', 'syntax error',
+                         'indentationerror', 'indented block', 'unexpected eof',
+                         'unexpected token', 'cannot parse'],
+            'confidence': 0.90,
             'languages': ['*'],
         },
         'ConnectionError': {
@@ -89,7 +93,8 @@ class UnifiedBugClassifier:
         'SecurityRisk': {
             'keywords': ['sql injection', 'drop table', 'eval(', 'exec(', 'system(',
                          'subprocess', 'rm -rf', 'sudo', 'api_key', 'password =',
-                         'token =', 'injection', 'xss', 'csrf', 'exploit'],
+                         'token =', 'injection', 'xss', 'csrf', 'exploit',
+                         'pickle', 'marshal', 'deserializ'],
             'confidence': 0.95,
             'languages': ['*'],
             'security': True,
