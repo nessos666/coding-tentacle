@@ -7,3 +7,4 @@ from .self_healing_brain import SelfHealingBrain, SelfHealingReport, CircuitBrea
 from .deutero_learning_brain import DeuteroLearningBrain, DeuteroLearningReport
 from .causal_chain_graph import CausalChainGraph, CausalChainReport, ChainNode
 from .vital_interaction_matrix import VitalInteractionMatrix, InteractionReport
+from .bug_mode_router import BugModeRouter, ModeDecision

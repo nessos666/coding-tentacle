@@ -53,6 +53,8 @@ class ShadowRunReport:
     root_cause_confidence: float = 0.0
     root_cause_evidence: list = field(default_factory=list)
     causal_chain: str = ""
+    bug_mode: str = ""
+    bug_mode_confidence: float = 0.0
     approval_status: str = ""        # pending | approved | rejected | changes_requested
     approval_notes: str = ""
     blm_written: bool = False
@@ -132,6 +134,25 @@ class ShadowModeRunner:
             issue=run.issue_url,
             issue_title=run.issue_title,
         )
+        
+        # ═══ STEP -1: BUG MODE ROUTER (RC71) ═══
+        try:
+            from coding_tentacle.brains.bug_mode_router import BugModeRouter
+            router = BugModeRouter()
+            mode_decision = router.route(bug_report)
+            report.bug_mode = mode_decision.mode
+            report.bug_mode_confidence = mode_decision.confidence
+            
+            if mode_decision.mode == 'SECURITY':
+                report.recommendation = f'SECURITY MODE: {mode_decision.explanation}'
+                # Security mode: don't call engine, go straight to safety
+            elif mode_decision.mode == 'UNKNOWN':
+                report.recommendation = f'UNKNOWN MODE: {mode_decision.explanation}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
+                return report  # Unknown → human triage
+        except Exception:
+            pass
         
         # ═══ STEP 0: REFLEX LAYER (RC52) — runs BEFORE everything ═══
         try:
