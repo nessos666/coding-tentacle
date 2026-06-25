@@ -212,6 +212,9 @@ class ShadowModeRunner:
         try:
             from coding_tentacle.brains.self_healing_brain import SelfHealingBrain
             shb = SelfHealingBrain()
+            # P0.4: Pass circuit breaker to EngineRouter
+            if hasattr(self, 'engine_router') and self.engine_router:
+                self.engine_router.circuit_breaker = shb.circuit_breaker
             heal_report = shb.monitor_and_heal(
                 engine_trust=getattr(self, '_last_trust', 0.60),
                 engine_name='opencode',

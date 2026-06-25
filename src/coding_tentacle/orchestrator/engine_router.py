@@ -9,9 +9,11 @@ import subprocess, time, os
 
 
 class EngineRouter:
-    """Routes bugs to the best available fix engine."""
+    """Routes bugs to the best available fix engine. Respects Circuit Breaker."""
     
-    ENGINES = {
+    def __init__(self, circuit_breaker=None):
+        self.circuit_breaker = circuit_breaker  # P0.4: SelfHealingBrain's CircuitBreaker
+        self.ENGINES = {
         'opencode': {
             'path': '/usr/local/bin/opencode',
             'check_cmd': ['opencode', '--version'],
@@ -69,7 +71,7 @@ class EngineRouter:
         self.health_checked = True
     
     def route(self, bug_type, priority='auto'):
-        """Return the best engine for a bug type.
+        """Return the best engine for a bug type. Respects Circuit Breaker.
         
         Returns: (engine_name, engine_config, reason)
         """
@@ -77,22 +79,51 @@ class EngineRouter:
             self.check_health()
         
         candidates = []
+        circuit_blocked = []
+        
         for name, cfg in self.ENGINES.items():
             if cfg['status'] not in ('healthy', 'unknown'):
                 continue
+            
+            # P0.4: Circuit Breaker check
+            cb_state = 'CLOSED'  # Default: no breaker = closed
+            if self.circuit_breaker:
+                cb_state = self.circuit_breaker.state(name)
+            
+            if cb_state == 'OPEN':
+                circuit_blocked.append(f'{name}(OPEN)')
+                continue  # Skip completely
+            
             if '*' in cfg['bug_types'] or bug_type in cfg['bug_types']:
-                candidates.append((cfg['priority'], name, cfg))
+                candidates.append((cfg['priority'], name, cfg, cb_state))
         
         if not candidates:
+            if circuit_blocked:
+                return None, None, f'ALL ENGINES BLOCKED: {", ".join(circuit_blocked)}'
             return None, None, "No engines available"
         
         candidates.sort()
         
-        # Try OpenCode first for its bug types, then Ollama
-        for _, name, cfg in candidates:
-            return name, cfg, f"Routed to {name} (priority {cfg['priority']})"
+        for _, name, cfg, cb_state in candidates:
+            state_info = ''
+            if cb_state == 'HALF_OPEN':
+                state_info = ' (HALF_OPEN — test run)'
+            return name, cfg, f'Routed to {name} (CB: {cb_state}){state_info}'
         
         return None, None, "Routing failed"
+    
+    def get_engine_status(self, engine_name: str) -> dict:
+        """P0.4: Get full engine status including circuit breaker state."""
+        cfg = self.ENGINES.get(engine_name, {})
+        cb_state = 'CLOSED'
+        if self.circuit_breaker:
+            cb_state = self.circuit_breaker.state(engine_name)
+        return {
+            'health': cfg.get('status', 'unknown'),
+            'circuit_breaker': cb_state,
+            'path': cfg.get('path', ''),
+            'priority': cfg.get('priority', 99),
+        }
     
     def get_available_engines(self):
         """List all available engines."""
