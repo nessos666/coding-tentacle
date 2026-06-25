@@ -184,6 +184,30 @@ class ShadowModeRunner:
         except Exception:
             pass
         
+        # ═══ STEP 0C.1: VITAL INTERACTION MATRIX (RC62) ═══
+        try:
+            from coding_tentacle.brains.vital_interaction_matrix import VitalInteractionMatrix
+            vim = VitalInteractionMatrix()
+            interaction_report = vim.analyze({
+                'engine_trust': getattr(self, '_last_trust', 0.60),
+                'error_rate': getattr(self, '_error_rate', 0.0),
+                'blm_entries': getattr(self, '_blm_count', 10),
+                'response_time': 0.0,
+                'unknown_rate': 0.0,
+                'audit_score': 1.0,
+                'safety_active': self.safety_brain is not None,
+                'engine_usage_ratio': 0.50,
+                'calibration_gap': 0.0,
+                'last_consolidation_age': 0,
+            })
+            if interaction_report.interaction_score < 0.30:
+                report.recommendation = f'INTERACTION CRITICAL: {interaction_report.explanation}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
+                return report
+        except Exception:
+            pass
+        
         # ═══ STEP 0D: SELF-HEALING CHECK (RC56) ═══
         try:
             from coding_tentacle.brains.self_healing_brain import SelfHealingBrain

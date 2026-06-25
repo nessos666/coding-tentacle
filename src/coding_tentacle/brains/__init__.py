@@ -6,3 +6,4 @@ from .self_observation_brain import SelfObservationBrain, SelfObservationReport,
 from .self_healing_brain import SelfHealingBrain, SelfHealingReport, CircuitBreaker
 from .deutero_learning_brain import DeuteroLearningBrain, DeuteroLearningReport
 from .causal_chain_graph import CausalChainGraph, CausalChainReport, ChainNode
+from .vital_interaction_matrix import VitalInteractionMatrix, InteractionReport
