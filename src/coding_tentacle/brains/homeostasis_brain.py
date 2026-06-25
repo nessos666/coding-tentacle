@@ -22,18 +22,36 @@ class HomeostasisBrain:
     def __init__(self, engine_learning=None):
         self.engine_learning = engine_learning
         self.thresholds = {
+            # Vital 1-2: Engine Trust
             'trust_min': 0.15,      # Below = WARNING
             'trust_critical': 0.05,  # Below = CRITICAL
+            # Vital 3-4: Error Rate
             'error_max': 0.20,       # Above = WARNING
             'error_critical': 0.40,  # Above = CRITICAL
+            # Vital 5: BLM Health
             'blm_min_entries': 3,    # Below = WARNING
+            # Vital 6-7: Response Time
             'response_max': 45.0,    # Seconds, above = WARNING
             'response_critical': 90.0,
+            # Vital 8: Confidence Calibration
+            'calibration_gap_max': 0.30,  # |confidence - actual| > 30% = WARNING
+            # Vital 9: Consolidation Health
+            'consolidation_max_age': 86400,  # 24h since last consolidation = WARNING
+            # Vital 10: Engine Diversity
+            'monoculture_ratio': 0.80,  # One engine >80% usage = WARNING
+            # Vital 11: Unknown Rate
+            'unknown_rate_max': 0.25,  # >25% unknown bugs = WARNING
+            # Vital 12: Evidence Completeness
+            'audit_score_min': 0.60,  # Below 60% audit score = WARNING
         }
     
     def check(self, engine_trust=0.60, error_rate=0.0, blm_entries=0,
               response_time=0.0, safety_active=True, approval_active=True,
-              reflex_active=True, injection_active=True) -> HomeostasisReport:
+              reflex_active=True, injection_active=True,
+              # RC61: 5 → 12 Vital Signs
+              calibration_gap=0.0, last_consolidation_age=0,
+              engine_usage_ratio=0.0, unknown_rate=0.0,
+              audit_score=1.0) -> HomeostasisReport:
         """Evaluate all 5 vital signs."""
         report = HomeostasisReport()
         
@@ -80,6 +98,37 @@ class HomeostasisBrain:
             report.detected_imbalances.append(f'SAFETY GAP: {missing} inactive')
             report.automatic_adjustments.append('SAFE_MODE: block all engine calls')
             report.requires_human_review = True
+        
+        # Vital 8: Confidence Calibration (RC61)
+        report.vital_scores['calibration_gap'] = calibration_gap
+        if calibration_gap > self.thresholds['calibration_gap_max']:
+            report.detected_imbalances.append(f'CALIBRATION DRIFT: gap={calibration_gap:.0%}')
+            report.recommended_actions.append('RECALIBRATE: confidence vs actual mismatch')
+        
+        # Vital 9: Consolidation Health (RC61)
+        report.vital_scores['last_consolidation_age'] = last_consolidation_age
+        if last_consolidation_age > self.thresholds['consolidation_max_age']:
+            hours = last_consolidation_age / 3600
+            report.detected_imbalances.append(f'CONSOLIDATION OVERDUE: {hours:.0f}h since last')
+            report.recommended_actions.append('RUN_CONSOLIDATION: start ConsolidationCycle')
+        
+        # Vital 10: Engine Diversity (RC61)
+        report.vital_scores['engine_usage_ratio'] = engine_usage_ratio
+        if engine_usage_ratio > self.thresholds['monoculture_ratio']:
+            report.detected_imbalances.append(f'ENGINE MONOCULTURE: {engine_usage_ratio:.0%} single engine')
+            report.recommended_actions.append('DIVERSIFY: explore alternative engines')
+        
+        # Vital 11: Unknown Rate (RC61)
+        report.vital_scores['unknown_rate'] = unknown_rate
+        if unknown_rate > self.thresholds['unknown_rate_max']:
+            report.detected_imbalances.append(f'HIGH UNKNOWN RATE: {unknown_rate:.0%} unclassified')
+            report.recommended_actions.append('RESEARCH: too many unknown bugs, need more context')
+        
+        # Vital 12: Evidence Completeness (RC61)
+        report.vital_scores['audit_score'] = audit_score
+        if audit_score < self.thresholds['audit_score_min']:
+            report.detected_imbalances.append(f'LOW AUDIT SCORE: {audit_score:.0%} evidence missing')
+            report.recommended_actions.append('IMPROVE_EVIDENCE: missing test results or root cause')
         
         # Determine overall status
         if missing:
@@ -128,6 +177,27 @@ if __name__ == "__main__":
         ("T7: Missing Approval", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
                                       response_time=12.0, safety_active=True, approval_active=False,
                                       reflex_active=True, injection_active=True), "CRITICAL"),
+        # RC61: New 12-vital-sign tests
+        ("T8: Calibration drift", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
+                                       response_time=12.0, safety_active=True, approval_active=True,
+                                       reflex_active=True, injection_active=True,
+                                       calibration_gap=0.45), "WARNING"),
+        ("T9: Consolidation overdue", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
+                                           response_time=12.0, safety_active=True, approval_active=True,
+                                           reflex_active=True, injection_active=True,
+                                           last_consolidation_age=100000), "WARNING"),
+        ("T10: Engine monoculture", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
+                                         response_time=12.0, safety_active=True, approval_active=True,
+                                         reflex_active=True, injection_active=True,
+                                         engine_usage_ratio=0.92), "WARNING"),
+        ("T11: High unknown rate", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
+                                        response_time=12.0, safety_active=True, approval_active=True,
+                                        reflex_active=True, injection_active=True,
+                                        unknown_rate=0.40), "WARNING"),
+        ("T12: Low audit score", dict(engine_trust=0.75, error_rate=0.05, blm_entries=100,
+                                      response_time=12.0, safety_active=True, approval_active=True,
+                                      reflex_active=True, injection_active=True,
+                                      audit_score=0.30), "WARNING"),
     ]
     
     print("HOMEOSTASIS BRAIN — Self-Test")
