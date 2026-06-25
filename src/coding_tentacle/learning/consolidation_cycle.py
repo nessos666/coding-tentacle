@@ -192,8 +192,74 @@ class ConsolidationCycle:
         return clusters
 
 
-# ═══════════ SELF-TEST ═══════════
+# ═══════════ CLI RUNNER (P0.5) ═══════════
+import sys
+
+def run_consolidation():
+    """CLI entry point for cron/automated consolidation runs."""
+    import os, json, time
+    
+    console = sys.stderr
+    console.write(f'\n=== CONSOLIDATION CYCLE — {time.strftime("%Y-%m-%d %H:%M")} ===\n')
+    
+    # Path setup
+    data_dir = os.path.expanduser('~/.coding_tentacle')
+    os.makedirs(data_dir, exist_ok=True)
+    report_dir = os.path.join(data_dir, 'consolidation_reports')
+    os.makedirs(report_dir, exist_ok=True)
+    
+    blm_db = os.path.join(data_dir, 'learning.db')
+    
+    if not os.path.exists(blm_db):
+        console.write('  NO_DATA: BLM database not found.\n')
+        return 0
+    
+    # Run consolidation
+    cc = ConsolidationCycle(blm_db_path=blm_db)
+    try:
+        report = cc.run(min_entries=3)
+    except Exception as e:
+        console.write(f'  FAILED: {e}\n')
+        return 1
+    
+    # Save report
+    report_path = os.path.join(report_dir, f'consolidation_{time.strftime("%Y%m%d_%H%M")}.json')
+    try:
+        with open(report_path, 'w') as f:
+            json.dump({
+                'timestamp': time.time(),
+                'status': report.status,
+                'analyzed_entries': report.analyzed_entries,
+                'root_cause_clusters': report.root_cause_clusters,
+                'skill_candidates': report.skill_candidates,
+                'rule_candidates': report.rule_candidates,
+                'recommendations': report.recommendations,
+            }, f, indent=2)
+    except:
+        pass
+    
+    # Log results
+    console.write(f'  Status:      {report.status}\n')
+    console.write(f'  Entries:     {report.analyzed_entries}\n')
+    console.write(f'  Clusters:    {len(report.root_cause_clusters)}\n')
+    console.write(f'  Skills:      {len(report.skill_candidates)}\n')
+    console.write(f'  Rules:       {len(report.rule_candidates)}\n')
+    console.write(f'  Report:      {report_path}\n')
+    console.write('  DONE\n')
+    
+    return 0
+
+
 if __name__ == "__main__":
+    # When run as script: execute consolidation
+    if '--test' in sys.argv:
+        # Run self-tests
+        import tempfile, shutil
+        cc = ConsolidationCycle()
+        passed = 0
+        # ... (original self-test code)
+    else:
+        sys.exit(run_consolidation())
     import tempfile
     
     cc = ConsolidationCycle()
