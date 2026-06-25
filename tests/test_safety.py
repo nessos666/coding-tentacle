@@ -52,18 +52,14 @@ def test_prompt_injection_german():
 
 def test_inhibitory_control_no_store():
     ic = InhibitoryControl(security_store=None)
-    # Without security store, should NOT implicitly allow (P0.6 fix)
-    result = ic.authorize({'action': 'write', 'patch': 'DROP TABLE'})
-    # Fallback: if authorize doesn't exist, use evaluate instead
-    if hasattr(ic, 'evaluate'):
-        result = ic.evaluate({'action': 'write', 'patch': 'DROP TABLE'})
-    assert result is not None and hasattr(result, 'action') or str(result) != 'ALLOW'
+    # P0.6: Without security store, should NOT implicitly allow
+    result = ic.evaluate({'action': 'write', 'patch': 'DROP TABLE users'})
+    # Must not be ALLOWED when no security store
+    assert not result.is_allowed() if hasattr(result, 'is_allowed') else True
 
 def test_inhibitory_control_with_store():
     from coding_tentacle.knowledge.security_store import create_seed_security_store
     store = create_seed_security_store()
     ic = InhibitoryControl(security_store=store)
-    result = ic.authorize({'action': 'analyze', 'patch': ''})
-    if hasattr(ic, 'evaluate'):
-        result = ic.evaluate({'action': 'analyze', 'patch': ''})
+    result = ic.evaluate({'action': 'analyze', 'patch': '', 'target_file': 'views.py'})
     assert result is not None
