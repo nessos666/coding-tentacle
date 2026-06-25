@@ -547,9 +547,12 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         bug_type=bug_type,
                         success=success,
                         runtime_s=report.duration_ms / 1000 if report.duration_ms else 0,
-                        skeptic_risk=getattr(report, 'skeptic_risk', 0.0),
-                        impact_risk=getattr(report, 'impact_risk', 0.0),
                     )
+                    
+                    # P0.3: Learning Backward Paths
+                    from coding_tentacle.learning.backward_paths import LearningBackwardPaths
+                    lbp = LearningBackwardPaths()
+                    lbp.feed_engine_learning(report.engine_used, bug_type, success)
                 except Exception:
                     pass  # Engine learning failure is non-fatal
             
