@@ -1,0 +1,13 @@
+.git
+__pycache__
+.pytest_cache
+.venv
+venv
+reports
+archive
+*.pyc
+*.pyo
+.gehirn*
+~/.coding_tentacle
+.dockerignore
+Dockerfile
