@@ -89,7 +89,7 @@ class ProcedureStore:
         if proc:
             proc.times_succeeded += 1
             proc.confidence = min(0.98, proc.confidence + 0.05)
-            proc.times_used += 1
+            # P0.6: times_used incremented only in find_procedure, not again here
             self._save()
     
     def record_failure(self, bug_type, language="python", failed_step=None, reason=""):
@@ -97,7 +97,7 @@ class ProcedureStore:
         key = f"{bug_type}:{language}"
         proc = self.procedures.get(key)
         if proc:
-            proc.times_used += 1
+            # P0.6: times_used incremented only in find_procedure, not again here
             proc.confidence = max(0.2, proc.confidence - 0.05)
             if failed_step and failed_step < len(proc.steps):
                 proc.steps[failed_step].failure_count += 1

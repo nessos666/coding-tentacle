@@ -143,7 +143,7 @@ class UnifiedBugClassifier:
             conf = pattern['confidence']
             
             for kw in pattern['keywords']:
-                if re.search(re.escape(kw).replace('\\\\', '\\'), text_lower, re.IGNORECASE):
+                if kw in text_lower:  # P0.6: Fixed — was re.escape(kw) which destroyed regex patterns
                     matched = True
                     break
             

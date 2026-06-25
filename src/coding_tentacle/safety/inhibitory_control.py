@@ -117,7 +117,7 @@ class InhibitoryControl:
         is_readonly = action in self.READ_ONLY_ACTIONS
 
         # ═══ 0. SECURITY STORE CHECK ═══
-        security_clear = not bool(self.security_store)  # True if no store (can't check = implicitly safe)
+        security_clear = False  # P0.6: Default unsafe — missing SecurityStore = REVIEW_REQUIRED
         if self.security_store:
             patch_text = ar.get('patch', '')
             if patch_text:

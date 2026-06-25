@@ -32,8 +32,10 @@ class EnginePerformanceStore:
             entry['failures'] += 1
         
         entry['total_runtime_s'] += runtime_s
-        entry['avg_skeptic_risk'] = (entry['avg_skeptic_risk'] + skeptic_risk) / 2 if entry['attempts'] > 1 else skeptic_risk
-        entry['avg_impact_risk'] = (entry['avg_impact_risk'] + impact_risk) / 2 if entry['attempts'] > 1 else impact_risk
+        # P0.6: Fixed incremental average (was pairwise: (old+new)/2 dominated by newest value)
+        n = entry['attempts']
+        entry['avg_skeptic_risk'] = entry['avg_skeptic_risk'] + (skeptic_risk - entry['avg_skeptic_risk']) / n
+        entry['avg_impact_risk'] = entry['avg_impact_risk'] + (impact_risk - entry['avg_impact_risk']) / n
         entry['last_used'] = time.time()
         
         # Bayesian trust update with caps + diminishing returns (RC46 Fix3)
