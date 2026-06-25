@@ -4,3 +4,4 @@ from .reflex_layer import ReflexLayer, VarietyMonitor, ReflexReport
 from .homeostasis_brain import HomeostasisBrain, HomeostasisReport
 from .self_observation_brain import SelfObservationBrain, SelfObservationReport, DecisionStep
 from .self_healing_brain import SelfHealingBrain, SelfHealingReport, CircuitBreaker
+from .deutero_learning_brain import DeuteroLearningBrain, DeuteroLearningReport

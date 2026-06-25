@@ -194,7 +194,21 @@ class ShadowModeRunner:
                 report.recommendation = f'SELF-HEALING CRITICAL: {heal_report.detected_problem}'
                 report.run_time = time.time() - t0
                 self.history.append(report)
-                return report  # Critical = don't proceed
+                return report
+        except Exception:
+            pass
+        
+        # ═══ STEP 0E: DEUTERO-LEARNING CHECK (RC57) ═══
+        try:
+            from coding_tentacle.brains.deutero_learning_brain import DeuteroLearningBrain
+            dlb = DeuteroLearningBrain()
+            dl_report = dlb.evaluate(
+                engine_trusts={'opencode': 0.75, 'ollama': 0.40, 'claude': 0.65},
+                engine_usage={'opencode': 5, 'ollama': 2, 'claude': 1},
+            )
+            if dl_report.status == 'CRITICAL':
+                if not report.recommendation:
+                    report.recommendation = f'LEARNING CRITICAL: {dl_report.detected_pathologies}'
         except Exception:
             pass
         
