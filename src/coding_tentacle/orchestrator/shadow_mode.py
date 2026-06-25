@@ -178,6 +178,22 @@ class ShadowModeRunner:
                 report.recommendation = f'HOMEOSTASIS CRITICAL: {homeo_report.detected_imbalances}'
                 report.run_time = time.time() - t0
                 self.history.append(report)
+                return report
+        except Exception:
+            pass
+        
+        # ═══ STEP 0D: SELF-HEALING CHECK (RC56) ═══
+        try:
+            from coding_tentacle.brains.self_healing_brain import SelfHealingBrain
+            shb = SelfHealingBrain()
+            heal_report = shb.monitor_and_heal(
+                engine_trust=getattr(self, '_last_trust', 0.60),
+                engine_name='opencode',
+            )
+            if heal_report.status == 'CRITICAL':
+                report.recommendation = f'SELF-HEALING CRITICAL: {heal_report.detected_problem}'
+                report.run_time = time.time() - t0
+                self.history.append(report)
                 return report  # Critical = don't proceed
         except Exception:
             pass
