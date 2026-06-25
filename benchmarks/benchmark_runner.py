@@ -141,7 +141,8 @@ class BenchmarkRunner:
             bug_report = f'{case["title"]}\n{case["body"]}'
             
             # 1. Classification
-            bug_type = self.classifier.classify(bug_report)
+            raw_classification = self.classifier.classify(bug_report)
+            bug_type = raw_classification.bug_type if hasattr(raw_classification, 'bug_type') else str(raw_classification)
             
             # 2. Root Cause
             rc = self.root_cause.analyze(bug_type, bug_report=bug_report)
