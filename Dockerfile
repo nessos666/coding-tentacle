@@ -8,8 +8,13 @@ COPY src/ src/
 COPY tests/ tests/
 COPY scripts/ scripts/
 
-# Install package and test runner
-RUN pip install -e . && pip install pytest
+# Setup venv and install
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install -e . && \
+    /opt/venv/bin/pip install pytest
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Default: run tests
 CMD ["sh", "-c", "pytest -q tests/ && python -m compileall src/ && echo '✅ All tests passed'"]
