@@ -21,6 +21,16 @@ class RootCauseReport:
     repeat_count: int = 0
     evidence: list = field(default_factory=list)
     recommendation: str = ''
+    # P0.1: RootCauseMemory integration
+    historical_matches: list = field(default_factory=list)
+    recurrence_count: int = 0
+    successful_fixes: list = field(default_factory=list)
+    failed_fixes: list = field(default_factory=list)
+    preferred_engine: str = ''
+    avoid_engine: str = ''
+    suggested_skill: str = ''
+    confidence_adjustment: float = 0.0
+    explanation: str = ''
 
 
 class RootCauseBrain:
@@ -195,6 +205,45 @@ class RootCauseBrain:
         report.recommendation = best[1]['fix_pattern']
         report.repeat_count = len(blm_similar) if blm_similar else 0
         
+        # P0.1: RootCauseMemory integration
+        rc_mem = RootCauseMemory()
+        if report.root_cause != 'UNKNOWN_ROOT_CAUSE':
+            affected = impacted[0] if impacted else 'unknown'
+            rc_repeats = rc_mem.get_repeat_count(report.root_cause, affected)
+            report.recurrence_count = rc_repeats
+            
+            if rc_repeats >= 3:
+                report.confidence_adjustment = min(0.20, rc_repeats * 0.05)
+                report.confidence = min(0.95, report.confidence + report.confidence_adjustment)
+                report.explanation = (f'Seen this root cause {rc_repeats}x before in {affected}. '
+                                     f'Confidence boosted by {report.confidence_adjustment:.0%}.')
+                report.suggested_skill = self._skill_for_root_cause(report.root_cause)
+                report.preferred_engine = 'opencode'  # Default, override if data available
+            
+            if rc_repeats > 0:
+                report.historical_matches.append({
+                    'root_cause': report.root_cause,
+                    'file': affected,
+                    'recurrence_count': rc_repeats,
+                })
+        
+        return report
+    
+    def _skill_for_root_cause(self, root_cause: str) -> str:
+        """Map root cause to suggested skill."""
+        skill_map = {
+            'MISSING_GUARD': 'add_guard_clause',
+            'MISSING_VALIDATION': 'add_input_validator',
+            'WRONG_TYPE_CONVERSION': 'add_type_normalization',
+            'BAD_IMPORT_PATH': 'fix_missing_import',
+            'UNSAFE_EVAL': 'replace_eval_with_safe_parser',
+            'UNSAFE_SHELL': 'use_subprocess_with_list_args',
+            'RACE_CONDITION': 'add_lock_or_queue',
+            'DEADLOCK': 'add_timeout_or_reorder_locks',
+            'TIMEOUT': 'add_timeout_handling',
+        }
+        return skill_map.get(root_cause, '')
+        
         if impacted:
             report.affected_component = impacted[0] if isinstance(impacted[0], str) else str(impacted[0])
         
@@ -307,12 +356,16 @@ if __name__ == "__main__":
     if t14: passed += 1
     print(f"  {'✅' if t14 else '❌'} Persistence → {repeat2} after reload")
     
-    # T15: BLM-similar boost
-    result_blm = brain.analyze('NullPointer', 'none has no attribute', 
-                               blm_similar=[{'bug_type': 'NullPointer'}, {'bug_type': 'NullPointer'}, {'bug_type': 'NullPointer'}])
-    t15 = 'BLM:' in str(result_blm.evidence) and result_blm.confidence >= 0.50
+    # T15: RootCauseMemory integration (P0.1)
+    rc_mem.record('MISSING_GUARD', 'NullPointer', 'views.py', 'guard clause')
+    rc_mem.record('MISSING_GUARD', 'NullPointer', 'views.py', 'guard clause')
+    rc_mem.record('MISSING_GUARD', 'KeyError', 'views.py', 'guard clause')
+    result_rc_mem = brain.analyze('NullPointer', bug_report='NoneType has no attribute', 
+                                    impacted_files=['views.py'])
+    t15 = result_rc_mem.recurrence_count >= 3 and result_rc_mem.confidence_adjustment > 0
     if t15: passed += 1
-    print(f"  {'✅' if t15 else '❌'} BLM boost → conf={result_blm.confidence:.2f} ev={result_blm.evidence}")
+    print(f"  {'✅' if t15 else '❌'} RC Memory → recurrences={result_rc_mem.recurrence_count} "
+          f"adj={result_rc_mem.confidence_adjustment:.2f} skill={result_rc_mem.suggested_skill}")
     
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"\n  ERGEBNIS: {passed}/15 Tests bestanden")
