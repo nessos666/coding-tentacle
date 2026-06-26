@@ -3,7 +3,7 @@ ALGORITHMIC TOURNAMENT — RC73
 Compares multiple repair strategies. Winner = best candidate for human review.
 Safety > Test score. Never auto-apply. EvidenceLedger tracks everything.
 """
-import os, time, hashlib, json
+import os, time
 from dataclasses import dataclass, field
 
 
@@ -225,7 +225,7 @@ class AlgorithmicTournament:
             safety_clean=True, evidence_complete=True,
         )
         try:
-            from coding_tentacle.llm.adapters.mock_adapter import LocalLLMAdapter
+            from coding_tentacle.llm.adapters.local_llm_adapter import LocalLLMAdapter
             adapter = LocalLLMAdapter()
             
             if not adapter.is_available():
