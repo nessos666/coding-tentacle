@@ -60,7 +60,7 @@ class IssueUnderstandingBrain:
             'keywords': ['security', 'vulnerability', 'cve', 'injection', 'xss',
                         'csrf', 'exploit', 'unauthorized', 'sql injection',
                         'privilege escalation', 'data leak', 'sensitive data',
-                        'eval(', 'exec(', 'pickle', 'unsafe', 'sandbox escape'],
+                        'eval\\(', 'exec\\(', 'pickle', 'unsafe', 'sandbox escape'],
             'next_action': 'SECURITY_VETO',
             'description': 'Security vulnerability — block and escalate',
         },
@@ -142,14 +142,21 @@ class IssueUnderstandingBrain:
             result.reasoning = ['No recognizable keywords in issue text']
             result.next_action = 'HUMAN_TRIAGE'
         else:
-            # Priority: SECURITY > BUG > FEATURE_REQUEST > ENHANCEMENT > others
-            priority = ['SECURITY', 'BUG', 'FEATURE_REQUEST', 'ENHANCEMENT',
-                       'DOCUMENTATION', 'PERFORMANCE', 'SUPPORT',
-                       'NEEDS_REPRODUCTION', 'MISSING_CONTEXT']
+            # Priority: SECURITY > BUG > PERFORMANCE > FEATURE_REQUEST > 
+            #           ENHANCEMENT > DOCUMENTATION > SUPPORT >
+            #           NEEDS_REPRODUCTION > MISSING_CONTEXT
+            # For BUG: only if has_stacktrace or has_test_output (RC81.1)
+            priority = ['SECURITY', 'NEEDS_REPRODUCTION', 'MISSING_CONTEXT',
+                       'PERFORMANCE', 'FEATURE_REQUEST', 'ENHANCEMENT',
+                       'DOCUMENTATION', 'SUPPORT', 'BUG']
             
             best = None
             for p in priority:
                 if p in scores:
+                    # RC81.1: BUG needs extra evidence
+                    if p == 'BUG' and not (result.has_stacktrace or result.has_test_output):
+                        if scores.get('NEEDS_REPRODUCTION', 0) > 0 or scores.get('ENHANCEMENT', 0) > 0:
+                            continue  # Skip BUG if better alternatives exist
                     best = p
                     break
             
