@@ -147,8 +147,8 @@ class IssueUnderstandingBrain:
             #           NEEDS_REPRODUCTION > MISSING_CONTEXT
             # For BUG: only if has_stacktrace or has_test_output (RC81.1)
             priority = ['SECURITY', 'NEEDS_REPRODUCTION', 'MISSING_CONTEXT',
-                       'PERFORMANCE', 'FEATURE_REQUEST', 'ENHANCEMENT',
-                       'DOCUMENTATION', 'SUPPORT', 'BUG']
+                       'FEATURE_REQUEST', 'ENHANCEMENT',  
+                       'PERFORMANCE', 'DOCUMENTATION', 'SUPPORT', 'BUG']
             
             best = None
             for p in priority:
