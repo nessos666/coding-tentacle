@@ -115,7 +115,22 @@ class BugModeRouter:
             except:
                 pass
             
-            report.mode = 'UNKNOWN'
+            # RC81: Issue Understanding Brain — break down UNKNOWN
+            try:
+                from coding_tentacle.brains.issue_understanding_brain import IssueUnderstandingBrain
+                iub = IssueUnderstandingBrain()
+                issue_result = iub.analyze(issue_text=original, issue_title=bug_report[:100])
+                if issue_result.issue_type != 'UNKNOWN':
+                    report.mode = f'ISSUE:{issue_result.issue_type}'
+                    report.confidence = issue_result.confidence
+                    report.signals = issue_result.reasoning
+                    report.recommended_pipeline = issue_result.next_action
+                    report.explanation = issue_result.ISSUE_TYPES[issue_result.issue_type]['description'] if issue_result.issue_type in issue_result.ISSUE_TYPES else ''
+                    if issue_result.missing_information:
+                        report.explanation += f' | Missing: {", ".join(issue_result.missing_information)}'
+                    return report
+            except:
+                pass
             report.confidence = 0.0
             report.recommended_pipeline = 'Human Triage Required'
             report.explanation = 'No recognizable bug pattern — human review needed'
