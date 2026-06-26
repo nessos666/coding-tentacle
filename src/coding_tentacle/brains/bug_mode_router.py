@@ -14,6 +14,8 @@ class ModeDecision:
     signals: list = field(default_factory=list)
     recommended_pipeline: str = ''
     external_tools: list = field(default_factory=list)
+    missing_context: list = field(default_factory=list)
+    context_questions: list = field(default_factory=list)
     explanation: str = ''
 
 
@@ -121,6 +123,24 @@ class BugModeRouter:
                 iub = IssueUnderstandingBrain()
                 issue_result = iub.analyze(issue_text=original, issue_title=bug_report[:100])
                 if issue_result.issue_type != 'UNKNOWN':
+                    # RC82: Context Acquisition — what's missing?
+                    context_info = ''
+                    try:
+                        from coding_tentacle.brains.context_acquisition_brain import ContextAcquisitionBrain
+                        cab = ContextAcquisitionBrain()
+                        ctx = cab.acquire(issue_result.issue_type, issue_result.recommended_bug_mode,
+                                        has_stacktrace=issue_result.has_stacktrace,
+                                        has_reproduction=issue_result.has_reproduction,
+                                        has_test_output=issue_result.has_test_output,
+                                        has_code_reference=issue_result.has_code_reference)
+                        if ctx.missing_items:
+                            context_info = f' | Context needed: {", ".join(ctx.missing_items[:3])}'
+                            report.missing_context = ctx.missing_items
+                        if ctx.priority_questions:
+                            report.context_questions = ctx.priority_questions
+                    except:
+                        pass
+                    
                     report.mode = f'ISSUE:{issue_result.issue_type}'
                     report.confidence = issue_result.confidence
                     report.signals = issue_result.reasoning
@@ -128,6 +148,8 @@ class BugModeRouter:
                     report.explanation = issue_result.ISSUE_TYPES[issue_result.issue_type]['description'] if issue_result.issue_type in issue_result.ISSUE_TYPES else ''
                     if issue_result.missing_information:
                         report.explanation += f' | Missing: {", ".join(issue_result.missing_information)}'
+                    if context_info:
+                        report.explanation += context_info
                     return report
             except:
                 pass
