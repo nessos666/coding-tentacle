@@ -37,7 +37,7 @@ class IssueUnderstandingBrain:
         },
         'ENHANCEMENT': {
             'keywords': ['improve', 'better', 'faster', 'optimize', 'refactor',
-                        'performance improvement', 'speed up', 'make .* faster',
+                        'make it faster', 'speed up',
                         'could be improved', 'needs refactoring', 'should be faster'],
             'next_action': 'ROUTE_TO_PLANNING',
             'description': 'Improvement to existing functionality (not a new feature)',
