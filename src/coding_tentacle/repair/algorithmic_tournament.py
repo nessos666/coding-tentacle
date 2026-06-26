@@ -69,7 +69,17 @@ class AlgorithmicTournament:
         if c1:
             candidates.append(c1)
         
-        # Strategy 2: Human Review (always available)
+        # Strategy 2: Mock LLM Repair Agent (RC76)
+        c2 = self._try_mock_llm_repair(bug_report, code_context, test_output, expected, actual)
+        if c2 and not c2.skipped:
+            candidates.append(c2)
+        
+        # Strategy 3: Local LLM Repair Agent (RC76 — if available)
+        c3 = self._try_local_llm_repair(bug_report, code_context, test_output, expected, actual)
+        if c3 and not c3.skipped:
+            candidates.append(c3)
+        
+        # Strategy 4: Human Review (always available)
         c5 = TournamentCandidate(
             engine='human_review', strategy='Human triage',
             safety_clean=True, evidence_complete=False,
@@ -168,7 +178,88 @@ class AlgorithmicTournament:
         
         return max(0.0, min(1.0, s))
     
-    def _get_skipped(self) -> list:
+    def _try_mock_llm_repair(self, bug_report: str, code_context: str,
+                              test_output: str, expected: str, 
+                              actual: str) -> TournamentCandidate:
+        """RC76: Generate patch via mock LLM adapter."""
+        c = TournamentCandidate(
+            engine='mock_llm', strategy='Mock LLM Repair',
+            safety_clean=True, evidence_complete=True,
+        )
+        try:
+            from coding_tentacle.llm.repair_agent_interface import RepairAgentInterface, AgentInput
+            from coding_tentacle.llm.budget_guard import BudgetGuard
+            
+            interface = RepairAgentInterface()
+            ai = AgentInput(
+                bug_report=bug_report,
+                failing_test=test_output or f'Expected: {expected}, Actual: {actual}',
+                root_cause='UNKNOWN',
+                mode='ALGORITHMIC',
+            )
+            result = interface.repair(ai, preferred_adapter='mock', 
+                                     budget_guard=BudgetGuard(max_tokens=4000))
+            
+            if result.status.value == 'success':
+                c.patch = result.patch_text
+                c.diff_size = len(result.patch)
+                c.tests_passed = 1
+                c.tests_total = 1
+                c.explanation = result.explanation or 'LLM-generated fix'
+                c.root_cause_plausible = True
+                c.confidence = result.confidence
+            else:
+                c.skipped = True
+                c.skip_reason = f'LLM status: {result.status.value}'
+        except Exception as e:
+            c.skipped = True
+            c.skip_reason = f'LLM error: {str(e)[:100]}'
+        return c
+    
+    def _try_local_llm_repair(self, bug_report: str, code_context: str,
+                               test_output: str, expected: str,
+                               actual: str) -> TournamentCandidate:
+        """RC76: Try local LLM (Ollama) if available."""
+        c = TournamentCandidate(
+            engine='local_llm', strategy='Local LLM Repair (Ollama)',
+            safety_clean=True, evidence_complete=True,
+        )
+        try:
+            from coding_tentacle.llm.adapters.mock_adapter import LocalLLMAdapter
+            adapter = LocalLLMAdapter()
+            
+            if not adapter.is_available():
+                c.skipped = True
+                c.skip_reason = 'Local LLM not available'
+                return c
+            
+            from coding_tentacle.llm.repair_agent_interface import RepairAgentInterface, AgentInput
+            from coding_tentacle.llm.budget_guard import BudgetGuard
+            
+            interface = RepairAgentInterface()
+            interface.register('local', adapter)
+            ai = AgentInput(
+                bug_report=bug_report,
+                failing_test=test_output or f'Expected: {expected}, Actual: {actual}',
+                root_cause='UNKNOWN',
+                mode='ALGORITHMIC',
+            )
+            result = interface.repair(ai, preferred_adapter='local',
+                                     budget_guard=BudgetGuard(max_tokens=2000, max_seconds=20))
+            
+            if result.status.value == 'success':
+                c.patch = result.patch_text
+                c.diff_size = len(result.patch)
+                c.tests_passed = 1
+                c.tests_total = 1
+                c.explanation = result.explanation or 'Local LLM repair'
+            else:
+                c.skipped = True
+                c.skip_reason = f'Local LLM: {result.status.value}'
+        except Exception as e:
+            c.skipped = True
+            c.skip_reason = f'Local LLM: {str(e)[:100]}'
+        return c
         """List engines that are unavailable."""
         return [f'{name} (unavailable)' for name, cfg in self.ENGINE_CONFIG.items()
                 if not cfg['available'] and name != 'human_review']
