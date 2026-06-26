@@ -202,7 +202,7 @@ class AlgorithmicTournament:
             
             if result.status.value == 'success':
                 c.patch = result.patch_text
-                c.diff_size = len(result.patch)
+                c.diff_size = len(result.patch_text)
                 c.tests_passed = 1
                 c.tests_total = 1
                 c.explanation = result.explanation or 'LLM-generated fix'
@@ -249,7 +249,7 @@ class AlgorithmicTournament:
             
             if result.status.value == 'success':
                 c.patch = result.patch_text
-                c.diff_size = len(result.patch)
+                c.diff_size = len(result.patch_text)
                 c.tests_passed = 1
                 c.tests_total = 1
                 c.explanation = result.explanation or 'Local LLM repair'
