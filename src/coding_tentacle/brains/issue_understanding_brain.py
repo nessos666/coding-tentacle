@@ -80,7 +80,7 @@ class IssueUnderstandingBrain:
         },
         'MISSING_CONTEXT': {
             'keywords': ['no stacktrace', 'no error message', 'no logs', 'not sure',
-                        'unknown', 'unclear', 'vague', '???', 'need more info'],
+                        'unknown', 'unclear', 'vague', 'need more info'],
             'next_action': 'REQUEST_CONTEXT',
             'description': 'Report lacks sufficient information to classify',
         },
