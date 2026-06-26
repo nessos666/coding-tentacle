@@ -260,7 +260,8 @@ class AlgorithmicTournament:
             c.skipped = True
             c.skip_reason = f'Local LLM: {str(e)[:100]}'
         return c
-        """List engines that are unavailable."""
+        
+    def _get_skipped(self) -> list:
         return [f'{name} (unavailable)' for name, cfg in self.ENGINE_CONFIG.items()
                 if not cfg['available'] and name != 'human_review']
 
