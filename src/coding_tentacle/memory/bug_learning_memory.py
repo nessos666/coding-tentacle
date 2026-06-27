@@ -70,9 +70,10 @@ class BugLearningMemory:
 
     # ═══════════ RECORD ═══════════
     def record_experience(self, *, bug_signature, bug_type='', language='python',
-                          library='', file_path='', root_cause='',
-                          fix_type, fix_summary='', success=False,
-                          tests_run=0, test_result='', confidence=0.5, notes=''):
+                           library='', file_path='', root_cause='',
+                           fix_type, fix_summary='', success=False,
+                           tests_run=0, test_result='', confidence=0.5, notes='',
+                           reflection_data: dict = None):
         """Store a fix attempt (successful or failed)."""
         canon = self.normalize_bug_signature(bug_signature, bug_type, language, file_path)
         self.conn.execute('''INSERT INTO experiences 

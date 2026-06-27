@@ -36,6 +36,7 @@ class ShadowRunReport:
     injection_attack_type: str = ''
     observation: str = ""
     evidence_ledger_path: str = ""
+    reflection_result: dict = field(default_factory=dict)
     detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
@@ -605,10 +606,40 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
             except Exception:
                 pass
             
+            # ═══ STEP 8G: Reflection Brain (RC85) ═══
+            try:
+                from coding_tentacle.brains.reflection_brain import ReflectionBrain, ReflectionInput
+                rb = ReflectionBrain()
+                ri = ReflectionInput(
+                    bug_mode=report.bug_mode if hasattr(report, 'bug_mode') else 'UNKNOWN',
+                    root_cause=report.root_cause or 'UNKNOWN_ROOT_CAUSE',
+                    engine=report.engine_used or '',
+                    prompt=bug_report[:500],
+                    patch=report.generated_diff or '',
+                    tests_before=0,
+                    tests_after=1 if report.test_result and report.test_result.get('tests_passed', 0) > 0 else 0,
+                    safety_result='BLOCKED' if report.safety_events else 'CLEAN',
+                    tournament_score=getattr(report, 'tournament_score', 0.0),
+                    human_review=report.approval_status or 'PENDING',
+                    duration_s=report.run_time or 0,
+                    cost=0.0,
+                    evidence_complete=bool(report.evidence_ledger_path),
+                )
+                reflection = rb.reflect(ri)
+                report.reflection_result = {
+                    'success_reason': reflection.success_reason,
+                    'failure_reason': reflection.failure_reason,
+                    'reusable_lesson': reflection.reusable_lesson,
+                    'recommended_rule': reflection.recommended_rule,
+                    'confidence_adjustment': reflection.confidence_adjustment,
+                    'severity': reflection.severity,
+                }
+            except Exception:
+                report.reflection_result = {'error': 'Reflection failed'}
+            
             # ═══ STEP 8F: Evidence Ledger (RC59) ═══
             try:
                 from coding_tentacle.audit.evidence_ledger import EvidenceLedger
-                el = EvidenceLedger()
                 el_report = el.record(
                     run_id=f'{repo_name}_{report.detected_bug_type}',
                     bug_report=bug_report,

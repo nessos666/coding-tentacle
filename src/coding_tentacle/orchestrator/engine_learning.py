@@ -22,8 +22,8 @@ class EnginePerformanceStore:
         self._load()
     
     def record(self, engine_name, bug_type, success, runtime_s=0, 
-               skeptic_risk=0, impact_risk=0):
-        """Record an engine attempt."""
+               skeptic_risk=0, impact_risk=0, confidence_adjustment: float = 0.0):
+        """Record an engine attempt. Optional confidence_adjustment from Reflection (RC85)."""
         entry = self.stats[engine_name][bug_type]
         entry['attempts'] += 1
         if success:
