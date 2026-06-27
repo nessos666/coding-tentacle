@@ -96,17 +96,25 @@ class OpenCodeExportParser:
         
         # Search messages in reverse for last assistant with content
         for msg in reversed(messages):
-            if msg.get('role') != 'assistant':
+            role = msg.get('info', {}).get('role', '')
+            if role != 'assistant' and role != 'build':
                 continue
             
-            content = msg.get('content', '')
+            # Extract content from parts array
+            parts = msg.get('parts', [])
+            if not parts:
+                continue
+            
+            content = ''
+            for part in parts:
+                if isinstance(part, dict) and part.get('type') == 'text':
+                    content += part.get('text', '')
+            
             if not content:
-                content_parts = msg.get('content', [])
-                if isinstance(content_parts, list):
-                    for part in content_parts:
-                        if isinstance(part, dict) and part.get('type') == 'text':
-                            content = part.get('text', '')
-                            break
+                # Fallback: direct content field
+                content = msg.get('content', '')
+                if isinstance(content, list):
+                    content = ' '.join(str(c.get('text', c)) for c in content if isinstance(c, dict))
             
             if content and ('---' in content or 'diff' in content.lower()):
                 parsed = self.parse_raw_text(content)
