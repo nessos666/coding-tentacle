@@ -1,5 +1,29 @@
 # Changelog
 
+## CODING TENTACLE 10.0.V — Cybernetic Repair Agent (2026-06-28)
+
+Architecture publication. Phase 1 complete.
+
+### Cybernetic Architecture
+- Reflection → DeuteroLearning loop closed (RC95)
+- SelfObservation → Evidence wiring (RC96)
+- Adaptive Homeostasis: 12 vital signs self-adjusting (RC96)
+- Autonomous SelfHealing: triggered by system pathologies (RC98)
+- FeedbackDampener prevents oscillation (RC95)
+
+### Integration
+- OpenCode PTY Adapter: production-ready (RC89.1)
+- Benchmark Runner: resumable CLI with stats (RC86)
+- Failure Taxonomy: 73% of failures = single cause (RC91)
+
+### Kybernetik Score: 5.86 → 8.08 → ~9.0/10
+
+### Benchmark Status
+- SWE-bench Score: NOT YET FINAL (50-task run pending)
+- This is an ARCHITECTURE publication. Performance data follows.
+
+---
+
 ## v1.0.0 (2026-06-26)
 
 ### Safety

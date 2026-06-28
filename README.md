@@ -1,5 +1,10 @@
 # 🐙 Coding Tentacle v0.9.0
 
+> **📢 CODING TENTACLE 10.0.V — Published (2026-06-28)**  
+> Cybernetic Architecture for Safe, Self-Learning Code Repair Agents.  
+> Phase 1 complete. [Read the paper →](papers/CODING_TENTACLE_10.0.V.pdf)  
+> Safety-first. Evidence-led. Self-healing. No Auto-Apply.
+
 **Safety-First Guardian Layer for LLM-Based Code Fixing**
 
 [![Status](https://img.shields.io/badge/status-research%20%2F%20shadow-blue)]()
