@@ -45,6 +45,35 @@ class HomeostasisBrain:
             'audit_score_min': 0.60,  # Below 60% audit score = WARNING
         }
     
+    def adjust_thresholds(self, reflection_confidence: float = 0.0,
+                          engine_trust_trend: float = 0.0,
+                          error_rate_trend: float = 0.0):
+        """RC96: Adaptive thresholds within safe bounds. No sudden jumps."""
+        # Trust threshold: adapt between 0.15 and 0.35
+        if reflection_confidence > 0.7:
+            self.thresholds['trust_min'] = max(0.15, self.thresholds['trust_min'] - 0.01)
+            self.thresholds['trust_critical'] = min(0.35, self.thresholds['trust_critical'] + 0.01)
+        elif reflection_confidence < 0.3:
+            self.thresholds['trust_min'] = min(0.35, self.thresholds['trust_min'] + 0.01)
+        
+        # Error rate: tighten if improving, loosen if worsening
+        if error_rate_trend < 0:
+            self.thresholds['error_rate_max'] = min(0.20, self.thresholds['error_rate_max'] + 0.01)
+        elif error_rate_trend > 0:
+            self.thresholds['error_rate_max'] = max(0.05, self.thresholds['error_rate_max'] - 0.01)
+        
+        # BLM entries: scale with experience (max 15)
+        if self.thresholds['blm_min'] < 100:
+            self.thresholds['blm_min'] = min(15, self.thresholds['blm_min'] + 1)
+        
+        # Response time: relax if system is stable
+        self.thresholds['response_time_max'] = min(10.0, max(3.0,
+            self.thresholds['response_time_max'] + (0.1 if engine_trust_trend > 0 else -0.1)))
+        
+        # Audit score: slightly relax if everything is healthy
+        if reflection_confidence > 0.8 and engine_trust_trend > 0:
+            self.thresholds['audit_score_min'] = min(0.75, self.thresholds['audit_score_min'] + 0.02)
+    
     def check(self, engine_trust=0.60, error_rate=0.0, blm_entries=0,
               response_time=0.0, safety_active=True, approval_active=True,
               reflex_active=True, injection_active=True,

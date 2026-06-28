@@ -37,6 +37,7 @@ class ShadowRunReport:
     observation: str = ""
     evidence_ledger_path: str = ""
     reflection_result: dict = field(default_factory=dict)
+    cybernetic_loop_status: dict = field(default_factory=dict)
     detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
@@ -277,6 +278,30 @@ class ShadowModeRunner:
             )
         except Exception:
             pass
+        
+        # RC96: SelfObservation → EvidenceLedger wiring
+        try:
+            report.cybernetic_loop_status = {
+                'deutero_status': getattr(report, 'deutero_status', 'NOT_RUN'),
+                'detected_pathologies': getattr(report, 'detected_learning_pathologies', []) or [],
+                'dampener_active': getattr(report, 'dampener_active', False),
+                'reflection_severity': report.reflection_result.get('severity', 'INFO') if isinstance(report.reflection_result, dict) else 'INFO',
+                'observation_available': hasattr(report, 'observation'),
+            }
+            
+            # RC96: Adaptive Homeostasis thresholds from reflection
+            conf = report.reflection_result.get('confidence_adjustment', 0) if isinstance(report.reflection_result, dict) else 0
+            from coding_tentacle.brains.homeostasis_brain import HomeostasisBrain
+            hb = HomeostasisBrain()
+            hb.adjust_thresholds(
+                reflection_confidence=abs(conf),
+                engine_trust_trend=0.01 if conf > 0 else -0.01,
+                error_rate_trend=-0.01 if conf > 0 else 0.01,
+            )
+        except Exception:
+            pass
+        
+        # Fix: remove duplicate except block from RC95
         except Exception:
             pass
         
