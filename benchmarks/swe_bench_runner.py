@@ -199,6 +199,7 @@ Failing Tests: {failing}
 Generate a minimal fix as unified diff (--- / +++ / @@). No explanation."""
     
     def _run_opencode(self, prompt: str, repo_dir: str) -> str:
+        """LEGACY: use OpenCodePTYAdapter instead (RC92). Kept for non-PTY engines."""
         try:
             proc = subprocess.run(
                 ['opencode', '--prompt', prompt],
