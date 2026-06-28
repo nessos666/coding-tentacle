@@ -253,13 +253,30 @@ class ShadowModeRunner:
         try:
             from coding_tentacle.brains.deutero_learning_brain import DeuteroLearningBrain
             dlb = DeuteroLearningBrain()
+            # RC95: Feed reflection results into deutero-learning
+            reflection_context = getattr(report, 'reflection_result', {}) or {}
             dl_report = dlb.evaluate(
-                engine_trusts={'opencode': 0.75, 'ollama': 0.40, 'claude': 0.65},
-                engine_usage={'opencode': 5, 'ollama': 2, 'claude': 1},
+                engine_trusts={report.engine_used or 'unknown': 0.60},
+                blm_entries=50,
+                blm_reuse_count=len(reflection_context.get('recommended_rule', '')) > 0,
+                skill_candidates=1 if reflection_context.get('reusable_lesson') else 0,
             )
-            if dl_report.status == 'CRITICAL':
-                if not report.recommendation:
-                    report.recommendation = f'LEARNING CRITICAL: {dl_report.detected_pathologies}'
+            report.deutero_status = dl_report.status
+            report.detected_learning_pathologies = dl_report.detected_pathologies
+        except Exception:
+            pass
+        
+        # RC95: Feedback dampening guard — prevents oscillation
+        try:
+            from coding_tentacle.memory.feedback_dampener import FeedbackDampener
+            fd = FeedbackDampener()
+            report.dampener_active = fd.should_dampen(
+                report.engine_used or 'unknown',
+                report.detected_bug_type or 'Unknown',
+                report.root_cause_confidence or 0.5,
+            )
+        except Exception:
+            pass
         except Exception:
             pass
         
