@@ -38,6 +38,10 @@ class ShadowRunReport:
     evidence_ledger_path: str = ""
     reflection_result: dict = field(default_factory=dict)
     cybernetic_loop_status: dict = field(default_factory=dict)
+    self_healing_triggered: bool = False
+    self_healing_reason: str = ''
+    self_healing_recommendations: str = ''
+    self_healing_severity: str = 'STABLE'
     detected_bug_type: str = 'Unknown'
     confidence: float = 0.0
     selected_procedure: str = ""
@@ -298,6 +302,39 @@ class ShadowModeRunner:
                 engine_trust_trend=0.01 if conf > 0 else -0.01,
                 error_rate_trend=-0.01 if conf > 0 else 0.01,
             )
+            
+            # RC98: Autonomous SelfHealingBrain trigger
+            deutero_status = getattr(report, 'deutero_status', 'STABLE')
+            dampener_active = getattr(report, 'dampener_active', False)
+            safety_blocked = bool(report.safety_events)
+            evidence_incomplete = not bool(report.evidence_ledger_path)
+            
+            should_heal = (
+                deutero_status == 'CRITICAL' or
+                dampener_active or
+                safety_blocked or
+                evidence_incomplete
+            )
+            
+            if should_heal:
+                from coding_tentacle.brains.self_healing_brain import SelfHealingBrain
+                sh = SelfHealingBrain()
+                sh_report = sh.monitor_and_heal(
+                    engine_name=report.engine_used or 'unknown',
+                    error_count=int(safety_blocked),
+                    unknown_rate=0.25 if evidence_incomplete else 0.0,
+                    safety_blocks=1 if safety_blocked else 0,
+                    engine_trust=conf if conf > 0 else 0.50,
+                )
+                report.self_healing_triggered = True
+                report.self_healing_reason = '|'.join([
+                    f'CRITICAL_DEUTERO' if deutero_status == 'CRITICAL' else '',
+                    f'DAMPENER_ACTIVE' if dampener_active else '',
+                    f'SAFETY_BLOCKED' if safety_blocked else '',
+                    f'EVIDENCE_INCOMPLETE' if evidence_incomplete else '',
+                ]).strip('|')
+                report.self_healing_recommendations = sh_report.recovery_plan
+                report.self_healing_severity = sh_report.status
         except Exception:
             pass
         
