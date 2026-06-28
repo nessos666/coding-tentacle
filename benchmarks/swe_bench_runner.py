@@ -107,7 +107,28 @@ class SWEBenchRunner:
                 report.status = 'FAILED'
             else:
                 prompt = self._build_prompt(task)
-                oc_output = self._run_opencode(prompt, repo_dir)
+                
+                # RC92: Use PTY adapter for reliable output
+                from coding_tentacle.llm.adapters.opencode_pty_adapter import OpenCodePTYAdapter
+                pty = OpenCodePTYAdapter(timeout=60)
+                pty_result = pty.generate(prompt, cwd=repo_dir)
+                
+                report.duration_s = pty_result.duration_s
+                
+                if pty_result.status == 'SUCCESS' and pty_result.unified_diff:
+                    report.patch_generated = True
+                    report.patch_bytes = len(pty_result.unified_diff)
+                    report.patch_hash = hashlib.sha256(pty_result.unified_diff.encode()).hexdigest()[:16]
+                    report.status = 'PATCH_GENERATED'
+                    oc_output = pty_result.unified_diff  # Use diff directly, skip old parser
+                elif pty_result.status == 'NO_PATCH':
+                    report.error = 'NO_PATCH: ' + (pty_result.error or 'No diff in PTY output')
+                    report.status = 'NO_PATCH'
+                    oc_output = pty_result.raw_output
+                else:
+                    report.error = pty_result.error or f'PTY status: {pty_result.status}'
+                    report.status = pty_result.status
+                    oc_output = pty_result.raw_output
                 
                 # 3. Parse patch
                 from coding_tentacle.llm.opencode_export_parser import OpenCodeExportParser
