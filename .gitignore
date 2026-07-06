@@ -24,7 +24,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# IDE
+# IDE (duplicate)
 .idea/
 .vscode/
 *.swp
@@ -41,3 +41,27 @@ real_pm_probe.py
 rc4_store_probe.py
 rc5_light_mode.py
 *.log
+
+# PRIVATE: Experiment/Probe-Skripte (enthalten lokale Pfade, nicht für Public)
+07_experimente/
+deep_bug_hunt.py
+master_test_protocol.py
+working_memory.py
+br_scientific_method.py
+efficiency_compatibility.py
+mini_tentacle_system.py
+universal_gap_analysis.py
+forschungs_audit.py
+brains_reaudit.py
+10_schicht_diagnose.py
+inhibitory_control.py
+escalation_logic.py
+minimal_orchestrator.py
+15_ensemble/
+41_hyperon_integrator/
+47_grosser_check.py
+51_brain_mesh/
+scripts/public_demo.py
+scripts/oc_vs_codex.py
+scripts/quixbugs_runner.py
+scripts/ct_llm_engine.py
