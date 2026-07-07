@@ -134,7 +134,7 @@ class ShadowModeRunner:
             try:
                 from coding_tentacle.knowledge.droste_client import DrosteClient
                 droste_root = os.path.expanduser(
-                    '~/Schreibtisch/CODING_TENTACLE_WORKING/coding_tentacle_v0.9.0_testlab')
+                    os.path.expanduser('~/coding-tentacle'))
                 if os.path.exists(droste_root):
                     self.droste_client = DrosteClient(project_root=droste_root)
                 else:
@@ -763,7 +763,7 @@ if __name__ == "__main__":
     dg = DiffGenerator(safety_brain=safety, patch_suggestion=ps)
     droste = DrosteClient(
         project_root=os.path.expanduser(
-            '~/Schreibtisch/CODING_TENTACLE_WORKING/coding_tentacle_v0.9.0_testlab'
+            os.path.expanduser('~/coding-tentacle')
         )
     )
     runner = ShadowModeRunner(meta_brain=mb, teacher=t, diff_generator=dg,

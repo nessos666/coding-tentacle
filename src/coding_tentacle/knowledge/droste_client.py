@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
     # Test 7-8: live Droste
     if client.is_available():
-        root = "/home/boobi/Schreibtisch/CODING_TENTACLE_WORKING/coding_tentacle_v0.9.0_testlab"
+        root = os.path.expanduser('~/coding-tentacle')
         print("Test 7: Real Droste call...", end=" ")
         ctx = client.get_context("NullPointer safety", budget=1200, root=root)
         assert isinstance(ctx, DrosteContext) and ctx.elapsed_ms > 0

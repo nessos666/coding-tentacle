@@ -32,7 +32,7 @@ class EngineRouter:
             'bug_types': ['*'],  # All bug types
         },
         'claude': {
-            'path': '/home/boobi/.local/bin/claude',
+            'path': '/usr/local/bin/claude',
             'check_cmd': ['claude', '--version'],
             'fix_cmd': ['claude', '-p', '{prompt}'],
             'status': 'unknown',
@@ -42,7 +42,7 @@ class EngineRouter:
                          'Deadlock', 'RecursionError', 'MemoryError', 'Performance'],
         },
         'codex': {
-            'path': '/home/boobi/.npm-global/bin/codex',
+            'path': 'codex',
             'check_cmd': ['codex', '--version'],
             'fix_cmd': ['codex', 'exec', '--skip-git-repo-check', '{prompt}'],
             'status': 'disabled',  # Needs API key
