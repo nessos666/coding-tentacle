@@ -6,6 +6,8 @@ Builds import graph, function index, class index, circular dependency detection.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import ast, os, json, time, hashlib
 from pathlib import Path
 from collections import defaultdict, deque

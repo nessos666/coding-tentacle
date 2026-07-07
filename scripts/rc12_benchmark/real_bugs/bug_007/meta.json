@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_007",
+  "bug_file": "inject.py",
+  "category": "repair",
+  "description": "Bug: SECURITY \u2014 eval() mit User-Input (CWE-95)"
+}

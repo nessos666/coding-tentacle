@@ -1,0 +1,16 @@
+{
+  "name": "ct_typeerror",
+  "count": 100,
+  "categories": [
+    "CWE-628",
+    "CWE-704"
+  ],
+  "bug_types": [
+    "Typeerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "ct_indexerror",
+  "count": 100,
+  "categories": [
+    "CWE-129"
+  ],
+  "bug_types": [
+    "Indexerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

@@ -1,43 +1,48 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "coding-tentacle"
-version = "0.1.0"
-description = "Octopus-inspired bug-fixing agent — hypothesize, test, falsify. Safety-first."
+version = "11.0.0"
+description = "Secure Self-Learning Bug Repair Agent — Safety-first, Droste-powered, Evidence-backed"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "David", email = "david@coding-tentacle.dev"}
+    {name = "David Miko", email = "nessos6666@gmail.com"}
 ]
-keywords = ["ai", "debugging", "bug-fixing", "cognitive-architecture", "octopus"]
+keywords = ["bug-repair", "security", "static-analysis", "code-graph", "llm-agent", "safety"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development :: Debuggers",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Security",
 ]
 requires-python = ">=3.10"
-dependencies = [
-    "numpy>=1.24",
-    "sentence-transformers>=2.0",
-]
+dependencies = []
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-]
+dev = ["pytest>=7", "pytest-cov"]
+opencode = ["opencode>=1.17"]
+all = ["pytest>=7", "pytest-cov"]
 
 [project.urls]
 Homepage = "https://github.com/nessos666/coding-tentacle"
-Documentation = "https://github.com/nessos666/coding-tentacle/docs"
 Repository = "https://github.com/nessos666/coding-tentacle"
+Issues = "https://github.com/nessos666/coding-tentacle/issues"
+
+[project.scripts]
+ct = "coding_tentacle.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"

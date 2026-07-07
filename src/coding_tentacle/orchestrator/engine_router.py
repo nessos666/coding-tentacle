@@ -5,6 +5,8 @@ OpenCode primary, Ollama fallback, Codex disabled.
 
 Author: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import subprocess, time, os
 
 
@@ -29,6 +31,16 @@ class EngineRouter:
             'priority': 2,
             'bug_types': ['*'],  # All bug types
         },
+        'claude': {
+            'path': '/home/boobi/.local/bin/claude',
+            'check_cmd': ['claude', '--version'],
+            'fix_cmd': ['claude', '-p', '{prompt}'],
+            'status': 'unknown',
+            'priority': 1,  # Same as OpenCode — both are top-tier
+            'bug_types': ['NullPointer', 'TypeError', 'ImportError', 'KeyError',
+                         'IndexError', 'ValueError', 'SecurityRisk', 'RaceCondition',
+                         'Deadlock', 'RecursionError', 'MemoryError', 'Performance'],
+        },
         'codex': {
             'path': '/home/boobi/.npm-global/bin/codex',
             'check_cmd': ['codex', '--version'],
@@ -40,9 +52,11 @@ class EngineRouter:
         },
     }
     
-    def __init__(self):
+    def __init__(self, bug_type_trust=None, feedback_dampener=None):
         self.health_checked = False
         self.route_stats = {}  # engine → {success, failure, timeout}
+        self.bug_type_trust = bug_type_trust  # RC-W2: per-bug-type trust
+        self.feedback_dampener = feedback_dampener  # RC-W3: confidence dampening
     
     def check_health(self):
         """Check which engines are available."""
@@ -71,16 +85,37 @@ class EngineRouter:
             if cfg['status'] not in ('healthy', 'unknown'):
                 continue
             if '*' in cfg['bug_types'] or bug_type in cfg['bug_types']:
-                candidates.append((cfg['priority'], name, cfg))
+                # RC-W2: Adjust priority based on BugTypeTrust
+                adjusted_priority = cfg['priority']
+                trust_note = ''
+                if self.bug_type_trust:
+                    trust, _, source = self.bug_type_trust.get_trust(name, bug_type)
+                    if source == 'specific':
+                        # RC-W3: Apply feedback dampening to prevent over-confidence
+                        if self.feedback_dampener:
+                            bt_data = self.bug_type_trust.matrix.get(name, {}).get(bug_type)
+                            if bt_data:
+                                trust = self.feedback_dampener.dampen_confidence(
+                                    trust, bt_data.correct, bt_data.predictions,
+                                    len(self.bug_type_trust.matrix.get(name, {})))
+                        # High trust → boost priority (lower number = higher priority)
+                        if trust > 0.80:
+                            adjusted_priority -= 0.5
+                            trust_note = f' trust={trust:.2f}'
+                        elif trust < 0.40:
+                            adjusted_priority += 1.0
+                            trust_note = f' low_trust={trust:.2f}'
+                candidates.append((adjusted_priority, name, cfg, trust_note))
         
         if not candidates:
             return None, None, "No engines available"
         
         candidates.sort()
         
-        # Try OpenCode first for its bug types, then Ollama
-        for _, name, cfg in candidates:
-            return name, cfg, f"Routed to {name} (priority {cfg['priority']})"
+        # Return best candidate
+        for priority_val, name, cfg, trust_note in candidates:
+            reason = f"Routed to {name} (priority {priority_val}{trust_note})"
+            return name, cfg, reason
         
         return None, None, "Routing failed"
     

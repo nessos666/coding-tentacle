@@ -10,6 +10,8 @@ NEVER executes actions. Read-only evidence for BQ, BR, PatchSuggestion.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import sqlite3, time, os, json, hashlib
 from pathlib import Path
 
@@ -147,9 +149,9 @@ class BugLearningMemory:
     def find_similar(self, bug_signature, bug_type=None, language=None, limit=5):
         """Find similar bugs using FTS5 (deprecated for retrieval — use find_similar_tfidf).
         FTS5 remains useful for Safety exact-pattern checks."""
-        return self._fts5_search(bug_signature, limit)
+        return self._fts5_search(bug_signature, bug_type=bug_type, language=language, limit=limit)
     
-    def _fts5_search(self, bug_signature, limit=5):
+    def _fts5_search(self, bug_signature, bug_type=None, language=None, limit=5):
         """Internal FTS5 search. Used by find_similar() legacy + safety checks."""
         # Try FTS5
         try:

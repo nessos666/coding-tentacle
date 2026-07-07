@@ -1,0 +1,20 @@
+{
+  "name": "ct_security",
+  "count": 100,
+  "categories": [
+    "CWE-89",
+    "CWE-502",
+    "CWE-95",
+    "CWE-22",
+    "CWE-798",
+    "CWE-78"
+  ],
+  "bug_types": [
+    "Security"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

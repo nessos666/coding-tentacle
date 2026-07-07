@@ -1,0 +1,18 @@
+{
+  "name": "ct_importerror",
+  "count": 100,
+  "categories": [
+    "CWE-628",
+    "CWE-1047",
+    "CWE-477",
+    "CWE-1104"
+  ],
+  "bug_types": [
+    "Importerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

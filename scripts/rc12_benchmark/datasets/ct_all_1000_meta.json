@@ -1,0 +1,42 @@
+{
+  "name": "ct_all_1000",
+  "count": 900,
+  "categories": [
+    "CWE-367",
+    "CWE-789",
+    "CWE-22",
+    "CWE-477",
+    "CWE-20",
+    "CWE-89",
+    "CWE-628",
+    "CWE-400",
+    "CWE-78",
+    "CWE-476",
+    "CWE-1047",
+    "CWE-1104",
+    "CWE-1049",
+    "CWE-502",
+    "CWE-129",
+    "CWE-252",
+    "CWE-362",
+    "CWE-95",
+    "CWE-704",
+    "CWE-798"
+  ],
+  "bug_types": [
+    "Valueerror",
+    "Typeerror",
+    "Nullpointer",
+    "RaceCondition",
+    "Importerror",
+    "Keyerror",
+    "Performance",
+    "Security",
+    "Indexerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 297,
+    "medium": 297,
+    "hard": 306
+  }
+}

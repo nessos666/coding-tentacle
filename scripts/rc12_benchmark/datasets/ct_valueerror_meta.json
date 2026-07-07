@@ -1,0 +1,16 @@
+{
+  "name": "ct_valueerror",
+  "count": 100,
+  "categories": [
+    "CWE-628",
+    "CWE-20"
+  ],
+  "bug_types": [
+    "Valueerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

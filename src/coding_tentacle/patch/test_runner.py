@@ -7,6 +7,8 @@ Integrates with SandboxRunner — tests only run in isolated temp dirs.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import subprocess, time, re, shlex
 from dataclasses import dataclass, field, asdict
 

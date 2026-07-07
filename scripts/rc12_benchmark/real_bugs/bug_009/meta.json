@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_009",
+  "bug_file": "counter.py",
+  "category": "repair",
+  "description": "Bug: RACE CONDITION \u2014 Counter ohne Lock (CWE-362)"
+}

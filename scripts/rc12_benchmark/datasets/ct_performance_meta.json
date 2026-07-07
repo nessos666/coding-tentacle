@@ -1,0 +1,17 @@
+{
+  "name": "ct_performance",
+  "count": 100,
+  "categories": [
+    "CWE-1049",
+    "CWE-400",
+    "CWE-789"
+  ],
+  "bug_types": [
+    "Performance"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

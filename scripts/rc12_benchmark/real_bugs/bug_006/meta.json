@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_006",
+  "bug_file": "form.py",
+  "category": "repair",
+  "description": "Bug: ValueError \u2014 int() Parse-Fehler bei ung\u00fcltiger Eingabe"
+}

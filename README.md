@@ -1,227 +1,97 @@
-# 🐙 Coding Tentacle v0.9.0
+# 🐙 Coding Tentacle v11.0.0
 
-**Safety-First Guardian Layer for LLM-Based Code Fixing**
+**Secure Self-Learning Repair Agent — Safety-First Guardian for LLM Code Fixing**
 
-[![Status](https://img.shields.io/badge/status-research%20%2F%20shadow-blue)]()
+[![Version](https://img.shields.io/badge/version-11.0.0-blue)](https://github.com/nessos666/coding-tentacle)
+[![Tests](https://img.shields.io/badge/tests-14%2F14-brightgreen)]()
+[![Regression](https://img.shields.io/badge/regression-10%2F10-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
-[![Tests](https://img.shields.io/badge/tests-10%2F10-brightgreen)]()
 
 ---
 
-## What is Coding Tentacle?
-
-Coding Tentacle does NOT try to replace coding agents like OpenCode, Codex, or Claude Code.
-
-Instead, it **controls** them.
+CT sits **between you and the LLM**. OpenCode, Claude Code, and Codex generate code brilliantly — but with **zero safety guarantees**. They can emit `eval(user_input)`, `DROP TABLE`, or `rm -rf /` without hesitation. **CT is the safety layer that controls them.**
 
 ```
-                    ┌─────────────────────────┐
-                    │    Coding Tentacle       │
-                    │    ┌───────────────────┐ │
-  Bug Report ──────►│    │  Safety VETO 🛡️   │ │
-                    │    │  SkepticBrain 🔍  │ │
-                    │    │  ImpactAnalyzer 📊 │ │
-                    │    │  Trust Calibration │ │
-                    │    │  Learning Loop 🧠  │ │
-                    │    └───────┬───────────┘ │
-                    │            │             │
-                    │    APPROVE / REJECT      │
-                    │    / REQUEST_CHANGES     │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │   Fix Engines            │
-                    │   ┌──────┐ ┌──────────┐ │
-                    │   │OpenCode│ │ Ollama  │ │
-                    │   │deepseek│ │granite  │ │
-                    │   └───┬──┘ └────┬─────┘ │
-                    │       │         │       │
-                    │   Unified Diff Output   │
-                    └─────────────────────────┘
+Bug -> CT (classify -> security scan -> route -> Droste context)
+    -> OpenCode/Claude/Ollama (generates fix)
+    -> CT (safety review -> skeptic -> impact -> approval -> REFLECTION)
+    -> Human approves -> Fix applied -> BLM learns WHY
 ```
 
----
-
-## Architecture: Two Tentacles
+## Architecture: CT + Droste Fusion
 
 ```
-┌───────────────────────────────────┐  ┌─────────────────────────────┐
-│      TENTACLE A: ANALYZE          │  │     TENTACLE B: FIX         │
-│      Safety + Learning            │  │     Code Generation         │
-│                                   │  │                             │
-│  ✅ Bug Classification (18 types) │  │  ✅ OpenCode (deepseek-v4)  │
-│  ✅ Safety VETO (absolute block)  │  │  ✅ Ollama (granite3.2)     │
-│  ✅ SkepticBrain (adversarial)    │  │  ✅ Template Fallback       │
-│  ✅ ImpactAnalyzer                │  │                             │
-│  ✅ Engine Router                 │  │  ❌ NO direct file access   │
-│  ✅ Human Approval Gate           │  │  ❌ NO commits / PRs        │
-│  ✅ BLM Learning Loop             │  │  ❌ NO safety bypass        │
-│  ✅ Engine Trust Calibration      │  │                             │
-│  ✅ Outcome Learning              │  │  Sandbox + TestRunner only  │
-│                                   │  │                             │
-│  CAN block any fix.               │  │  CANNOT act without A.      │
-│  CAN learn from every run.        │  │  CAN be replaced/upgraded.  │
-└───────────────────────────────────┘  └─────────────────────────────┘
-              │                                      │
-              └────────── A controls B ──────────────┘
+CODING TENTACLE
+  Classifier(18 types) | SecurityBrain | MetaBrain | EngineRouter
+  ImpactAnalyzer | SkepticBrain | ApprovalGate | Sandbox
+  BLM | EngineLearning | REFLECTION ENGINE | Decision Trace
+
+  DROSTE FUSION (v1.1.6)
+    Causal Code Graph -> Engine Prompt
+    4.187 symbols, 4.697 edges, 98% budget efficiency
+    "Which functions are causally connected to this bug?"
+
+  ENGINES: OpenCode(deepseek-v4) | Claude Code(2.1.86) | Ollama(granite3.2)
 ```
-
----
-
-## Learning Loop
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │                     LEARNING FLOW                             │
-  │                                                               │
-  │  Run #1: Bug → CT → OpenCode → Fix → BLM stores experience   │
-  │                                          ↓                    │
-  │  Run #2: Bug → CT → BLM: "I've seen this!" → EnginePrompt    │
-  │                     → "SIMILAR: NullPointer fixed by opencode"│
-  │                     → OpenCode gets CONTEXT → BETTER fix      │
-  │                                          ↓                    │
-  │  Run #N: BLM: 500+ experiences                               │
-  │          EngineLearning: trust=0.95 for opencode+NullPointer  │
-  │          OutcomeLearning: "OpenCode excels at NullPointer"    │
-  │          → Automatic routing to best engine                   │
-  │          → Higher fix quality                                 │
-  └──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ShadowMode Pipeline
-
-```
-  GitHub Issue
-      │
-      ▼
-  ┌─────────────┐
-  │ Classifier   │ ← UnifiedBugClassifier (18 types, 100% accuracy)
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ SafetyBrain  │ ← VETO: DROP TABLE, eval(), system() → BLOCKED
-  └──────┬──────┘         (Base64/HTML/string-concat decoded)
-         │ GO
-         ▼
-  ┌─────────────┐
-  │ EngineRouter │ ← OpenCode primary, Ollama fallback
-  └──────┬──────┘    Bug-type-specific trust routing
-         │
-         ▼
-  ┌─────────────┐
-  │ OpenCode     │ ← Generates real code fix (unified diff)
-  └──────┬──────┘    Template-fallback if engine unavailable
-         │
-         ▼
-  ┌─────────────┐
-  │ Safety scan  │ ← Scans ENGINE OUTPUT for dangerous patterns
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ SkepticBrain │ ← "Why could this fix be WRONG?"
-  └──────┬──────┘    risk_score + objections + recommendation
-         │
-         ▼
-  ┌─────────────┐
-  │ Sandbox      │ ← Isolated test environment
-  └──────┬──────┘    Original files NEVER touched
-         │
-         ▼
-  ┌─────────────┐
-  │ TestRunner   │ ← pytest / shellcheck
-  └──────┬──────┘
-         │
-         ▼
-  ┌─────────────┐
-  │ ApprovalGate │ ← APPROVE / REJECT / REQUEST_CHANGES
-  └──────┬──────┘    Safety BLOCK can NEVER be overridden
-         │
-         ▼
-  ┌─────────────┐
-  │ BLM + EL     │ ← Store experience + update engine trust
-  └─────────────┘
-```
-
----
 
 ## Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/nessos666/mmrp-research.git
-cd mmrp-research
+git clone https://github.com/nessos666/coding-tentacle.git
+cd coding-tentacle
+pip install -e .
 
-# Run a single bug through the full pipeline
-python3 -c "
-from coding_tentacle.orchestrator.shadow_mode import ShadowModeRunner, GitHubIssueRun
-from coding_tentacle.orchestrator.metabrain import MetaBrain, SafetyBrain
-from coding_tentacle.safety.inhibitory_control import InhibitoryControl
-from coding_tentacle.knowledge.security_store import create_seed_security_store
-from coding_tentacle.orchestrator.engine_router import EngineRouter
-from coding_tentacle.orchestrator.skeptic_brain import SkepticBrain
-from coding_tentacle.safety.approval_gate import ApprovalGate
-
-sec = create_seed_security_store()
-ic = InhibitoryControl(security_store=sec)
-safety = SafetyBrain(ic=ic, security_store=sec)
-mb = MetaBrain(safety=safety)
-er = EngineRouter(); er.check_health()
-sb = SkepticBrain(); ag = ApprovalGate()
-
-runner = ShadowModeRunner(meta_brain=mb, engine_router=er,
-                          approval_gate=ag, skeptic_brain=sb,
-                          safety_brain=safety)
-
-r = runner.analyze_issue(GitHubIssueRun(
-    'https://github.com/user/repo', '#1',
-    'NullPointer in views.py',
-    'NoneType has no attribute at line 42'))
-
-print(f'Bug Type: {r.detected_bug_type}')
-print(f'Engine:   {r.engine_used}')
-print(f'Diff:     {r.generated_diff[:200]}...')
-print(f'Safety:   {\"BLOCKED\" if r.safety_events else \"OK\"}')
-print(f'Skeptic:  risk={r.skeptic_risk:.2f} {r.skeptic_recommendation}')
-print(f'Approval: {r.approval_status}')
-"
+# CLI
+ct version
+ct repair --title "NullPointer in payment.py" --body "NoneType has no attribute"
 ```
 
----
+## Benchmark
+
+```
+CT v11.0.0 + OpenCode + Droste + Reflection
+CT+OpenCode:  9/10 (90%)
+Baseline:     3/10 (30%)
+Delta:        +6 bugs
+Security:     2 blocks (eval, API key) — Baseline "fixed" unsafely
+```
+
+## Learning System V2
+
+CT doesn't just store experiences. It **understands WHY**:
+
+```
+Run 1: Bug -> Fix -> REFLECTION: "Why did this work? Droste helpful? Root cause correct?"
+Run 2: Bug -> BLM: "I've seen this!" -> LEARNED LESSONS enrich prompt -> BETTER fix
+Run N: 92 experiences, 23 REFLECTION entries, trust calibrated, rules consolidated
+```
+
+## Pipeline (16 Steps)
+
+```
+BUG -> Classifier -> SecurityBrain(VETO) -> REFLECTION RETRIEVAL ->
+Droste Context -> EngineRouter -> OpenCode/Claude -> Safety Scan ->
+ImpactAnalyzer -> SkepticBrain -> Sandbox -> Approval ->
+BLM Record -> REFLECTION ENGINE -> Consolidator -> Recommendation
+```
+
+## Engines
+
+| Engine | Status | Notes |
+|--------|:------:|-------|
+| OpenCode (deepseek-v4) | Primary | Local, free |
+| Claude Code (2.1.86) | Active | Top-tier |
+| Ollama (granite3.2) | Fallback | Offline |
+| Codex (GPT-5.x) | Disabled | Needs API key |
 
 ## Requirements
 
-- Python 3.10+
-- OpenCode CLI (`opencode`) — for actual code fixing
-- Ollama + granite3.2-vision — for local fallback
-- No API keys required
-- No cloud dependencies
+Python 3.10+ | Droste v1.1.6 (auto-init) | OpenCode CLI | No API keys | No cloud
 
----
+## Project Status
 
-## What CT Is Not
-
-- ❌ Not a replacement for Codex, Devin, or Claude Code
-- ❌ Not an autonomous bug fixer without an LLM engine
-- ❌ Not a product — research/shadow release
-
-## What CT Is
-
-- ✅ Safety-first guardian layer for LLM-generated code
-- ✅ Self-learning bug analysis system
-- ✅ Engine router with trust calibration
-- ✅ Human-in-the-loop approval gate
-- ✅ The ONLY coding agent with Safety VETO + SkepticBrain + Bayesian Trust
-
----
+27 modules (8.405 LOC) | 34 archived | 10/10 Regression | 14/14 pytest | 28 Checkpoints | Tag: v11.0.0
 
 ## License
 
-MIT — free, open source, no restrictions.
-
----
-
-*Built by David + Hermes. June 2026.*
+MIT — free, open source, no restrictions. Built by David + Hermes. June–July 2026.

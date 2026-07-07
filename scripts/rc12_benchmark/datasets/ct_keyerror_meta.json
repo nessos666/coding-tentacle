@@ -1,0 +1,15 @@
+{
+  "name": "ct_keyerror",
+  "count": 100,
+  "categories": [
+    "CWE-252"
+  ],
+  "bug_types": [
+    "Keyerror"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

@@ -73,7 +73,8 @@ def call_engine(engine_path, engine_name, prompt, timeout=60):
         if 'opencode' in engine_name.lower():
             cmd = [engine_path, 'run', prompt]
         else:
-            cmd = [engine_path, 'exec', '-m', prompt, '--skip-git-repo-check']
+            # Codex: prompt is POSITIONAL argument, not stdin
+            cmd = [engine_path, 'exec', '--skip-git-repo-check', prompt]
         
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd='/tmp')
         dt = round(time.time() - t0, 1)

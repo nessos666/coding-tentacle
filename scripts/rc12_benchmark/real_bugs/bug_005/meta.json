@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_005",
+  "bug_file": "search.py",
+  "category": "repair",
+  "description": "Bug: IndexError \u2014 Zugriff auf leere Liste"
+}

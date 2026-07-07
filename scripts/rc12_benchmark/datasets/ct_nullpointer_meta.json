@@ -1,0 +1,15 @@
+{
+  "name": "ct_nullpointer",
+  "count": 100,
+  "categories": [
+    "CWE-476"
+  ],
+  "bug_types": [
+    "Nullpointer"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

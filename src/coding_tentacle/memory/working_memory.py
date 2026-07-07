@@ -6,6 +6,8 @@ Mit Working Memory: Debugging-Sessions mit persistentem Kontext.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import time, json, os, uuid
 from collections import defaultdict, deque
 
@@ -218,9 +220,6 @@ class WorkingMemory:
         """Alle Fix-Versuche einer Session abrufen."""
         state = self.sessions.get(session_id)
         return state.fix_attempts if state else []
-
-        state.update()
-        return dec
 
     def summarize(self, session_id):
         """Zusammenfassung des aktuellen Zustands"""

@@ -1,0 +1,16 @@
+{
+  "name": "ct_race_condition",
+  "count": 100,
+  "categories": [
+    "CWE-367",
+    "CWE-362"
+  ],
+  "bug_types": [
+    "RaceCondition"
+  ],
+  "difficulty_distribution": {
+    "easy": 33,
+    "medium": 33,
+    "hard": 34
+  }
+}

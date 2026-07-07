@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_004",
+  "bug_file": "api.py",
+  "category": "repair",
+  "description": "Bug: KeyError \u2014 dict access ohne .get()"
+}

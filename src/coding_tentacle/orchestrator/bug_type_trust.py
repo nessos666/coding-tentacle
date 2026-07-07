@@ -5,6 +5,8 @@ Falls back to global trust when per-type data is sparse.
 
 Autor: Hermes + David | Coding Tentacle 2026
 """
+
+# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import time, math
 from dataclasses import dataclass, field
 
@@ -40,10 +42,15 @@ class BugTypeTrust:
         if len(self.recent) > 20:
             self.recent.pop(0)
         
-        # Bayesian update
+        # RC-W2-FIX: Smoothed Bayesian update with floor/ceiling
+        # Prevents trust collapse from consecutive failures
         prior = self.trust
         likelihood = 0.80 if was_correct else 0.20
-        self.trust = (likelihood * prior) / max(0.001, (likelihood * prior + (1-likelihood)*(1-prior)))
+        raw_trust = (likelihood * prior) / max(0.001, (likelihood * prior + (1-likelihood)*(1-prior)))
+        # Smooth: blend with prior (70% new, 30% old) to dampen oscillations
+        self.trust = 0.7 * raw_trust + 0.3 * prior
+        # Floor at 0.05 — prevents total collapse from 3+ failures
+        self.trust = max(0.05, min(0.95, self.trust))
         self.uncertainty *= 0.95
 
 

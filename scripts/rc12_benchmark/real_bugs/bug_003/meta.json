@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_003",
+  "bug_file": "checkout.py",
+  "category": "repair",
+  "description": "Bug: ImportError \u2014 PaymentProcessor wurde in PaymentHandler umbenannt."
+}

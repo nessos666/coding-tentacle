@@ -1,0 +1,6 @@
+{
+  "bug_dir": "bug_010",
+  "bug_file": "cache.py",
+  "category": "repair",
+  "description": "Bug: MemoryError \u2014 Gro\u00dfe Datei komplett in Speicher laden (CWE-789)"
+}
