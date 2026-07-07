@@ -268,6 +268,9 @@ class ShadowModeRunner:
                         if summary and len(summary) > 10:
                             lessons.append(summary[:150])
                     if lessons:
+                        blm_context += '\\nLEARNED LESSONS (from past reflections):\\n'
+                        for l in lessons[:2]:
+                            blm_context += f'  → {l}\\n'
                         report.lessons_applied = len(lessons)
             except Exception:
                 pass

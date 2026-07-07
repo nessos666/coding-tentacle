@@ -100,7 +100,7 @@ class ProcedureStore:
         proc = self.procedures.get(key)
         if proc:
             proc.times_used += 1
-            proc.confidence = max(0.2, proc.confidence - 0.05)
+            proc.confidence = max(0.10, proc.confidence - 0.05)
             if failed_step and failed_step < len(proc.steps):
                 proc.steps[failed_step].failure_count += 1
             self._save()
