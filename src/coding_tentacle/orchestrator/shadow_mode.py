@@ -48,6 +48,16 @@ class ShadowRunReport:
     approval_notes: str = ""
     blm_written: bool = False
     blm_error: str = ""
+    droste_nodes: int = 0             # RC72: Droste context nodes count
+    droste_budget_used: int = 0       # RC72: chars used by Droste context
+    rules_updated: int = 0              # RC-W1: rules from ExperienceConsolidator
+    consolidator_rule: str = ""           # RC-W1b: PREFER/AVOID rule applied
+    bug_type_trust_source: str = ""       # RC-W2: global/blended/specific
+    dampened_trust: float = 0.0            # RC-W3: trust after FeedbackDampener
+    wm_session_id: str = ""                # RC-W4: WorkingMemory session
+    security_blocked: bool = False        # RC11: SecurityBrain blocked
+    security_risk_score: float = 0.0      # RC11: AST risk score
+    trojan_source_clean: bool = True       # RC11: Trojan Source scan passed
     sandbox_result: dict = field(default_factory=dict)
     test_result: dict = field(default_factory=dict)
     safety_events: list = field(default_factory=list)
@@ -100,7 +110,8 @@ class ShadowModeRunner:
     def __init__(self, meta_brain=None, teacher=None, diff_generator=None,
                  sandbox_runner=None, test_runner=None, repair_loop=None,
                  approval_gate=None, project_map_class=None,
-                 engine_router=None, safety_brain=None, skeptic_brain=None):
+                 engine_router=None, safety_brain=None, skeptic_brain=None,
+                 droste_client='auto'):
         self.meta_brain = meta_brain
         self.teacher = teacher
         self.diff_generator = diff_generator
@@ -112,6 +123,19 @@ class ShadowModeRunner:
         self.engine_router = engine_router
         self.safety_brain = safety_brain or (meta_brain.safety if meta_brain else None)
         self.skeptic_brain = skeptic_brain
+        
+        # RC72: Auto-instantiate Droste client when available
+        if droste_client == 'auto':
+            try:
+                from coding_tentacle.knowledge.droste_client import DrosteClient
+                self.droste_client = DrosteClient(project_root=os.getcwd())
+            except Exception:
+                self.droste_client = None
+        else:
+            self.droste_client = droste_client
+        self._working_memory = None       # RC-W4: lazy-init
+        self._bug_type_trust = None        # RC-W2: lazy-init
+        self._feedback_dampener = None     # RC-W3: lazy-init
         self.runs = []
     
     def analyze_issue(self, run: GitHubIssueRun) -> ShadowRunReport:
@@ -130,6 +154,18 @@ class ShadowModeRunner:
         # ═══ STEP 1: Extract bug information from issue ═══
         bug_report = f"{run.issue_title}\n{run.issue_body}"[:500]
         
+        # RC-W4: WorkingMemory — session context for this run
+        try:
+            from coding_tentacle.memory.working_memory import WorkingMemory
+            if self._working_memory is None:
+                self._working_memory = WorkingMemory()
+            session_id = f"run_{int(time.time())}_{hash(run.issue_url) % 10000}"
+            self._working_memory.create_session(session_id)
+            self._working_memory.update_context(session_id, 'bug', bug_report[:200])
+            report.wm_session_id = session_id
+        except Exception:
+            pass
+        
         # ═══ STEP 2: Create isolated workspace ═══
         workspace = tempfile.mkdtemp(prefix=f'ct_shadow_{repo_name}_')
         
@@ -141,6 +177,40 @@ class ShadowModeRunner:
             bug_type = self._classify_bug_type(bug_report)
             report.detected_bug_type = bug_type
             report.confidence = 0.7 if bug_type != 'Unknown' else 0.2
+            
+            # ═══ STEP 3B: SecurityBrain — Trojan Source + AST Security Scan (RC11) ═══
+            try:
+                from coding_tentacle.security.trojan_source_scanner import TrojanSourceScanner
+                from coding_tentacle.security.ast_security_analyzer import ASTSecurityAnalyzer
+                
+                # Trojan Source scan (issue title + body + any code context)
+                trojan = TrojanSourceScanner()
+                scan_text = bug_report + '\n' + code_context.get('code', '')
+                trojan_result = trojan.scan(scan_text)
+                report.trojan_source_clean = trojan_result.clean
+                
+                # AST Security scan (only if code_context has code)
+                ast_result = None
+                if code_context.get('code', '').strip():
+                    ast_analyzer = ASTSecurityAnalyzer()
+                    ast_result = ast_analyzer.analyze(code_context.get('code', ''))
+                    report.security_risk_score = ast_result.risk_score
+                
+                # BLOCK if critical security issues found
+                trojan_critical = any(f.risk == 'CRITICAL' for f in trojan_result.findings)
+                ast_critical = ast_result and ast_result.num_critical > 0
+                
+                if trojan_critical or ast_critical:
+                    report.security_blocked = True
+                    report.safety_events.append(
+                        f'SECURITY_BLOCK: Trojan={trojan_critical} AST_Critical={ast_critical}'
+                    )
+                    report.recommendation = 'BLOCKED by SecurityBrain — potential backdoor detected'
+                    self.runs.append(report)
+                    return report  # Skip engine call entirely
+                    
+            except Exception:
+                pass  # Security scan failure → allow through (fail-open for availability)
             
             # ═══ STEP 4: MetaBrain analyzes ═══
             if self.meta_brain:
@@ -165,8 +235,31 @@ class ShadowModeRunner:
             if self.engine_router and bug_type != 'SecurityRisk':
                 try:
                     from coding_tentacle.orchestrator.engine_router import EngineRouter
+                    from coding_tentacle.orchestrator.bug_type_trust import BugTypeSpecificTrust
+                    
+                    # RC-W2: BugTypeTrust for per-bug-type engine routing
+                    if not self._bug_type_trust is not None:
+                        self._bug_type_trust = BugTypeSpecificTrust(min_samples=3)
+                    if not hasattr(self.engine_router, 'bug_type_trust') or self.engine_router.bug_type_trust is None:
+                        self.engine_router.bug_type_trust = self._bug_type_trust
+                    
+                    # RC-W3: FeedbackDampener prevents over-confidence
+                    if not self._feedback_dampener is not None:
+                        from coding_tentacle.memory.feedback_dampener import FeedbackDampener
+                        self._feedback_dampener = FeedbackDampener()
+                    if not hasattr(self.engine_router, 'feedback_dampener') or self.engine_router.feedback_dampener is None:
+                        self.engine_router.feedback_dampener = self._feedback_dampener
+                    
                     engine_name, engine_cfg, route_reason = self.engine_router.route(bug_type)
                     report.engine_used = engine_name or 'none'
+                    
+                    # RC-W4: Record engine routing decision
+                    try:
+                        if self._working_memory is not None and report.wm_session_id:
+                            self._working_memory.add_decision(report.wm_session_id,
+                                f'route_to_{engine_name}', route_reason, 0.8)
+                    except Exception:
+                        pass
                     
                     # RC46 Fix2: BLM context enrichment for engine prompt
                     blm_context = ''
@@ -184,12 +277,28 @@ class ShadowModeRunner:
                     except Exception:
                         pass
                     
+                    # RC72: Droste causal code context for engine prompt
+                    droste_context = ''
+                    if self.droste_client:
+                        try:
+                            ctx = self.droste_client.get_context(
+                                query=f"{bug_type} {run.issue_title}"[:200],
+                                budget=1200,
+                            )
+                            if ctx:
+                                droste_context = ctx.to_prompt_context()
+                                report.droste_nodes = ctx.selected_count
+                                report.droste_budget_used = ctx.used
+                        except Exception:
+                            pass
+                    
                     if engine_name and engine_cfg:
                         prompt = f"""Fix this bug. Output ONLY the corrected code or unified diff.
 
 BUG: {run.issue_title}
 DESCRIPTION: {run.issue_body[:300]}
 {blm_context}
+{droste_context}
 BUG TYPE: {bug_type}
 
 RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
@@ -345,6 +454,17 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                 _os.makedirs(blm_dir, exist_ok=True)
                 blm_db = _os.path.join(blm_dir, 'learning.db')
                 blm = BugLearningMemory(db_path=blm_db)
+                
+                # RC-W1 FIX: success was defaulting to False — all experiences counted as failures.
+                # Now correctly determines success from pipeline outcome.
+                blm_success = False
+                if report.test_result and report.test_result.get('success'):
+                    blm_success = True
+                elif report.generated_diff and not report.safety_events:
+                    blm_success = True  # Diff generated + safety clean = partial success
+                elif report.skeptic_recommendation == 'APPROVE':
+                    blm_success = True
+                
                 blm.record_experience(
                     bug_signature=f"{bug_type}: {run.issue_title[:80]}",
                     bug_type=bug_type,
@@ -353,9 +473,33 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     fix_summary=report.generated_diff[:100] if report.generated_diff else 'No diff',
                     file_path=code_context.get('file', 'unknown'),
                     language='python',
+                    success=blm_success,
                 )
                 report.blm_written = True
                 report.blm_error = ''
+                
+                # RC-W1: ExperienceConsolidator — BLM experiences → PREFER/AVOID rules
+                try:
+                    from coding_tentacle.memory.experience_consolidator import ExperienceConsolidator
+                    consolidator = ExperienceConsolidator(min_samples=5)
+                    consolidator.consolidate(blm)
+                    report.rules_updated = len(consolidator.rules)
+                    
+                    # RC-W1b: Read consolidator rules back INTO pipeline
+                    # Check if we have a PREFER/AVOID rule for this bug+fix combo
+                    if report.engine_used:
+                        rule_check = consolidator.check_fix(
+                            bug_type, report.engine_used)
+                        if rule_check:
+                            action, conf = rule_check
+                            report.consolidator_rule = f'{action}:{report.engine_used}:{conf:.0%}'
+                            # PREFER rule → boost confidence in report
+                            if action == 'PREFER':
+                                report.confidence = min(0.95, report.confidence + 0.05)
+                            elif action == 'AVOID':
+                                report.confidence = max(0.10, report.confidence - 0.10)
+                except Exception:
+                    report.rules_updated = -1
             except Exception as e:
                 report.blm_written = False
                 report.blm_error = str(e)[:200]
