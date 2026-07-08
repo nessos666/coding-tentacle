@@ -9,8 +9,10 @@ Autor: Hermes + David | Coding Tentacle 2026
 """
 
 # CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
-import os, time, json, tempfile, shutil
+import os, time, json, tempfile, shutil, logging
 from dataclasses import dataclass, field, asdict
+
+logger = logging.getLogger(__name__)
 from typing import Optional
 
 
@@ -174,8 +176,8 @@ class ShadowModeRunner:
             self._working_memory.create_session(session_id)
             self._working_memory.update_context(session_id, 'bug', bug_report[:200])
             report.wm_session_id = session_id
-        except Exception:
-            pass
+        except Exception as _e_noncrit:
+            logger.debug('Non-critical: %s', _e_noncrit)
         
         # ═══ STEP 2: Create isolated workspace ═══
         workspace = tempfile.mkdtemp(prefix=f'ct_shadow_{repo_name}_')
@@ -224,14 +226,14 @@ class ShadowModeRunner:
                         ref = ReflectionEngine().analyze(report)
                         report.reflection = ref.to_dict()
                         report.transferable_lesson = ref.transferable_lesson
-                    except Exception:
-                        pass
+                    except Exception as _e_noncrit:
+                        logger.debug('Non-critical: %s', _e_noncrit)
                     
                     self.runs.append(report)
                     return report  # Skip engine call entirely
                     
-            except Exception:
-                pass  # Security scan failure → allow through (fail-open for availability)
+            except Exception as _e_noncrit:
+                logger.warning('Security scan degraded: %s', _e_noncrit)
             
             # ═══ STEP 4: MetaBrain analyzes ═══
             if self.meta_brain:
@@ -288,8 +290,8 @@ class ShadowModeRunner:
                         droste_context = ctx.to_prompt_context()
                         report.droste_nodes = ctx.selected_count
                         report.droste_budget_used = ctx.used
-                except Exception:
-                    pass
+                except Exception as _e_noncrit:
+                    logger.debug('Non-critical: %s', _e_noncrit)
             
             if self.engine_router and bug_type != 'SecurityRisk':
                 try:
@@ -626,8 +628,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         skeptic_risk=getattr(report, 'skeptic_risk', 0.0),
                         impact_risk=getattr(report, 'impact_risk', 0.0),
                     )
-                except Exception:
-                    pass  # Engine learning failure is non-fatal
+                except Exception as _e_noncrit:
+                    logger.debug('Engine learning: %s', _e_noncrit)
             
             # ═══ STEP 8D.5: Reflection Engine — Learn WHY (CT 11.x P0) ═══
             try:
