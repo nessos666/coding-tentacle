@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nessos666/coding-tentacle/master/ct-logo.png" width="500" alt="Coding Tentacle v11"><br>
+  <img src="https://raw.githubusercontent.com/nessos666/coding-tentacle/main/ct-logo.png" width="500" alt="Coding Tentacle v11"><br>
   <h1 align="center">🦑 Coding Tentacle 11</h1>
   <p align="center"><strong>Secure Self-Learning Repair Agent</strong></p>
 </p>
