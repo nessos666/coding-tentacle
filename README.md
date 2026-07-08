@@ -1,13 +1,15 @@
-# 🐙 Coding Tentacle v11.0.0
+<p align="center">
+  <img src="ct-logo.png" width="500" alt="Coding Tentacle v11"><br>
+  <h1 align="center">🦑 Coding Tentacle 11</h1>
+  <p align="center"><strong>Secure Self-Learning Repair Agent</strong></p>
+</p>
 
-**Secure Self-Learning Repair Agent — Safety-First Guardian for LLM Code Fixing**
-
-[![Version](https://img.shields.io/badge/version-11.0.0-blue)](https://github.com/nessos666/coding-tentacle)
-[![Tests](https://img.shields.io/badge/tests-14%2F14-brightgreen)]()
-[![Regression](https://img.shields.io/badge/regression-10%2F10-brightgreen)]()
-[![License](https://img.shields.io/badge/license-MIT-green)]()
-
-<p align="center"><img src="ct-logo.png" width="400" alt="Coding Tentacle Logo"></p>
+<p align="center">
+  <img src="https://img.shields.io/badge/version-11.0.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/tests-14%2F14-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/regression-10%2F10-brightgreen" alt="Regression">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+</p>
 
 ---
 
