@@ -7,6 +7,8 @@
 [![Regression](https://img.shields.io/badge/regression-10%2F10-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
+<p align="center"><img src="ct-logo.png" width="400" alt="Coding Tentacle Logo"></p>
+
 ---
 
 CT sits **between you and the LLM**. OpenCode, Claude Code, and Codex generate code brilliantly — but with **zero safety guarantees**. They can emit `eval(user_input)`, `DROP TABLE`, or `rm -rf /` without hesitation. **CT is the safety layer that controls them.**
