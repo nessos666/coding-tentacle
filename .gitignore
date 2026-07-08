@@ -41,3 +41,8 @@ real_pm_probe.py
 rc4_store_probe.py
 rc5_light_mode.py
 *.log
+
+*.pyc
+*.pyo
+real_results/
+~/.coding_tentacle/
