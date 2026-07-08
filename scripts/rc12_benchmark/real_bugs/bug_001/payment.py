@@ -8,8 +8,9 @@ def process_payment(user):
     BUG: user kann None sein wenn nicht eingeloggt.
     Kein Null-Check → AttributeError: 'NoneType' has no attribute 'get'
     """
-    # BUG: Kein guard clause
-    amount = user.get('amount', 0)  # Line 12: CRASH wenn user=None
+    if user is None:
+        return "Processed 0"
+    amount = user.get('amount', 0)
     return f"Processed {amount}"
 
 

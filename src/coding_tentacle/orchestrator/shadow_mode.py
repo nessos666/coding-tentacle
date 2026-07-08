@@ -60,6 +60,7 @@ class ShadowRunReport:
     reflection: dict = field(default_factory=dict)  # CT11.x: Reflection analysis
     transferable_lesson: str = ""          # CT11.x: Lesson for next bug
     lessons_applied: int = 0              # CT11.102: Past lessons used in prompt
+    prompt_learning_used: bool = False    # CT11.x: PromptLearner template used
     security_blocked: bool = False        # RC11: SecurityBrain blocked
     security_risk_score: float = 0.0      # RC11: AST risk score
     trojan_source_clean: bool = True       # RC11: Trojan Source scan passed
@@ -373,6 +374,18 @@ class ShadowModeRunner:
                     
 
                     
+                    # CT 11.x Prompt Learning: Load best prompt template
+                    prompt_template = None
+                    try:
+                        from coding_tentacle.learning.prompt_learner import PromptLearner
+                        learner = PromptLearner()
+                        best = learner.get_best_prompt(bug_type, engine_name)
+                        if best:
+                            prompt_template = best.prompt_template
+                            report.prompt_learning_used = True
+                    except Exception:
+                        pass
+                    
                     if engine_name and engine_cfg:
                         prompt = f"""Fix this bug. Output ONLY the corrected code or unified diff.
 
@@ -646,6 +659,27 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         pass
             except Exception:
                 pass  # Reflection is bonus, never blocks pipeline
+            
+            # CT 11.x: Save prompt + result for Prompt Learning
+            if hasattr(report, 'engine_used') and report.engine_used:
+                try:
+                    from coding_tentacle.learning.prompt_learner import PromptLearner
+                    learner = PromptLearner()
+                    template = f"Fix {bug_type} in {{file}}. "
+                    if report.droste_nodes > 0:
+                        template += "Use Droste context. "
+                    template += "Add guard clause or validation."
+                    learner.record(
+                        bug_type=bug_type,
+                        engine=report.engine_used,
+                        prompt_template=template,
+                        success=report.reflection.get('success', False) if report.reflection else False,
+                        droste_used=report.droste_nodes > 0,
+                        droste_nodes=report.droste_nodes,
+                        reflection_quality=0.7 if report.reflection.get('success') else 0.3,
+                    )
+                except Exception:
+                    pass
             
             # ═══ STEP 9: Recommendation ═══
             # RC-W4-READ: Session summary for report
