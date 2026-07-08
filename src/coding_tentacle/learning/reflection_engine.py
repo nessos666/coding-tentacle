@@ -178,16 +178,18 @@ class ReflectionEngine:
         # ─── TRANSFERABLE LESSON ───
         if r.success:
             comps = ', '.join(r.useful_components[:3])
+            useful_str = ', '.join(r.useful_components[:3]) if r.useful_components else 'classifier only'
             r.transferable_lesson = (
                 f'For {bug_type}: {engine_used or "template"} fix worked. '
-                f'Helpful: {comps}. '
+                f'Helpful: {useful_str}. '
                 f'Root cause: {root_cause or "unknown"}.'
             )
             r.confidence_adjustment = 0.05
         else:
+            reasons = '; '.join(r.failure_reasons[:3]) if r.failure_reasons else 'no engine or diff generated'
             r.transferable_lesson = (
                 f'For {bug_type}: Fix failed. '
-                f'Reasons: {"; ".join(r.failure_reasons[:3])}. '
+                f'Reasons: {reasons}. '
                 f'Avoid: {engine_used or "no engine"} for this case.'
             )
             r.confidence_adjustment = -0.05
