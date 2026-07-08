@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "coding-tentacle"
-version = "11.0.0"
+version = "11.0.1"
 description = "Secure Self-Learning Bug Repair Agent — Safety-first, Droste-powered, Evidence-backed"
 readme = "README.md"
 license = {text = "MIT"}

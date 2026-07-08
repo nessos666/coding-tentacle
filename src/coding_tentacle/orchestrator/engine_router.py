@@ -9,6 +9,9 @@ Author: Hermes + David | Coding Tentacle 2026
 # CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
 import subprocess, time, os
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class EngineRouter:
     """Routes bugs to the best available fix engine."""
@@ -68,7 +71,8 @@ class EngineRouter:
                                        text=True, timeout=10)
                 cfg['status'] = 'healthy' if result.returncode == 0 else 'unhealthy'
                 cfg['last_check'] = time.time()
-            except Exception:
+            except Exception as e:
+                logger.debug('Health check degraded: %s', e)
                 cfg['status'] = 'unavailable'
         self.health_checked = True
     

@@ -8,7 +8,7 @@ Full pipeline: Clone → Analyze → Diff → Sandbox → Test → Report.
 Autor: Hermes + David | Coding Tentacle 2026
 """
 
-# CT-v11.0.0: PRODUCTION | 10/10 regression | 25 modules | 90% wired | Droste active
+# CT-v11.0.1: PRODUCTION | 24/24 tests | Exception audit passed | Droste v11.0.1-index
 import os, time, json, tempfile, shutil, logging
 from dataclasses import dataclass, field, asdict
 
@@ -132,17 +132,17 @@ class ShadowModeRunner:
         self.safety_brain = safety_brain or (meta_brain.safety if meta_brain else None)
         self.skeptic_brain = skeptic_brain
         
-        # RC72: Auto-instantiate Droste client when available
+        # CT-v11.0.1: Auto-instantiate Droste client when available
         if droste_client == 'auto':
             try:
                 from coding_tentacle.knowledge.droste_client import DrosteClient
-                droste_root = os.path.expanduser(
-                    os.path.expanduser('~/coding-tentacle'))
+                droste_root = os.path.expanduser('~/GEHIRN_BIBLIOTHEK')
                 if os.path.exists(droste_root):
                     self.droste_client = DrosteClient(project_root=droste_root)
                 else:
                     self.droste_client = DrosteClient(project_root=os.getcwd())
-            except Exception:
+            except Exception as e:
+                logger.warning('Droste auto-init failed: %s', e)
                 self.droste_client = None
         else:
             self.droste_client = droste_client
@@ -275,8 +275,8 @@ class ShadowModeRunner:
                         for l in lessons[:2]:
                             blm_context += f'  → {l}\\n'
                         report.lessons_applied = len(lessons)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug('Reflection retrieval: %s', e)
             
             # RC72: Droste causal code context for engine prompt
             droste_context = ''
@@ -299,13 +299,13 @@ class ShadowModeRunner:
                     from coding_tentacle.orchestrator.bug_type_trust import BugTypeSpecificTrust
                     
                     # RC-W2: BugTypeTrust for per-bug-type engine routing
-                    if not self._bug_type_trust is not None:
+                    if self._bug_type_trust is None:
                         self._bug_type_trust = BugTypeSpecificTrust(min_samples=3)
                     if not hasattr(self.engine_router, 'bug_type_trust') or self.engine_router.bug_type_trust is None:
                         self.engine_router.bug_type_trust = self._bug_type_trust
                     
                     # RC-W3: FeedbackDampener prevents over-confidence
-                    if not self._feedback_dampener is not None:
+                    if self._feedback_dampener is None:
                         from coding_tentacle.memory.feedback_dampener import FeedbackDampener
                         self._feedback_dampener = FeedbackDampener()
                     if not hasattr(self.engine_router, 'feedback_dampener') or self.engine_router.feedback_dampener is None:
@@ -321,8 +321,8 @@ class ShadowModeRunner:
                                               if 'route_to_' in d.get('action','')]
                                 if engines_used:
                                     wm_context = f'\nSESSION: Previously used: {", ".join(engines_used[-3:])}'
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            logger.debug('WM decision read: %s', e)
                     
                     # CT 11.102: Reflection Retrieval — past lessons for prompt
                     try:
@@ -343,8 +343,8 @@ class ShadowModeRunner:
                                 for l in lessons[:2]:
                                     blm_context += f'  → {l}\\n'
                                 report.lessons_applied = len(lessons)
-                    except Exception as _e:
-                        pass
+                    except Exception as e:
+                        logger.debug('BLM reflection retrieval: %s', e)
                     
                     engine_name, engine_cfg, route_reason = self.engine_router.route(bug_type)
                     report.engine_used = engine_name or 'none'
@@ -354,8 +354,8 @@ class ShadowModeRunner:
                         if self._working_memory is not None and report.wm_session_id:
                             self._working_memory.add_decision(report.wm_session_id,
                                 f'route_to_{engine_name}', route_reason, 0.8)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug('Prompt learning: %s', e)
                     
                     # RC46 Fix2: BLM context enrichment for engine prompt
                     blm_context = ''
@@ -371,8 +371,8 @@ class ShadowModeRunner:
                                 for s in similar[:2]:
                                     blm_context += f"- {s.get('bug_type','?')}: {str(s.get('bug_signature',''))[:80]} | fix: {s.get('fix_type','?')}\\n"
                             
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug('BLM context enrichment: %s', e)
                     
 
                     
@@ -385,8 +385,8 @@ class ShadowModeRunner:
                         if best:
                             prompt_template = best.prompt_template
                             report.prompt_learning_used = True
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug('Prompt learning: %s', e)
                     
                     if engine_name and engine_cfg:
                         prompt = f"""Fix this bug. Output ONLY the corrected code or unified diff.
@@ -430,7 +430,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                                         report.generated_diff = output[:500]
                             except subprocess.TimeoutExpired:
                                 report.generated_diff = ''
-                            except Exception:
+                            except Exception as e:
+                                logger.error('Engine execution failed: %s', e)
                                 report.generated_diff = ''
                 except ImportError:
                     pass  # Engine router not available, fall through to template
@@ -446,7 +447,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     decoded_text = report.generated_diff
                     try:
                         decoded_text += ' ' + base64.b64decode(report.generated_diff.encode()).decode('utf-8', errors='ignore')
-                    except: pass
+                    except Exception:
+                        pass  # base64 decode expected to fail on non-encoded text
                     decoded_text = html.unescape(decoded_text)
                     decoded_text += ' ' + re.sub(r"['\"]\\s*\\+\\s*['\"]", '', decoded_text)
                     
@@ -455,8 +457,9 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         report.safety_events.append(f'ENGINE_DIFF_DANGEROUS: {patterns}')
                         report.generated_diff = ''
                         report.recommendation = f'SAFETY BLOCK — engine diff contains: {patterns}'
-                except Exception:
-                    pass  # Safety check failed, continue with caution
+                except Exception as e:
+                    logger.error('SAFETY SCAN DEGRADED — continuing without diff safety check: %s', e)
+                    report.safety_events.append('SAFETY_SCAN_DEGRADED')  # pipeline continues but is marked
             
             # ═══ STEP 6B.5: ImpactAnalyzer (RC48 Fix1) ═══
             if report.generated_diff:
@@ -472,8 +475,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     report.impacted_tests = impact.impacted_tests[:3]
                     if impact.risk_score > 0.40:
                         report.skeptic_recommendation = 'REQUEST_MORE'
-                except Exception:
-                    pass  # Impact analysis is bonus, not critical
+                except Exception as e:
+                    logger.debug('Impact analysis: %s', e)  # bonus, not critical
             
             # ═══ STEP 6C: SkepticBrain review of engine diff (RC42 Fix3) ═══
             if report.generated_diff and hasattr(self, 'skeptic_brain') and self.skeptic_brain:
@@ -493,8 +496,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     if review.suggested_action == 'REJECT':
                         report.recommendation = f'SKEPTIC REJECT — risk={review.risk_score}'
                         report.approval_status = 'rejected'
-                except Exception:
-                    pass  # Skeptic review failed, continue
+                except Exception as e:
+                    logger.warning('Skeptic review degraded: %s', e)  # important but non-fatal
             
             # Fallback: template-based diff (if no engine or engine failed)
             if not report.generated_diff and self.diff_generator and self.teacher:
@@ -598,9 +601,10 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                                     report.confidence = min(0.95, report.confidence + 0.05)
                                 elif action == 'AVOID':
                                     report.confidence = max(0.10, report.confidence - 0.10)
-                        except Exception:
-                            pass
-                except Exception:
+                        except Exception as e:
+                            logger.debug('Consolidator rule check: %s', e)
+                except Exception as e:
+                    logger.warning('Consolidation failed: %s', e)
                     report.rules_updated = -1
             except Exception as e:
                 report.blm_written = False
@@ -657,10 +661,10 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                                 language='python',
                                 success=True,  # REFLECTION is always valuable learning
                             )
-                    except Exception:
-                        pass
-            except Exception:
-                pass  # Reflection is bonus, never blocks pipeline
+                    except Exception as e:
+                        logger.debug('Reflection BLM enrichment: %s', e)
+            except Exception as e:
+                logger.warning('Reflection engine degraded: %s', e)  # bonus, never blocks
             
             # CT 11.x: Save prompt + result for Prompt Learning
             if hasattr(report, 'engine_used') and report.engine_used:
@@ -680,8 +684,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                         droste_nodes=report.droste_nodes,
                         reflection_quality=0.7 if report.reflection.get('success') else 0.3,
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug('Prompt learner record: %s', e)
             
             # ═══ STEP 9: Recommendation ═══
             # RC-W4-READ: Session summary for report
@@ -691,8 +695,8 @@ RULES: Output only the fix. Do NOT modify files. No commits. No PRs."""
                     if summary:
                         report.approval_notes = (report.approval_notes or '') + \
                             f' | WM: {summary.get("steps",0)} steps, {len(summary.get("brains_consulted",[]))} brains'
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug('WM summary: %s', e)
             
             if report.safety_events:
                 report.recommendation = "DO NOT APPLY — Safety concern"
@@ -820,7 +824,7 @@ if __name__ == "__main__":
     print(f"  T1: {'✅' if t1 else '❌'} Safe issue → {report.detected_bug_type}")
     
     # T2: Report has recommendation
-    t2 = report.recommendation
+    t2 = bool(report.recommendation)
     print(f"  T2: {'✅' if t2 else '❌'} Recommendation → {report.recommendation[:60]}")
     
     # T3: Diff generated

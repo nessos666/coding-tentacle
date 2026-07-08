@@ -15,6 +15,9 @@ Autor: Hermes + David | Coding Tentacle 2026
 import sqlite3, time, os, json, hashlib
 from pathlib import Path
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class BugLearningMemory:
     """Persistent memory: which fixes worked, which failed."""
@@ -203,8 +206,8 @@ class BugLearningMemory:
                             d['_tfidf_score'] = round(sim_score, 3)
                             d['_retrieval_method'] = 'tfidf'
                             result.append(d)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug('BLM record: %s', e)
                 if result:
                     return result
         

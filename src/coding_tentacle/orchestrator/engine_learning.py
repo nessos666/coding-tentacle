@@ -10,6 +10,9 @@ Author: Hermes + David | Coding Tentacle 2026
 import time, os, json
 from collections import defaultdict
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class EnginePerformanceStore:
     """Tracks engine performance per bug type. Bayesian trust updates."""
@@ -105,8 +108,8 @@ class EnginePerformanceStore:
             with open(self.store_path, 'w') as f:
                 json.dump({e: {bt: dict(d) for bt, d in bts.items()} 
                           for e, bts in self.stats.items()}, f, indent=2)
-        except:
-            pass
+        except Exception as e:
+            logger.debug('Engine learning record: %s', e)
     
     def _load(self):
         try:
@@ -116,8 +119,8 @@ class EnginePerformanceStore:
                 for engine, bug_types in data.items():
                     for bug_type, entry in bug_types.items():
                         self.stats[engine][bug_type].update(entry)
-        except:
-            pass
+        except Exception as e:
+            logger.debug('Engine learning record: %s', e)
 
 
 class AdaptiveEngineRouter:

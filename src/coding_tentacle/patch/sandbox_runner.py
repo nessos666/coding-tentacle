@@ -14,6 +14,9 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class SandboxResult:
@@ -169,8 +172,8 @@ class SandboxRunner:
                     if 'result' in dir():
                         result.cleanup_status = "cleaned"
                     # Don't override result if we're in exception path
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug('Sandbox cleanup: %s', e)
     
     def stats(self):
         return {

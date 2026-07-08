@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="ct-logo.png" width="180" alt="Coding Tentacle Logo">
+  <img src="ct-logo.png" width="320" alt="Coding Tentacle Logo">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="droste-logo.png" width="320" alt="Droste Memory Logo">
 </p>
 
 <h1 align="center">Coding Tentacle 11</h1>

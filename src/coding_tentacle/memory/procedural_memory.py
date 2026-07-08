@@ -14,6 +14,9 @@ import json, time, os
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ProcedureStep:
@@ -332,8 +335,8 @@ class ProcedureStore:
                         created_at=pd.get('created_at', 0),
                         last_used=pd.get('last_used', 0),
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug('Procedure load: %s', e)
 
 
 # ═══════════ TEST ═══════════

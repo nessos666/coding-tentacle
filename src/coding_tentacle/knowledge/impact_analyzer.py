@@ -13,6 +13,9 @@ Research: TDAD (70% regression reduction) + Athena
 import re, time, os, math
 from dataclasses import dataclass, field
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ImpactReport:
@@ -88,8 +91,8 @@ class TestMap:
                     try:
                         test_file = re.sub(src_pattern, tp, file_path)
                         results.append(test_file)
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.debug('Impact analysis: %s', e)
                 if results:
                     self.found_tests += 1
                     return results

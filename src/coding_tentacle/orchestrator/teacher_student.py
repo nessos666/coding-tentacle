@@ -15,6 +15,9 @@ import time, json
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 # ═══════════ DATA MODELS ═══════════
 
@@ -124,8 +127,8 @@ class Teacher:
                 hyps = r.get('all_hypotheses', [])
                 if hyps:
                     hypothesis = hyps[0].get('statement', hypothesis)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug('Student execution: %s', e)
         
         # Step 8: Build plan
         confidence = 0.5

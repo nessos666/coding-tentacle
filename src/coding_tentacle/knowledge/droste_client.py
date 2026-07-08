@@ -208,6 +208,7 @@ def _shorten_path(path: str, max_len: int = 50) -> str:
 # ─── Self-Tests ────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    import os
     import sys
 
     passed, failed = 0, 0

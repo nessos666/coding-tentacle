@@ -14,6 +14,9 @@ import time, json, os
 from collections import defaultdict, Counter
 from dataclasses import dataclass, field, asdict
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Rule:
@@ -51,7 +54,8 @@ class ExperienceConsolidator:
             rows = blm.conn.execute(
                 'SELECT bug_type, fix_type, success FROM experiences'
             ).fetchall()
-        except Exception:
+        except Exception as e:
+            logger.debug('Consolidation query: %s', e)
             return self.rules  # No data
         
         for row in rows:
@@ -162,7 +166,8 @@ class ExperienceConsolidator:
                 with open(self.rule_path) as f:
                     data = json.load(f)
                 self.rules = [Rule(**d) for d in data]
-            except Exception:
+            except Exception as e:
+                logger.debug('Rules parse: %s', e)
                 self.rules = []
 
 
