@@ -46,3 +46,4 @@ rc5_light_mode.py
 *.pyo
 real_results/
 ~/.coding_tentacle/
+*.pyc
